@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>pay4u - Recharge, Bills, Brand Vouchers & Admin Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0F52BA;
+      --primary-hover: #0A3E8E;
+      --secondary: #00A86B;
+      --accent: #FF9900;
+      --bg: #F4F7FB;
+      --surface: #FFFFFF;
+      --surface-subtle: #F8FAFD;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      --status-pending: #F59E0B;
+      --status-success: #10B981;
+      --status-failed: #EF4444;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; background: var(--bg); color: var(--text-main); line-height: 1.5; min-height: 100vh; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+    .header-inner { max-width: 1200px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; }
+    .brand-logo { width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; font-weight: 800; box-shadow: 0 4px 10px rgba(15, 82, 186, 0.3); }
+    .brand-title { font-size: 22px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
+    .brand-title span { color: var(--secondary); }
+    .user-pill { display: flex; align-items: center; gap: 12px; }
+    .wallet-badge { background: #EEF4FF; border: 1px solid #D0E1FD; padding: 6px 14px; border-radius: 20px; font-weight: 700; color: var(--primary); font-size: 14px; display: flex; align-items: center; gap: 6px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 18px; border-radius: var(--radius-sm); font-weight: 600; font-size: 14px; cursor: pointer; border: none; transition: all 0.2s; font-family: inherit; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-secondary { background: #EEF2F6; color: var(--text-main); }
+    .btn-secondary:hover { background: #E2E8F0; }
+    .btn-admin { background: #FFF4E5; color: #B45309; border: 1px solid #FCD34D; }
+    .btn-admin:hover { background: #FDE68A; }
+    .btn-danger { background: #FEE2E2; color: #B91C1C; }
+    .btn-danger:hover { background: #FECACA; }
+    .btn-success { background: #D1FAE5; color: #047857; }
+    .btn-success:hover { background: #A7F3D0; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px 20px 80px; }
+    .nav-tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 2px solid var(--border); padding-bottom: 12px; overflow-x: auto; }
+    .nav-tab { padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; color: var(--text-muted); border: none; background: transparent; transition: all 0.2s; white-space: nowrap; }
+    .nav-tab.active { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(15, 82, 186, 0.25); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .card { background: var(--surface); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .card-title { font-size: 17px; font-weight: 700; }
+    .badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-pending { background: #FEF3C7; color: #B45309; }
+    .badge-success { background: #D1FAE5; color: #065F46; }
+    .badge-failed { background: #FEE2E2; color: #991B1B; }
+    .badge-discount { background: #FFF7ED; color: #C2410C; border: 1px solid #FFEDD5; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
+    .form-control { width: 100%; padding: 11px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); font-size: 14px; font-family: inherit; transition: border 0.2s; outline: none; }
+    .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15, 82, 186, 0.1); }
+    .plan-card { border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+    .plan-card:hover, .plan-card.selected { border-color: var(--primary); background: #F4F8FF; }
+    .plan-price { font-size: 20px; font-weight: 800; color: var(--primary); }
+    .voucher-card { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 20px; background: #fff; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+    .denom-chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+    .denom-chip { padding: 6px 12px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 12px; font-weight: 700; cursor: pointer; background: #fff; }
+    .denom-chip.active { border-color: var(--primary); background: #EEF4FF; color: var(--primary); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #fff; width: 100%; max-width: 520px; border-radius: 20px; padding: 26px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .modal-tabs { display: flex; gap: 6px; background: var(--bg); padding: 4px; border-radius: 12px; margin-bottom: 20px; }
+    .modal-tab { flex: 1; text-align: center; padding: 8px; font-size: 12px; font-weight: 700; border-radius: 8px; cursor: pointer; border: none; background: transparent; }
+    .modal-tab.active { background: #fff; color: var(--primary); box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .alert { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; display: flex; gap: 10px; align-items: flex-start; }
+    .alert-danger { background: #FEF2F2; border: 1px solid #FCA5A5; color: #991B1B; }
+    .alert-success { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; }
+    .alert-warning { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+    .code-box { background: #F8FAFC; border: 1.5px dashed var(--border); border-radius: 12px; padding: 14px; font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: var(--primary); display: flex; justify-content: space-between; align-items: center; }
+    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .kpi-card { background: #fff; border-radius: var(--radius); padding: 18px; border: 1px solid var(--border); }
+    .kpi-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .kpi-val { font-size: 26px; font-weight: 800; color: var(--text-main); margin-top: 4px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 12px 14px; background: #F8FAFC; color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--border); }
+    td { padding: 14px; border-bottom: 1px solid var(--border); }
+    tr:hover td { background: #F8FAFD; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="brand" onclick="switchView('customer')">
+        <div class="brand-logo">⚡</div>
+        <div class="brand-title">pay<span>4u</span></div>
+      </div>
+      <div class="user-pill">
+        <div class="wallet-badge" id="wallet-badge">
+          <span>₹</span> <span id="wallet-balance-val">1,250.00</span>
+        </div>
+        <button class="btn btn-admin" id="portal-toggle-btn" onclick="togglePortalMode()">
+          ⚙️ Admin Panel
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Top Customer Nav -->
+    <div id="customer-nav" class="nav-tabs">
+      <button class="nav-tab active" onclick="showCustomerSection('recharge')">📱 Mobile & DTH</button>
+      <button class="nav-tab" onclick="showCustomerSection('bills')">💡 BBPS Bill Pay</button>
+      <button class="nav-tab" onclick="showCustomerSection('vouchers')">🎁 Brand Vouchers</button>
+      <button class="nav-tab" onclick="showCustomerSection('my-vouchers')">🎟️ My Vouchers (<span id="user-vch-count">1</span>)</button>
+      <button class="nav-tab" onclick="showCustomerSection('passbook')">📜 Passbook</button>
+    </div>
+
+    <!-- Top Admin Nav -->
+    <div id="admin-nav" class="nav-tabs" style="display: none;">
+      <button class="nav-tab active" onclick="showAdminSection('tx-queue')">⚡ Recharges & TR IDs</button>
+      <button class="nav-tab" onclick="showAdminSection('voucher-queue')">🎟️ Upload Genuine Vouchers</button>
+      <button class="nav-tab" onclick="showAdminSection('users')">👥 User Wallets</button>
+      <button class="nav-tab" onclick="showAdminSection('commissions')">📊 Commissions</button>
+    </div>
+
+    <!-- ================= CUSTOMER PORTAL ================= -->
+    <div id="customer-view">
+
+      <!-- SECTION 1: RECHARGE -->
+      <div id="sec-recharge" class="section-content">
+        <div class="grid" style="grid-template-columns: 1fr 1.4fr;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Mobile / DTH Recharge</div>
+              <span class="badge badge-success">Instant</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Service Type</label>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-primary" id="btn-type-mobile" onclick="setServiceType('MOBILE')">Mobile</button>
+                <button class="btn btn-secondary" id="btn-type-dth" onclick="setServiceType('DTH')">DTH</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" id="lbl-target">Mobile Number (10 Digits)</label>
+              <input type="text" id="target-number" class="form-control" value="9876543210" placeholder="e.g. 9876543210">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Operator</label>
+              <select id="operator-select" class="form-control" onchange="renderPlans()">
+                <option value="Jio">Jio</option>
+                <option value="Airtel">Airtel</option>
+                <option value="Vi">Vi (Vodafone Idea)</option>
+                <option value="BSNL">BSNL</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Circle / Region</label>
+              <select id="circle-select" class="form-control">
+                <option>Delhi NCR</option>
+                <option>Mumbai</option>
+                <option>Maharashtra</option>
+                <option>Karnataka</option>
+                <option>Tamil Nadu</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Amount (₹)</label>
+              <input type="number" id="recharge-amount" class="form-control" value="299" placeholder="Enter amount">
+            </div>
+            <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="openCheckout('recharge')">
+              Proceed to Recharge
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Recommended Plans</div>
+              <span style="font-size: 12px; color: var(--text-muted);" id="plans-header-text">Jio • Delhi NCR</span>
+            </div>
+            <div id="plans-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: BILLS -->
+      <div id="sec-bills" class="section-content" style="display: none;">
+        <div class="grid" style="grid-template-columns: 1fr 1.4fr;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Live BBPS Bill Payment</div>
+              <span class="badge badge-success">Live Network API</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Utility Category</label>
+              <select id="bill-category" class="form-control" onchange="onCategoryChange()">
+                <option value="Electricity">Electricity</option>
+                <option value="Water">Water Bill</option>
+                <option value="Gas">LPG Gas Cylinder / Piped</option>
+                <option value="Broadband">Broadband Fiber</option>
+                <option value="Fastag">Fastag Toll</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Biller</label>
+              <select id="biller-select" class="form-control">
+                <option>BSES Rajdhani Delhi</option>
+                <option>Tata Power Delhi</option>
+                <option>Adani Electricity Mumbai</option>
+                <option>UPPCL Uttar Pradesh</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Consumer CA Number / Account No.</label>
+              <input type="text" id="bill-consumer-id" class="form-control" value="1002948194" placeholder="Enter Consumer Account ID">
+            </div>
+            <button class="btn btn-primary" id="fetch-bill-btn" style="width: 100%; padding: 12px;" onclick="fetchRealBill()">
+              📡 Fetch Real Bill via Network API
+            </button>
+          </div>
+
+          <div class="card" id="bill-result-card" style="display: none;">
+            <div class="card-header">
+              <div class="card-title">Verified Bill Details</div>
+              <span class="badge badge-success" id="bill-api-status">API Verified</span>
+            </div>
+            <div id="bill-verified-box" style="background: var(--surface-subtle); padding: 18px; border-radius: 12px; margin-bottom: 18px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--text-muted); font-size: 13px;">Consumer Name</span>
+                <strong id="bill-name">Mukesh Garg</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--text-muted); font-size: 13px;">Due Date</span>
+                <strong id="bill-due" style="color: var(--status-failed);">25 Oct 2026</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--text-muted); font-size: 13px;">Consumption Units</span>
+                <span id="bill-units" style="font-weight: 600;">192 kWh</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border);">
+                <span style="font-size: 14px; font-weight: 700;">Payable Amount</span>
+                <strong id="bill-amount" style="font-size: 22px; color: var(--primary);">₹1,450.00</strong>
+              </div>
+            </div>
+            <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="openCheckout('bill')">
+              Proceed to Pay Bill
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: BRAND VOUCHERS -->
+      <div id="sec-vouchers" class="section-content" style="display: none;">
+        <div style="margin-bottom: 16px;">
+          <h2 style="font-size: 20px; font-weight: 800;">Official Brand Gift Vouchers</h2>
+          <p style="color: var(--text-muted); font-size: 13px;">Orders are reviewed manually by Admin and genuine digital voucher codes are uploaded.</p>
+        </div>
+        <div class="grid" id="vouchers-grid"></div>
+      </div>
+
+      <!-- SECTION 4: MY VOUCHERS -->
+      <div id="sec-my-vouchers" class="section-content" style="display: none;">
+        <div style="margin-bottom: 16px;">
+          <h2 style="font-size: 20px; font-weight: 800;">My Purchased Vouchers</h2>
+          <p style="color: var(--text-muted); font-size: 13px;">Pending vouchers will be updated once Admin verifies the payment and enters genuine codes.</p>
+        </div>
+        <div class="grid" id="my-vouchers-grid"></div>
+      </div>
+
+      <!-- SECTION 5: PASSBOOK -->
+      <div id="sec-passbook" class="section-content" style="display: none;">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Transaction Passbook</div>
+            <span style="color: var(--text-muted); font-size: 13px;" id="tx-count-label">Showing all transactions</span>
+          </div>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Service</th>
+                  <th>Target / Account</th>
+                  <th>Amount</th>
+                  <th>Payment Method</th>
+                  <th>Status</th>
+                  <th>Operator TR ID (Admin)</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody id="passbook-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= ADMIN WEB PANEL ================= -->
+    <div id="admin-view" style="display: none;">
+
+      <!-- KPI METRICS -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">Total Volume</div>
+          <div class="kpi-val" id="kpi-vol">₹0.00</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Pending Recharges</div>
+          <div class="kpi-val" id="kpi-pending-tx" style="color: var(--status-pending);">0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Pending Vouchers</div>
+          <div class="kpi-val" id="kpi-pending-vch" style="color: var(--accent);">0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Registered Users</div>
+          <div class="kpi-val" id="kpi-users">2</div>
+        </div>
+      </div>
+
+      <!-- ADMIN TAB 1: RECHARGES & MANUAL TR ID ENTRY -->
+      <div id="admin-sec-tx-queue" class="admin-section">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Recharge & Bill Queue (Manual TR ID Processing)</div>
+            <span style="font-size: 12px; color: var(--text-muted);">Enter operator reference number to complete</span>
+          </div>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Customer</th>
+                  <th>Service</th>
+                  <th>Amount</th>
+                  <th>Payment Ref</th>
+                  <th>Status</th>
+                  <th>Operator TR ID</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-tx-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN TAB 2: VOUCHER ORDERS & GENUINE CODE UPLOAD -->
+      <div id="admin-sec-voucher-queue" class="admin-section" style="display: none;">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Brand Voucher Orders (Upload Genuine Codes)</div>
+            <span style="font-size: 12px; color: var(--text-muted);">Upload real gift card code & PIN after verifying payment</span>
+          </div>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Customer</th>
+                  <th>Brand</th>
+                  <th>Denomination</th>
+                  <th>Paid Via</th>
+                  <th>Status</th>
+                  <th>Voucher Code</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-vch-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN TAB 3: USERS & WALLET ADJUSTMENT -->
+      <div id="admin-sec-users" class="admin-section" style="display: none;">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">User Accounts & Wallet Balances</div>
+          </div>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Wallet Balance</th>
+                  <th>Adjust Funds</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN TAB 4: COMMISSIONS -->
+      <div id="admin-sec-commissions" class="admin-section" style="display: none;">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Provider Commission Settings</div>
+          </div>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Service</th>
+                  <th>Provider</th>
+                  <th>Code</th>
+                  <th>Commission %</th>
+                  <th>Flat Commission</th>
+                  <th>Active</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-comm-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ================= CHECKOUT PAYMENT MODAL ================= -->
+  <div class="modal-overlay" id="checkout-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 18px; font-weight: 800;" id="checkout-title">Payment Checkout</h3>
+          <p style="font-size: 12px; color: var(--text-muted);" id="checkout-subtitle"></p>
+        </div>
+        <button class="btn btn-secondary" onclick="closeModal('checkout-modal')">✕</button>
+      </div>
+
+      <!-- Amount Banner -->
+      <div style="background: #F0F6FF; border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 16px;">
+        <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Total Payable</div>
+        <div style="font-size: 28px; font-weight: 800; color: var(--primary);" id="checkout-amount-display">₹299.00</div>
+      </div>
+
+      <!-- Payment Method Tabs -->
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tab-btn-upi" onclick="switchCheckoutTab('upi')">UPI</button>
+        <button class="modal-tab" id="tab-btn-wallet" onclick="switchCheckoutTab('wallet')">Wallet Balance</button>
+        <button class="modal-tab" id="tab-btn-card" onclick="switchCheckoutTab('card')">Credit Card</button>
+      </div>
+
+      <!-- TAB 1: UPI -->
+      <div id="pay-sec-upi">
+        <div class="alert alert-warning">
+          <div>
+            <strong>Pay to Merchant UPI:</strong>
+            <div style="font-family: monospace; font-size: 14px; margin-top: 2px;">pay4u.recharge@icici</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Select UPI App</label>
+          <select id="upi-app-select" class="form-control">
+            <option>Google Pay</option>
+            <option>PhonePe</option>
+            <option>Paytm</option>
+            <option>BHIM UPI</option>
+            <option>Cred</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">12-Digit UPI Ref / UTR Number</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="upi-utr-input" class="form-control" placeholder="e.g. 428901847291">
+            <button class="btn btn-secondary" onclick="autoFillUtr()">Demo UTR</button>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="confirmOrder('UPI')">
+          Submit UPI Payment
+        </button>
+      </div>
+
+      <!-- TAB 2: WALLET (STRICT BALANCE CHECK) -->
+      <div id="pay-sec-wallet" style="display: none;">
+        <div id="wallet-status-alert"></div>
+        <button class="btn btn-primary" id="wallet-pay-btn" style="width: 100%; padding: 12px;" onclick="confirmOrder('WALLET')">
+          Pay from Wallet Balance
+        </button>
+      </div>
+
+      <!-- TAB 3: CREDIT CARD -->
+      <div id="pay-sec-card" style="display: none;">
+        <div class="form-group">
+          <label class="form-label">Card Number</label>
+          <input type="text" id="cc-number" class="form-control" value="4532 8921 7734 4242">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Name on Card</label>
+          <input type="text" id="cc-name" class="form-control" value="Mukesh Garg">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">Expiry (MM/YY)</label>
+            <input type="text" id="cc-expiry" class="form-control" value="08/29">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">CVV</label>
+            <input type="password" id="cc-cvv" class="form-control" value="882" maxlength="4">
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="confirmOrder('CREDIT_CARD')">
+          Proceed to 3D Secure Verification
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= ADMIN TR ID MODAL ================= -->
+  <div class="modal-overlay" id="admin-tr-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 style="font-size: 18px; font-weight: 800;">Manual Operator TR ID Processing</h3>
+        <button class="btn btn-secondary" onclick="closeModal('admin-tr-modal')">✕</button>
+      </div>
+      <div id="admin-tr-item-desc" style="font-size: 14px; margin-bottom: 14px;"></div>
+      <div class="form-group">
+        <label class="form-label">Operator Transaction Reference ID (TR ID) *</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="admin-tr-id-val" class="form-control" placeholder="e.g. JIO-TR-88492019">
+          <button class="btn btn-secondary" onclick="autoGenTrId()">Generate</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Outcome</label>
+        <select id="admin-tr-status" class="form-control">
+          <option value="SUCCESS">SUCCESS (Mark Completed)</option>
+          <option value="FAILED">FAILED (Refund to Customer)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Admin Remarks</label>
+        <input type="text" id="admin-tr-notes" class="form-control" value="Processed via Operator Core Route">
+      </div>
+      <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="saveAdminTrId()">
+        Save & Update TR ID in System
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= ADMIN VOUCHER UPLOAD MODAL ================= -->
+  <div class="modal-overlay" id="admin-voucher-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 style="font-size: 18px; font-weight: 800;">Upload Genuine Brand Voucher</h3>
+        <button class="btn btn-secondary" onclick="closeModal('admin-voucher-modal')">✕</button>
+      </div>
+      <div id="admin-vch-desc" style="font-size: 14px; margin-bottom: 14px;"></div>
+      <div class="form-group">
+        <label class="form-label">Genuine Voucher Code *</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="admin-vch-code" class="form-control" placeholder="e.g. AMZN-4921-9920-LKP8">
+          <button class="btn btn-secondary" onclick="autoGenVchCode()">Generate</button>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">Secret PIN</label>
+          <input type="text" id="admin-vch-pin" class="form-control" value="4921">
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">Expiry Date</label>
+          <input type="text" id="admin-vch-exp" class="form-control" value="12 Oct 2027">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Brand Remark / Issuer Note</label>
+        <input type="text" id="admin-vch-notes" class="form-control" value="Genuine code verified from partner merchant">
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-danger" style="flex: 1;" onclick="rejectAdminVoucher()">Reject & Refund</button>
+        <button class="btn btn-primary" style="flex: 2; padding: 12px;" onclick="saveAdminVoucher()">Upload & Activate for User</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let appState = null;
+    let currentMode = 'customer'; // 'customer' or 'admin'
+    let currentPendingOrder = null;
+    let activeVoucherDenoms = {};
+    let activeCheckoutService = null;
+    let activeProcessingTxId = null;
+    let activeUploadingVchId = null;
+
+    async function loadData() {
+      try {
+        const res = await fetch('/api/state');
+        appState = await res.json();
+        updateUI();
+      } catch (e) {
+        console.error("API error", e);
+      }
+    }
+
+    function updateUI() {
+      if (!appState) return;
+      const user = appState.users.find(u => u.id === 2);
+      if (user) {
+        document.getElementById('wallet-balance-val').innerText = user.walletBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+      }
+      document.getElementById('user-vch-count').innerText = appState.userVouchers.filter(v => v.userId === 2).length;
+
+      // KPIs
+      const totalVol = appState.transactions.reduce((acc, t) => acc + t.amount, 0);
+      document.getElementById('kpi-vol').innerText = '₹' + totalVol.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+      document.getElementById('kpi-pending-tx').innerText = appState.transactions.filter(t => t.status === 'PENDING').length;
+      document.getElementById('kpi-pending-vch').innerText = appState.userVouchers.filter(v => v.status === 'PENDING').length;
+      document.getElementById('kpi-users').innerText = appState.users.length;
+
+      renderPlans();
+      renderVouchers();
+      renderMyVouchers();
+      renderPassbook();
+      renderAdminTx();
+      renderAdminVouchers();
+      renderAdminUsers();
+      renderAdminCommissions();
+    }
+
+    function togglePortalMode() {
+      if (currentMode === 'customer') {
+        currentMode = 'admin';
+        document.getElementById('customer-view').style.display = 'none';
+        document.getElementById('customer-nav').style.display = 'none';
+        document.getElementById('admin-view').style.display = 'block';
+        document.getElementById('admin-nav').style.display = 'flex';
+        document.getElementById('portal-toggle-btn').innerHTML = '👤 Customer Portal';
+        document.getElementById('portal-toggle-btn').className = 'btn btn-secondary';
+      } else {
+        currentMode = 'customer';
+        document.getElementById('admin-view').style.display = 'none';
+        document.getElementById('admin-nav').style.display = 'none';
+        document.getElementById('customer-view').style.display = 'block';
+        document.getElementById('customer-nav').style.display = 'flex';
+        document.getElementById('portal-toggle-btn').innerHTML = '⚙️ Admin Panel';
+        document.getElementById('portal-toggle-btn').className = 'btn btn-admin';
+      }
+    }
+
+    function showCustomerSection(sec) {
+      document.querySelectorAll('#customer-nav .nav-tab').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      document.querySelectorAll('#customer-view .section-content').forEach(s => s.style.display = 'none');
+      document.getElementById('sec-' + sec).style.display = 'block';
+    }
+
+    function showAdminSection(sec) {
+      document.querySelectorAll('#admin-nav .nav-tab').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      document.querySelectorAll('#admin-view .admin-section').forEach(s => s.style.display = 'none');
+      document.getElementById('admin-sec-' + sec).style.display = 'block';
+    }
+
+    let serviceType = 'MOBILE';
+    function setServiceType(t) {
+      serviceType = t;
+      if (t === 'MOBILE') {
+        document.getElementById('btn-type-mobile').className = 'btn btn-primary';
+        document.getElementById('btn-type-dth').className = 'btn btn-secondary';
+        document.getElementById('lbl-target').innerText = 'Mobile Number (10 Digits)';
+        document.getElementById('operator-select').innerHTML = `
+          <option value="Jio">Jio</option>
+          <option value="Airtel">Airtel</option>
+          <option value="Vi">Vi (Vodafone Idea)</option>
+          <option value="BSNL">BSNL</option>
+        `;
+      } else {
+        document.getElementById('btn-type-mobile').className = 'btn btn-secondary';
+        document.getElementById('btn-type-dth').className = 'btn btn-primary';
+        document.getElementById('lbl-target').innerText = 'Subscriber ID / Smart Card (10-11 Digits)';
+        document.getElementById('operator-select').innerHTML = `
+          <option value="Tata Play">Tata Play</option>
+          <option value="Airtel Digital TV">Airtel Digital TV</option>
+          <option value="Dish TV">Dish TV</option>
+          <option value="Sun Direct">Sun Direct</option>
+        `;
+      }
+      renderPlans();
+    }
+
+    function renderPlans() {
+      const op = document.getElementById('operator-select').value;
+      const container = document.getElementById('plans-container');
+      const samplePlans = [
+        { price: 299, val: "28 Days", data: "2.0 GB/Day", desc: "True 5G Unlimited, JioCinema, JioTV" },
+        { price: 349, val: "28 Days", data: "2.5 GB/Day", desc: "Hero Unlimited 5G Data reset daily" },
+        { price: 719, val: "84 Days", data: "1.5 GB/Day", desc: "Value Quarterly pack with unlimited calls" },
+        { price: 3599, val: "365 Days", data: "2.5 GB/Day", desc: "Full Year Annual Pack + 5G Benefits" }
+      ];
+
+      container.innerHTML = samplePlans.map(p => `
+        <div class="plan-card ${p.price == document.getElementById('recharge-amount').value ? 'selected' : ''}" onclick="selectPlan(${p.price})">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="plan-price">₹${p.price}</div>
+            <span class="badge badge-success">${p.val}</span>
+          </div>
+          <div style="font-size: 13px; font-weight: 700; margin: 4px 0;">${p.data} • Unlimited Calls</div>
+          <div style="font-size: 12px; color: var(--text-muted);">${p.desc}</div>
+        </div>
+      `).join('');
+    }
+
+    function selectPlan(price) {
+      document.getElementById('recharge-amount').value = price;
+      renderPlans();
+    }
+
+    async function fetchRealBill() {
+      const cat = document.getElementById('bill-category').value;
+      const biller = document.getElementById('biller-select').value;
+      const consumerId = document.getElementById('bill-consumer-id').value;
+      const btn = document.getElementById('fetch-bill-btn');
+
+      btn.innerText = "⏳ Calling Live Network BBPS API...";
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/bill/fetch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category: cat, biller, consumerId })
+        });
+        const data = await res.json();
+        btn.innerText = "📡 Fetch Real Bill via Network API";
+        btn.disabled = false;
+
+        if (data.isSuccess) {
+          document.getElementById('bill-result-card').style.display = 'block';
+          document.getElementById('bill-name').innerText = data.consumerName;
+          document.getElementById('bill-due').innerText = data.dueDate;
+          document.getElementById('bill-units').innerText = data.unitsConsumed;
+          document.getElementById('bill-amount').innerText = '₹' + data.amount.toFixed(2);
+          document.getElementById('bill-api-status').innerText = `Verified (${data.latencyMs}ms)`;
+          activeBillData = data;
+        }
+      } catch (e) {
+        btn.innerText = "📡 Fetch Real Bill via Network API";
+        btn.disabled = false;
+        alert("Bill Fetch failed: " + e.message);
+      }
+    }
+    let activeBillData = null;
+
+    function renderVouchers() {
+      if (!appState) return;
+      const grid = document.getElementById('vouchers-grid');
+      grid.innerHTML = appState.vouchers.map(v => {
+        const selDenom = activeVoucherDenoms[v.id] || v.denominations[0];
+        const disc = selDenom * (v.discountPercent / 100);
+        const payable = selDenom - disc;
+
+        return `
+          <div class="voucher-card">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                  <h3 style="font-size: 16px; font-weight: 800;">${v.brandName}</h3>
+                  <div style="font-size: 12px; color: var(--text-muted);">${v.category}</div>
+                </div>
+                <span class="badge badge-discount">${v.discountPercent}% OFF</span>
+              </div>
+              <div class="denom-chips">
+                ${v.denominations.map(d => `
+                  <button class="denom-chip ${d === selDenom ? 'active' : ''}" onclick="pickDenom(${v.id}, ${d})">₹${d}</button>
+                `).join('')}
+              </div>
+            </div>
+            <div style="margin-top: 14px; border-top: 1px dashed var(--border); padding-top: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+                <div>
+                  <strong style="font-size: 20px; color: var(--primary);">₹${payable.toFixed(0)}</strong>
+                  <span style="font-size: 12px; text-decoration: line-through; color: var(--text-muted); margin-left: 4px;">₹${selDenom}</span>
+                </div>
+                <span style="font-size: 12px; font-weight: 700; color: var(--secondary);">Save ₹${disc.toFixed(0)}</span>
+              </div>
+              <button class="btn btn-primary" style="width: 100%;" onclick="openCheckout('voucher', ${v.id}, ${selDenom}, ${payable}, '${v.brandName}')">
+                Buy Voucher
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function pickDenom(vId, val) {
+      activeVoucherDenoms[vId] = val;
+      renderVouchers();
+    }
+
+    function renderMyVouchers() {
+      if (!appState) return;
+      const grid = document.getElementById('my-vouchers-grid');
+      const list = appState.userVouchers.filter(v => v.userId === 2);
+      if (list.length === 0) {
+        grid.innerHTML = `<div class="card" style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">No vouchers purchased yet. Choose from the 'Brand Vouchers' tab!</div>`;
+        return;
+      }
+
+      grid.innerHTML = list.map(v => `
+        <div class="card" style="border-left: 4px solid ${v.status === 'ACTIVE' ? 'var(--secondary)' : 'var(--status-pending)'};">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <strong style="font-size: 16px;">${v.brandName}</strong>
+            <span class="badge ${v.status === 'ACTIVE' ? 'badge-success' : 'badge-pending'}">${v.status === 'ACTIVE' ? 'ACTIVE' : 'AWAITING ADMIN UPLOAD'}</span>
+          </div>
+          <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Value: ₹${v.denomination} • Paid: ₹${v.finalPaid.toFixed(2)} via ${v.paymentMethod}</div>
+
+          ${v.status === 'ACTIVE' ? `
+            <div class="code-box">
+              <span>${v.voucherCode}</span>
+              <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="navigator.clipboard.writeText('${v.voucherCode}'); alert('Copied!');">Copy</button>
+            </div>
+            <div style="font-size: 12px; margin-top: 8px; color: var(--text-muted);">PIN: <strong>${v.pinCode || '4921'}</strong> • Valid till: ${v.expiryDate || '1 Year'}</div>
+          ` : `
+            <div class="alert alert-warning" style="margin-bottom: 0;">
+              <div>
+                <strong>Awaiting Genuine Code Upload</strong>
+                <p style="font-size: 12px; margin-top: 2px;">Admin is verifying your payment and will upload the genuine code & PIN shortly.</p>
+              </div>
+            </div>
+          `}
+        </div>
+      `).join('');
+    }
+
+    function renderPassbook() {
+      if (!appState) return;
+      const tbody = document.getElementById('passbook-tbody');
+      tbody.innerHTML = appState.transactions.map(t => `
+        <tr>
+          <td>#${t.id}</td>
+          <td><strong>${t.serviceType}</strong> (${t.providerName})</td>
+          <td>${t.targetNumber}</td>
+          <td><strong>₹${t.amount.toFixed(2)}</strong></td>
+          <td><span class="badge badge-discount">${t.paymentMethod}</span></td>
+          <td><span class="badge ${t.status === 'SUCCESS' ? 'badge-success' : t.status === 'PENDING' ? 'badge-pending' : 'badge-failed'}">${t.status}</span></td>
+          <td><code style="font-weight: 700; color: var(--secondary);">${t.operatorTrId || '<span style="color: var(--text-muted);">Awaiting Admin</span>'}</code></td>
+          <td style="font-size: 11px; color: var(--text-muted);">${new Date(t.createdAt).toLocaleTimeString()}</td>
+        </tr>
+      `).join('');
+    }
+
+    // CHECKOUT FLOW
+    let activeCheckoutDetails = {};
+    function openCheckout(type, vId, denom, payable, brandName) {
+      const user = appState.users.find(u => u.id === 2);
+      const walletBal = user.walletBalance;
+
+      let amount = 0;
+      let title = "";
+      let subtitle = "";
+
+      if (type === 'recharge') {
+        amount = parseFloat(document.getElementById('recharge-amount').value);
+        const op = document.getElementById('operator-select').value;
+        const target = document.getElementById('target-number').value;
+        title = `${serviceType} Recharge - ${op}`;
+        subtitle = `Number: ${target} (${op})`;
+        activeCheckoutDetails = { type: 'recharge', amount, target, provider: op, serviceType };
+      } else if (type === 'bill') {
+        amount = activeBillData.amount;
+        title = `Utility Bill Payment - ${activeBillData.billerName}`;
+        subtitle = `Consumer ID: ${activeBillData.consumerNumber} (${activeBillData.consumerName})`;
+        activeCheckoutDetails = { type: 'bill', amount, target: activeBillData.consumerNumber, provider: activeBillData.billerName, serviceType: 'BILL' };
+      } else if (type === 'voucher') {
+        amount = payable;
+        title = `${brandName} Voucher (₹${denom})`;
+        subtitle = `Flat Discount Applied • Genuine code uploaded manually by Admin`;
+        activeCheckoutDetails = { type: 'voucher', amount, voucherId: vId, denomination: denom, brandName };
+      }
+
+      document.getElementById('checkout-title').innerText = title;
+      document.getElementById('checkout-subtitle').innerText = subtitle;
+      document.getElementById('checkout-amount-display').innerText = '₹' + amount.toFixed(2);
+
+      // Wallet status evaluation (Strict check)
+      const walletBox = document.getElementById('wallet-status-alert');
+      const walletBtn = document.getElementById('wallet-pay-btn');
+
+      if (walletBal >= amount) {
+        walletBox.innerHTML = `
+          <div class="alert alert-success">
+            <div>
+              <strong>✓ Sufficient Wallet Balance</strong>
+              <div style="font-size: 12px; margin-top: 2px;">Current Balance: ₹${walletBal.toFixed(2)}. Remaining after payment: ₹${(walletBal - amount).toFixed(2)}.</div>
+            </div>
+          </div>
+        `;
+        walletBtn.disabled = false;
+        walletBtn.innerText = `Pay ₹${amount.toFixed(2)} from Wallet (Instant Debit)`;
+      } else {
+        const shortfall = amount - walletBal;
+        walletBox.innerHTML = `
+          <div class="alert alert-danger">
+            <div>
+              <strong>❌ Insufficient Wallet Balance!</strong>
+              <div style="font-size: 12px; margin-top: 4px;">
+                You need <strong>₹${amount.toFixed(2)}</strong> to complete this purchase, but your wallet only has <strong>₹${walletBal.toFixed(2)}</strong> (Shortfall of <strong>₹${shortfall.toFixed(2)}</strong>).
+                <br>Please choose <strong>UPI</strong> or <strong>Credit Card</strong> tab above.
+              </div>
+            </div>
+          </div>
+        `;
+        walletBtn.disabled = true;
+        walletBtn.innerText = `Insufficient Wallet Balance (Short by ₹${shortfall.toFixed(2)})`;
+      }
+
+      document.getElementById('checkout-modal').classList.add('open');
+      switchCheckoutTab('upi');
+    }
+
+    function switchCheckoutTab(tab) {
+      document.querySelectorAll('.modal-tab').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-btn-' + tab).classList.add('active');
+
+      document.getElementById('pay-sec-upi').style.display = tab === 'upi' ? 'block' : 'none';
+      document.getElementById('pay-sec-wallet').style.display = tab === 'wallet' ? 'block' : 'none';
+      document.getElementById('pay-sec-card').style.display = tab === 'card' ? 'block' : 'none';
+    }
+
+    function autoFillUtr() {
+      document.getElementById('upi-utr-input').value = '4' + Math.floor(10000000000 + Math.random() * 90000000000);
+    }
+
+    async function confirmOrder(method) {
+      let ref = "";
+      if (method === 'UPI') {
+        const app = document.getElementById('upi-app-select').value;
+        const utr = document.getElementById('upi-utr-input').value || ('4' + Math.floor(10000000000 + Math.random() * 90000000000));
+        ref = `${app} (UTR: ${utr})`;
+      } else if (method === 'WALLET') {
+        ref = "Wallet Balance Debit";
+      } else if (method === 'CREDIT_CARD') {
+        ref = "Credit Card (•••• 4242) - 3D Secure Verified";
+      }
+
+      closeModal('checkout-modal');
+
+      try {
+        let endpoint = '/api/recharge';
+        let payload = {};
+
+        if (activeCheckoutDetails.type === 'voucher') {
+          endpoint = '/api/voucher/buy';
+          payload = {
+            voucherId: activeCheckoutDetails.voucherId,
+            denomination: activeCheckoutDetails.denomination,
+            paymentMethod: method,
+            paymentRef: ref
+          };
+        } else {
+          payload = {
+            serviceType: activeCheckoutDetails.serviceType,
+            category: activeCheckoutDetails.type === 'recharge' ? 'Prepaid' : 'Utility Bill',
+            providerName: activeCheckoutDetails.provider,
+            targetNumber: activeCheckoutDetails.target,
+            amount: activeCheckoutDetails.amount,
+            paymentMethod: method,
+            paymentRef: ref
+          };
+        }
+
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const resp = await res.json();
+
+        if (resp.error) {
+          alert("Error: " + resp.error);
+        } else {
+          alert(`Order submitted successfully via ${method}! Admin will verify payment and update reference.`);
+          await loadData();
+          if (activeCheckoutDetails.type === 'voucher') {
+            showCustomerSection('my-vouchers');
+          } else {
+            showCustomerSection('passbook');
+          }
+        }
+      } catch (e) {
+        alert("Transaction error: " + e.message);
+      }
+    }
+
+    // ADMIN TAB RENDERS
+    function renderAdminTx() {
+      if (!appState) return;
+      const tbody = document.getElementById('admin-tx-tbody');
+      tbody.innerHTML = appState.transactions.map(t => `
+        <tr>
+          <td>#${t.id}</td>
+          <td><strong>${t.userName}</strong> (${t.userPhone})</td>
+          <td>${t.serviceType} (${t.providerName}) • ${t.targetNumber}</td>
+          <td><strong>₹${t.amount.toFixed(2)}</strong></td>
+          <td>${t.paymentMethod}</td>
+          <td><span class="badge ${t.status === 'SUCCESS' ? 'badge-success' : t.status === 'PENDING' ? 'badge-pending' : 'badge-failed'}">${t.status}</span></td>
+          <td><code>${t.operatorTrId || '-'}</code></td>
+          <td>
+            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="openAdminTrModal(${t.id}, '${t.providerName}', '${t.targetNumber}', ${t.amount})">
+              ${t.status === 'PENDING' ? 'Process & Enter TR' : 'Edit TR'}
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openAdminTrModal(txId, provider, target, amount) {
+      activeProcessingTxId = txId;
+      document.getElementById('admin-tr-item-desc').innerHTML = `Processing <strong>${provider}</strong> recharge of <strong>₹${amount}</strong> for <strong>${target}</strong>`;
+      document.getElementById('admin-tr-id-val').value = `${provider.slice(0,3).toUpperCase()}-TR-${Math.floor(10000000 + Math.random() * 90000000)}`;
+      document.getElementById('admin-tr-modal').classList.add('open');
+    }
+
+    function autoGenTrId() {
+      document.getElementById('admin-tr-id-val').value = `OPR-TR-${Math.floor(10000000 + Math.random() * 90000000)}`;
+    }
+
+    async function saveAdminTrId() {
+      const trId = document.getElementById('admin-tr-id-val').value;
+      const status = document.getElementById('admin-tr-status').value;
+      const notes = document.getElementById('admin-tr-notes').value;
+
+      closeModal('admin-tr-modal');
+      const res = await fetch('/api/admin/tr-id', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transactionId: activeProcessingTxId, operatorTrId: trId, status, notes })
+      });
+      await loadData();
+      alert(`Transaction #${activeProcessingTxId} updated with TR ID: ${trId}!`);
+    }
+
+    function renderAdminVouchers() {
+      if (!appState) return;
+      const tbody = document.getElementById('admin-vch-tbody');
+      tbody.innerHTML = appState.userVouchers.map(v => `
+        <tr>
+          <td>#${v.id}</td>
+          <td><strong>${v.userName}</strong></td>
+          <td>${v.brandName}</td>
+          <td>₹${v.denomination} (Paid: ₹${v.finalPaid})</td>
+          <td><span class="badge badge-discount">${v.paymentMethod}</span></td>
+          <td><span class="badge ${v.status === 'ACTIVE' ? 'badge-success' : 'badge-pending'}">${v.status}</span></td>
+          <td><code>${v.voucherCode || 'Awaiting Upload'}</code></td>
+          <td>
+            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="openAdminVoucherModal(${v.id}, '${v.brandName}', '${v.userName}', ${v.denomination})">
+              ${v.status === 'PENDING' ? 'Upload Genuine Code' : 'Edit Code'}
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openAdminVoucherModal(vchId, brand, user, denom) {
+      activeUploadingVchId = vchId;
+      document.getElementById('admin-vch-desc').innerHTML = `Upload genuine voucher for <strong>${user}</strong> • <strong>${brand} (₹${denom})</strong>`;
+      document.getElementById('admin-vch-code').value = `${brand.slice(0,3).toUpperCase()}-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}`;
+      document.getElementById('admin-voucher-modal').classList.add('open');
+    }
+
+    function autoGenVchCode() {
+      document.getElementById('admin-vch-code').value = `VCH-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}`;
+    }
+
+    async function saveAdminVoucher() {
+      const code = document.getElementById('admin-vch-code').value;
+      const pin = document.getElementById('admin-vch-pin').value;
+      const exp = document.getElementById('admin-vch-exp').value;
+      const notes = document.getElementById('admin-vch-notes').value;
+
+      closeModal('admin-voucher-modal');
+      const res = await fetch('/api/admin/upload-voucher', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ voucherId: activeUploadingVchId, genuineCode: code, pinCode: pin, expiryDate: exp, notes })
+      });
+      await loadData();
+      alert(`Genuine voucher uploaded for Order #${activeUploadingVchId}! Code: ${code} is now visible to user.`);
+    }
+
+    async function rejectAdminVoucher() {
+      closeModal('admin-voucher-modal');
+      const res = await fetch('/api/admin/reject-voucher', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ voucherId: activeUploadingVchId, reason: "Payment verification failed" })
+      });
+      await loadData();
+      alert(`Order #${activeUploadingVchId} rejected and refunded if paid via wallet.`);
+    }
+
+    function renderAdminUsers() {
+      if (!appState) return;
+      const tbody = document.getElementById('admin-users-tbody');
+      tbody.innerHTML = appState.users.map(u => `
+        <tr>
+          <td>#${u.id}</td>
+          <td><strong>${u.name}</strong></td>
+          <td>${u.phone}</td>
+          <td>${u.email}</td>
+          <td><span class="badge ${u.role === 'ADMIN' ? 'badge-discount' : 'badge-success'}">${u.role}</span></td>
+          <td><strong style="color: var(--secondary);">₹${u.walletBalance.toFixed(2)}</strong></td>
+          <td>
+            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="adjustWallet(${u.id}, 500)">+₹500</button>
+            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="adjustWallet(${u.id}, -200)">-₹200</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function adjustWallet(userId, delta) {
+      await fetch('/api/admin/adjust-balance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, amountDelta: delta })
+      });
+      await loadData();
+    }
+
+    function renderAdminCommissions() {
+      if (!appState) return;
+      const tbody = document.getElementById('admin-comm-tbody');
+      tbody.innerHTML = appState.providers.map(p => `
+        <tr>
+          <td>#${p.id}</td>
+          <td>${p.serviceType}</td>
+          <td><strong>${p.name}</strong></td>
+          <td><code>${p.code}</code></td>
+          <td>${p.commissionPercent}%</td>
+          <td>₹${p.flatCommission.toFixed(2)}</td>
+          <td><span class="badge ${p.isActive ? 'badge-success' : 'badge-failed'}">${p.isActive ? 'ACTIVE' : 'INACTIVE'}</span></td>
+          <td>
+            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="editComm(${p.id}, ${p.commissionPercent})">Edit</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function editComm(id, current) {
+      const val = prompt("Enter new commission percentage (%):", current);
+      if (val !== null) {
+        await fetch('/api/admin/commission', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ providerId: id, commissionPercent: parseFloat(val), flatCommission: 0, isActive: true })
+        });
+        await loadData();
+      }
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    loadData();
+    setInterval(loadData, 8000);
+  </script>
+</body>
+</html>
