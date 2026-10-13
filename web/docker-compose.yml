@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  pay4u_v2:
+    build: .
+    container_name: pay4u_v2_portal
+    restart: unless-stopped
+    ports:
+      # Change 8085 to any free port on your VPS if 8085 is in use
+      - "8085:8080"
+    volumes:
+      - ./data.json:/app/data.json

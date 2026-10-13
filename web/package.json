@@ -1,0 +1,12 @@
+{
+  "name": "pay4u-web",
+  "version": "1.0.0",
+  "description": "pay4u Web Portal & APK Distribution Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["pay4u", "recharge", "portal"],
+  "author": "",
+  "license": "ISC"
+}

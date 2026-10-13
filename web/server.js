@@ -390,6 +390,46 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  // Serve tar.gz deployment bundle
+  if (pathname === '/pay4u-v2.tar.gz' || pathname === '/download/bundle' || pathname === '/bundle.tar.gz') {
+    const bundlePath = path.join(__dirname, 'pay4u-v2.tar.gz');
+    const rootBundlePath = path.join(__dirname, '..', 'pay4u-v2.tar.gz');
+    const targetBundle = fs.existsSync(bundlePath) ? bundlePath : (fs.existsSync(rootBundlePath) ? rootBundlePath : null);
+
+    if (targetBundle) {
+      const stat = fs.statSync(targetBundle);
+      res.writeHead(200, {
+        'Content-Type': 'application/gzip',
+        'Content-Length': stat.size,
+        'Content-Disposition': 'attachment; filename="pay4u-v2.tar.gz"'
+      });
+      return fs.createReadStream(targetBundle).pipe(res);
+    } else {
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      return res.end('Bundle file not found.');
+    }
+  }
+
+  // Serve APK download directly for users
+  if (pathname === '/pay4u.apk' || pathname === '/download' || pathname === '/download/apk') {
+    const rootApkPath = path.join(__dirname, '..', 'pay4u.apk');
+    const localApkPath = path.join(__dirname, 'pay4u.apk');
+    const targetApk = fs.existsSync(localApkPath) ? localApkPath : (fs.existsSync(rootApkPath) ? rootApkPath : null);
+
+    if (targetApk) {
+      const stat = fs.statSync(targetApk);
+      res.writeHead(200, {
+        'Content-Type': 'application/vnd.android.package-archive',
+        'Content-Length': stat.size,
+        'Content-Disposition': 'attachment; filename="pay4u.apk"'
+      });
+      return fs.createReadStream(targetApk).pipe(res);
+    } else {
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      return res.end('APK file not found on server.');
+    }
+  }
+
   // Serve static HTML index
   if (pathname === '/' || pathname === '/index.html' || pathname === '/admin') {
     const htmlPath = path.join(__dirname, 'index.html');
@@ -403,6 +443,7 @@ const server = http.createServer(async (req, res) => {
   res.end('Not Found');
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`pay4u Web Portal & Admin Panel listening on http://0.0.0.0:${PORT}`);
+const LISTEN_PORT = process.env.APP_PORT || (process.env.PORT && process.env.PORT !== '8080' ? process.env.PORT : 3000);
+server.listen(LISTEN_PORT, '0.0.0.0', () => {
+  console.log(`pay4u Web Portal & Admin Panel listening on http://0.0.0.0:${LISTEN_PORT}`);
 });
