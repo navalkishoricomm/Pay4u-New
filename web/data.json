@@ -1,0 +1,1257 @@
+{
+  "gatewayConfig": {
+    "upstreamPort": 5001,
+    "upstreamHost": "127.0.0.1",
+    "customBbpsApiUrl": "",
+    "apiKey": "",
+    "mode": "HYBRID_LIVE"
+  },
+  "users": [
+    {
+      "id": 1,
+      "name": "Master Admin",
+      "phone": "9999999999",
+      "email": "admin@pay4u.in",
+      "role": "ADMIN",
+      "walletBalance": 25000,
+      "schemeId": "SCH_VIP_SUPER"
+    },
+    {
+      "id": 2,
+      "name": "Mukesh Garg",
+      "phone": "9876543210",
+      "email": "mukgarg11@gmail.com",
+      "role": "RETAILER",
+      "walletBalance": 1051,
+      "schemeId": "SCH_RETAILER_DEF"
+    },
+    {
+      "id": 3,
+      "name": "Apex Telecom (Distributor)",
+      "phone": "9811223344",
+      "email": "apex@pay4u.in",
+      "role": "DISTRIBUTOR",
+      "walletBalance": 8400,
+      "schemeId": "SCH_DIST_GOLD"
+    },
+    {
+      "id": 4,
+      "name": "North Super Distribution Ltd",
+      "phone": "9988776655",
+      "email": "northsuper@pay4u.in",
+      "role": "SUPER_DISTRIBUTOR",
+      "walletBalance": 45000,
+      "schemeId": "SCH_VIP_SUPER"
+    }
+  ],
+  "schemes": [
+    {
+      "id": "SCH_RETAILER_DEF",
+      "name": "Standard Retailer Scheme",
+      "description": "Default commission scheme applied to all direct retail partners",
+      "isDefault": true,
+      "createdAt": 1791871506570,
+      "services": [
+        {
+          "code": "MOB_JIO",
+          "category": "Mobile Recharge",
+          "name": "Jio Prepaid",
+          "commType": "PERCENT",
+          "retailer": 2.5,
+          "distributor": 0.35,
+          "superDistributor": 0.15
+        },
+        {
+          "code": "MOB_AIRTEL",
+          "category": "Mobile Recharge",
+          "name": "Airtel Prepaid",
+          "commType": "PERCENT",
+          "retailer": 2.2,
+          "distributor": 0.3,
+          "superDistributor": 0.1
+        },
+        {
+          "code": "MOB_VI",
+          "category": "Mobile Recharge",
+          "name": "Vi Prepaid",
+          "commType": "PERCENT",
+          "retailer": 3.4,
+          "distributor": 0.4,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "MOB_BSNL",
+          "category": "Mobile Recharge",
+          "name": "BSNL Prepaid",
+          "commType": "PERCENT",
+          "retailer": 4.5,
+          "distributor": 0.5,
+          "superDistributor": 0.25
+        },
+        {
+          "code": "DTH_TATASKY",
+          "category": "DTH Recharge",
+          "name": "Tata Play",
+          "commType": "PERCENT",
+          "retailer": 2.8,
+          "distributor": 0.3,
+          "superDistributor": 0.15
+        },
+        {
+          "code": "DTH_AIRTEL",
+          "category": "DTH Recharge",
+          "name": "Airtel Digital TV",
+          "commType": "PERCENT",
+          "retailer": 2.9,
+          "distributor": 0.3,
+          "superDistributor": 0.15
+        },
+        {
+          "code": "DTH_DISHTV",
+          "category": "DTH Recharge",
+          "name": "Dish TV",
+          "commType": "PERCENT",
+          "retailer": 3.2,
+          "distributor": 0.35,
+          "superDistributor": 0.15
+        },
+        {
+          "code": "DTH_SUNDIRECT",
+          "category": "DTH Recharge",
+          "name": "Sun Direct",
+          "commType": "PERCENT",
+          "retailer": 3,
+          "distributor": 0.3,
+          "superDistributor": 0.15
+        },
+        {
+          "code": "DTH_D2H",
+          "category": "DTH Recharge",
+          "name": "Videocon D2H",
+          "commType": "PERCENT",
+          "retailer": 3.1,
+          "distributor": 0.35,
+          "superDistributor": 0.15
+        },
+        {
+          "code": "FASTAG_ALL",
+          "category": "Fastag",
+          "name": "FASTag Toll Top-up",
+          "commType": "PERCENT",
+          "retailer": 0.25,
+          "distributor": 0.05,
+          "superDistributor": 0.02
+        },
+        {
+          "code": "BBPS_ELEC",
+          "category": "BBPS Bills",
+          "name": "Electricity (50+ State Boards)",
+          "commType": "FLAT",
+          "retailer": 2.5,
+          "distributor": 0.5,
+          "superDistributor": 0.25
+        },
+        {
+          "code": "BBPS_WATER",
+          "category": "BBPS Bills",
+          "name": "Water Bill Boards",
+          "commType": "FLAT",
+          "retailer": 3,
+          "distributor": 0.5,
+          "superDistributor": 0.25
+        },
+        {
+          "code": "BBPS_GAS_PIPED",
+          "category": "BBPS Bills",
+          "name": "Piped Gas (PNG)",
+          "commType": "FLAT",
+          "retailer": 2,
+          "distributor": 0.4,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "BBPS_LPG",
+          "category": "BBPS Bills",
+          "name": "LPG Gas Cylinder Booking",
+          "commType": "FLAT",
+          "retailer": 2,
+          "distributor": 0.4,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "BBPS_BROADBAND",
+          "category": "BBPS Bills",
+          "name": "Broadband & Fiber",
+          "commType": "PERCENT",
+          "retailer": 1.2,
+          "distributor": 0.2,
+          "superDistributor": 0.1
+        },
+        {
+          "code": "BBPS_POSTPAID",
+          "category": "BBPS Bills",
+          "name": "Mobile Postpaid Bills",
+          "commType": "PERCENT",
+          "retailer": 0.8,
+          "distributor": 0.15,
+          "superDistributor": 0.05
+        },
+        {
+          "code": "BBPS_LANDLINE",
+          "category": "BBPS Bills",
+          "name": "Landline Postpaid",
+          "commType": "FLAT",
+          "retailer": 2,
+          "distributor": 0.3,
+          "superDistributor": 0.1
+        },
+        {
+          "code": "BBPS_CABLE",
+          "category": "BBPS Bills",
+          "name": "Cable TV / Postpaid DTH",
+          "commType": "PERCENT",
+          "retailer": 1.5,
+          "distributor": 0.2,
+          "superDistributor": 0.1
+        },
+        {
+          "code": "BBPS_LOAN",
+          "category": "BBPS Financial",
+          "name": "Loan EMI Repayment",
+          "commType": "PERCENT",
+          "retailer": 0.3,
+          "distributor": 0.05,
+          "superDistributor": 0.02
+        },
+        {
+          "code": "BBPS_INSURANCE",
+          "category": "BBPS Financial",
+          "name": "Life & General Insurance",
+          "commType": "PERCENT",
+          "retailer": 0.4,
+          "distributor": 0.05,
+          "superDistributor": 0.02
+        },
+        {
+          "code": "BBPS_CREDITCARD",
+          "category": "BBPS Financial",
+          "name": "Credit Card Payment",
+          "commType": "PERCENT",
+          "retailer": 0.2,
+          "distributor": 0.05,
+          "superDistributor": 0.02
+        },
+        {
+          "code": "BBPS_TAX",
+          "category": "BBPS Civic",
+          "name": "Municipal & Property Tax",
+          "commType": "FLAT",
+          "retailer": 5,
+          "distributor": 1,
+          "superDistributor": 0.5
+        },
+        {
+          "code": "BBPS_EDUCATION",
+          "category": "BBPS Civic",
+          "name": "Education Fees",
+          "commType": "FLAT",
+          "retailer": 5,
+          "distributor": 1,
+          "superDistributor": 0.5
+        },
+        {
+          "code": "BBPS_HOUSING",
+          "category": "BBPS Civic",
+          "name": "Housing Society Maintenance",
+          "commType": "FLAT",
+          "retailer": 4,
+          "distributor": 0.8,
+          "superDistributor": 0.4
+        },
+        {
+          "code": "BBPS_HOSPITAL",
+          "category": "BBPS Civic",
+          "name": "Hospital Bills",
+          "commType": "FLAT",
+          "retailer": 5,
+          "distributor": 1,
+          "superDistributor": 0.5
+        },
+        {
+          "code": "BBPS_OTT",
+          "category": "BBPS Subscriptions",
+          "name": "OTT & Digital Subscriptions",
+          "commType": "PERCENT",
+          "retailer": 2,
+          "distributor": 0.3,
+          "superDistributor": 0.15
+        },
+        {
+          "code": "BBPS_CLUBS",
+          "category": "BBPS Civic",
+          "name": "Clubs & Associations",
+          "commType": "FLAT",
+          "retailer": 5,
+          "distributor": 1,
+          "superDistributor": 0.5
+        },
+        {
+          "code": "VCH_AMAZON",
+          "category": "Brand Vouchers",
+          "name": "Amazon Pay Gift Card",
+          "commType": "PERCENT",
+          "retailer": 2,
+          "distributor": 0.3,
+          "superDistributor": 0.15
+        },
+        {
+          "code": "VCH_FLIPKART",
+          "category": "Brand Vouchers",
+          "name": "Flipkart Gift Card",
+          "commType": "PERCENT",
+          "retailer": 1.8,
+          "distributor": 0.25,
+          "superDistributor": 0.1
+        },
+        {
+          "code": "VCH_SWIGGY",
+          "category": "Brand Vouchers",
+          "name": "Swiggy Food & Instamart",
+          "commType": "PERCENT",
+          "retailer": 4,
+          "distributor": 0.5,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "VCH_ZOMATO",
+          "category": "Brand Vouchers",
+          "name": "Zomato Food Voucher",
+          "commType": "PERCENT",
+          "retailer": 3.5,
+          "distributor": 0.4,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "VCH_MYNTRA",
+          "category": "Brand Vouchers",
+          "name": "Myntra E-Gift Card",
+          "commType": "PERCENT",
+          "retailer": 5,
+          "distributor": 0.6,
+          "superDistributor": 0.3
+        },
+        {
+          "code": "VCH_PLAY",
+          "category": "Brand Vouchers",
+          "name": "Google Play Recharge Code",
+          "commType": "PERCENT",
+          "retailer": 2.5,
+          "distributor": 0.3,
+          "superDistributor": 0.15
+        }
+      ]
+    },
+    {
+      "id": "SCH_DIST_GOLD",
+      "name": "Gold Partner Scheme",
+      "description": "High-volume partner commission scheme with enhanced margins",
+      "isDefault": false,
+      "createdAt": 1791871506570,
+      "services": [
+        {
+          "code": "MOB_JIO",
+          "category": "Mobile Recharge",
+          "name": "Jio Prepaid",
+          "commType": "PERCENT",
+          "retailer": 2.8,
+          "distributor": 0.45,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "MOB_AIRTEL",
+          "category": "Mobile Recharge",
+          "name": "Airtel Prepaid",
+          "commType": "PERCENT",
+          "retailer": 2.5,
+          "distributor": 0.4,
+          "superDistributor": 0.15
+        },
+        {
+          "code": "MOB_VI",
+          "category": "Mobile Recharge",
+          "name": "Vi Prepaid",
+          "commType": "PERCENT",
+          "retailer": 3.7,
+          "distributor": 0.5,
+          "superDistributor": 0.25
+        },
+        {
+          "code": "MOB_BSNL",
+          "category": "Mobile Recharge",
+          "name": "BSNL Prepaid",
+          "commType": "PERCENT",
+          "retailer": 4.8,
+          "distributor": 0.6,
+          "superDistributor": 0.3
+        },
+        {
+          "code": "DTH_TATASKY",
+          "category": "DTH Recharge",
+          "name": "Tata Play",
+          "commType": "PERCENT",
+          "retailer": 3.1,
+          "distributor": 0.4,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "DTH_AIRTEL",
+          "category": "DTH Recharge",
+          "name": "Airtel Digital TV",
+          "commType": "PERCENT",
+          "retailer": 3.2,
+          "distributor": 0.4,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "DTH_DISHTV",
+          "category": "DTH Recharge",
+          "name": "Dish TV",
+          "commType": "PERCENT",
+          "retailer": 3.5,
+          "distributor": 0.45,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "DTH_SUNDIRECT",
+          "category": "DTH Recharge",
+          "name": "Sun Direct",
+          "commType": "PERCENT",
+          "retailer": 3.3,
+          "distributor": 0.4,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "DTH_D2H",
+          "category": "DTH Recharge",
+          "name": "Videocon D2H",
+          "commType": "PERCENT",
+          "retailer": 3.4,
+          "distributor": 0.45,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "FASTAG_ALL",
+          "category": "Fastag",
+          "name": "FASTag Toll Top-up",
+          "commType": "PERCENT",
+          "retailer": 0.35,
+          "distributor": 0.08,
+          "superDistributor": 0.03
+        },
+        {
+          "code": "BBPS_ELEC",
+          "category": "BBPS Bills",
+          "name": "Electricity (50+ State Boards)",
+          "commType": "FLAT",
+          "retailer": 3.5,
+          "distributor": 0.75,
+          "superDistributor": 0.35
+        },
+        {
+          "code": "BBPS_WATER",
+          "category": "BBPS Bills",
+          "name": "Water Bill Boards",
+          "commType": "FLAT",
+          "retailer": 4,
+          "distributor": 0.75,
+          "superDistributor": 0.35
+        },
+        {
+          "code": "BBPS_GAS_PIPED",
+          "category": "BBPS Bills",
+          "name": "Piped Gas (PNG)",
+          "commType": "FLAT",
+          "retailer": 3,
+          "distributor": 0.6,
+          "superDistributor": 0.3
+        },
+        {
+          "code": "BBPS_LPG",
+          "category": "BBPS Bills",
+          "name": "LPG Gas Cylinder Booking",
+          "commType": "FLAT",
+          "retailer": 3,
+          "distributor": 0.6,
+          "superDistributor": 0.3
+        },
+        {
+          "code": "BBPS_BROADBAND",
+          "category": "BBPS Bills",
+          "name": "Broadband & Fiber",
+          "commType": "PERCENT",
+          "retailer": 1.5,
+          "distributor": 0.3,
+          "superDistributor": 0.15
+        },
+        {
+          "code": "BBPS_POSTPAID",
+          "category": "BBPS Bills",
+          "name": "Mobile Postpaid Bills",
+          "commType": "PERCENT",
+          "retailer": 1,
+          "distributor": 0.2,
+          "superDistributor": 0.08
+        },
+        {
+          "code": "BBPS_LANDLINE",
+          "category": "BBPS Bills",
+          "name": "Landline Postpaid",
+          "commType": "FLAT",
+          "retailer": 2.5,
+          "distributor": 0.4,
+          "superDistributor": 0.15
+        },
+        {
+          "code": "BBPS_CABLE",
+          "category": "BBPS Bills",
+          "name": "Cable TV / Postpaid DTH",
+          "commType": "PERCENT",
+          "retailer": 1.8,
+          "distributor": 0.25,
+          "superDistributor": 0.12
+        },
+        {
+          "code": "BBPS_LOAN",
+          "category": "BBPS Financial",
+          "name": "Loan EMI Repayment",
+          "commType": "PERCENT",
+          "retailer": 0.4,
+          "distributor": 0.08,
+          "superDistributor": 0.03
+        },
+        {
+          "code": "BBPS_INSURANCE",
+          "category": "BBPS Financial",
+          "name": "Life & General Insurance",
+          "commType": "PERCENT",
+          "retailer": 0.5,
+          "distributor": 0.08,
+          "superDistributor": 0.03
+        },
+        {
+          "code": "BBPS_CREDITCARD",
+          "category": "BBPS Financial",
+          "name": "Credit Card Payment",
+          "commType": "PERCENT",
+          "retailer": 0.25,
+          "distributor": 0.07,
+          "superDistributor": 0.03
+        },
+        {
+          "code": "BBPS_TAX",
+          "category": "BBPS Civic",
+          "name": "Municipal & Property Tax",
+          "commType": "FLAT",
+          "retailer": 6.5,
+          "distributor": 1.5,
+          "superDistributor": 0.75
+        },
+        {
+          "code": "BBPS_EDUCATION",
+          "category": "BBPS Civic",
+          "name": "Education Fees",
+          "commType": "FLAT",
+          "retailer": 6.5,
+          "distributor": 1.5,
+          "superDistributor": 0.75
+        },
+        {
+          "code": "BBPS_HOUSING",
+          "category": "BBPS Civic",
+          "name": "Housing Society Maintenance",
+          "commType": "FLAT",
+          "retailer": 5,
+          "distributor": 1,
+          "superDistributor": 0.5
+        },
+        {
+          "code": "BBPS_HOSPITAL",
+          "category": "BBPS Civic",
+          "name": "Hospital Bills",
+          "commType": "FLAT",
+          "retailer": 6.5,
+          "distributor": 1.5,
+          "superDistributor": 0.75
+        },
+        {
+          "code": "BBPS_OTT",
+          "category": "BBPS Subscriptions",
+          "name": "OTT & Digital Subscriptions",
+          "commType": "PERCENT",
+          "retailer": 2.5,
+          "distributor": 0.4,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "BBPS_CLUBS",
+          "category": "BBPS Civic",
+          "name": "Clubs & Associations",
+          "commType": "FLAT",
+          "retailer": 6.5,
+          "distributor": 1.5,
+          "superDistributor": 0.75
+        },
+        {
+          "code": "VCH_AMAZON",
+          "category": "Brand Vouchers",
+          "name": "Amazon Pay Gift Card",
+          "commType": "PERCENT",
+          "retailer": 2.4,
+          "distributor": 0.4,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "VCH_FLIPKART",
+          "category": "Brand Vouchers",
+          "name": "Flipkart Gift Card",
+          "commType": "PERCENT",
+          "retailer": 2.2,
+          "distributor": 0.35,
+          "superDistributor": 0.15
+        },
+        {
+          "code": "VCH_SWIGGY",
+          "category": "Brand Vouchers",
+          "name": "Swiggy Food & Instamart",
+          "commType": "PERCENT",
+          "retailer": 4.5,
+          "distributor": 0.6,
+          "superDistributor": 0.25
+        },
+        {
+          "code": "VCH_ZOMATO",
+          "category": "Brand Vouchers",
+          "name": "Zomato Food Voucher",
+          "commType": "PERCENT",
+          "retailer": 4,
+          "distributor": 0.5,
+          "superDistributor": 0.25
+        },
+        {
+          "code": "VCH_MYNTRA",
+          "category": "Brand Vouchers",
+          "name": "Myntra E-Gift Card",
+          "commType": "PERCENT",
+          "retailer": 5.8,
+          "distributor": 0.75,
+          "superDistributor": 0.35
+        },
+        {
+          "code": "VCH_PLAY",
+          "category": "Brand Vouchers",
+          "name": "Google Play Recharge Code",
+          "commType": "PERCENT",
+          "retailer": 2.9,
+          "distributor": 0.4,
+          "superDistributor": 0.2
+        }
+      ]
+    },
+    {
+      "id": "SCH_VIP_SUPER",
+      "name": "VIP Super Distributor Scheme",
+      "description": "Maximum tier margins for master distributors and partners",
+      "isDefault": false,
+      "createdAt": 1791871506570,
+      "services": [
+        {
+          "code": "MOB_JIO",
+          "category": "Mobile Recharge",
+          "name": "Jio Prepaid",
+          "commType": "PERCENT",
+          "retailer": 3,
+          "distributor": 0.55,
+          "superDistributor": 0.25
+        },
+        {
+          "code": "MOB_AIRTEL",
+          "category": "Mobile Recharge",
+          "name": "Airtel Prepaid",
+          "commType": "PERCENT",
+          "retailer": 2.8,
+          "distributor": 0.45,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "MOB_VI",
+          "category": "Mobile Recharge",
+          "name": "Vi Prepaid",
+          "commType": "PERCENT",
+          "retailer": 4,
+          "distributor": 0.6,
+          "superDistributor": 0.3
+        },
+        {
+          "code": "MOB_BSNL",
+          "category": "Mobile Recharge",
+          "name": "BSNL Prepaid",
+          "commType": "PERCENT",
+          "retailer": 5,
+          "distributor": 0.7,
+          "superDistributor": 0.35
+        },
+        {
+          "code": "DTH_TATASKY",
+          "category": "DTH Recharge",
+          "name": "Tata Play",
+          "commType": "PERCENT",
+          "retailer": 3.3,
+          "distributor": 0.45,
+          "superDistributor": 0.25
+        },
+        {
+          "code": "DTH_AIRTEL",
+          "category": "DTH Recharge",
+          "name": "Airtel Digital TV",
+          "commType": "PERCENT",
+          "retailer": 3.4,
+          "distributor": 0.45,
+          "superDistributor": 0.25
+        },
+        {
+          "code": "DTH_DISHTV",
+          "category": "DTH Recharge",
+          "name": "Dish TV",
+          "commType": "PERCENT",
+          "retailer": 3.7,
+          "distributor": 0.5,
+          "superDistributor": 0.25
+        },
+        {
+          "code": "DTH_SUNDIRECT",
+          "category": "DTH Recharge",
+          "name": "Sun Direct",
+          "commType": "PERCENT",
+          "retailer": 3.5,
+          "distributor": 0.45,
+          "superDistributor": 0.25
+        },
+        {
+          "code": "DTH_D2H",
+          "category": "DTH Recharge",
+          "name": "Videocon D2H",
+          "commType": "PERCENT",
+          "retailer": 3.6,
+          "distributor": 0.5,
+          "superDistributor": 0.25
+        },
+        {
+          "code": "FASTAG_ALL",
+          "category": "Fastag",
+          "name": "FASTag Toll Top-up",
+          "commType": "PERCENT",
+          "retailer": 0.4,
+          "distributor": 0.1,
+          "superDistributor": 0.05
+        },
+        {
+          "code": "BBPS_ELEC",
+          "category": "BBPS Bills",
+          "name": "Electricity (50+ State Boards)",
+          "commType": "FLAT",
+          "retailer": 4,
+          "distributor": 1,
+          "superDistributor": 0.5
+        },
+        {
+          "code": "BBPS_WATER",
+          "category": "BBPS Bills",
+          "name": "Water Bill Boards",
+          "commType": "FLAT",
+          "retailer": 5,
+          "distributor": 1,
+          "superDistributor": 0.5
+        },
+        {
+          "code": "BBPS_GAS_PIPED",
+          "category": "BBPS Bills",
+          "name": "Piped Gas (PNG)",
+          "commType": "FLAT",
+          "retailer": 3.5,
+          "distributor": 0.8,
+          "superDistributor": 0.4
+        },
+        {
+          "code": "BBPS_LPG",
+          "category": "BBPS Bills",
+          "name": "LPG Gas Cylinder Booking",
+          "commType": "FLAT",
+          "retailer": 3.5,
+          "distributor": 0.8,
+          "superDistributor": 0.4
+        },
+        {
+          "code": "BBPS_BROADBAND",
+          "category": "BBPS Bills",
+          "name": "Broadband & Fiber",
+          "commType": "PERCENT",
+          "retailer": 1.8,
+          "distributor": 0.4,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "BBPS_POSTPAID",
+          "category": "BBPS Bills",
+          "name": "Mobile Postpaid Bills",
+          "commType": "PERCENT",
+          "retailer": 1.2,
+          "distributor": 0.25,
+          "superDistributor": 0.1
+        },
+        {
+          "code": "BBPS_LANDLINE",
+          "category": "BBPS Bills",
+          "name": "Landline Postpaid",
+          "commType": "FLAT",
+          "retailer": 3,
+          "distributor": 0.5,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "BBPS_CABLE",
+          "category": "BBPS Bills",
+          "name": "Cable TV / Postpaid DTH",
+          "commType": "PERCENT",
+          "retailer": 2,
+          "distributor": 0.3,
+          "superDistributor": 0.15
+        },
+        {
+          "code": "BBPS_LOAN",
+          "category": "BBPS Financial",
+          "name": "Loan EMI Repayment",
+          "commType": "PERCENT",
+          "retailer": 0.5,
+          "distributor": 0.1,
+          "superDistributor": 0.05
+        },
+        {
+          "code": "BBPS_INSURANCE",
+          "category": "BBPS Financial",
+          "name": "Life & General Insurance",
+          "commType": "PERCENT",
+          "retailer": 0.6,
+          "distributor": 0.1,
+          "superDistributor": 0.05
+        },
+        {
+          "code": "BBPS_CREDITCARD",
+          "category": "BBPS Financial",
+          "name": "Credit Card Payment",
+          "commType": "PERCENT",
+          "retailer": 0.3,
+          "distributor": 0.08,
+          "superDistributor": 0.04
+        },
+        {
+          "code": "BBPS_TAX",
+          "category": "BBPS Civic",
+          "name": "Municipal & Property Tax",
+          "commType": "FLAT",
+          "retailer": 8,
+          "distributor": 2,
+          "superDistributor": 1
+        },
+        {
+          "code": "BBPS_EDUCATION",
+          "category": "BBPS Civic",
+          "name": "Education Fees",
+          "commType": "FLAT",
+          "retailer": 8,
+          "distributor": 2,
+          "superDistributor": 1
+        },
+        {
+          "code": "BBPS_HOUSING",
+          "category": "BBPS Civic",
+          "name": "Housing Society Maintenance",
+          "commType": "FLAT",
+          "retailer": 6,
+          "distributor": 1.5,
+          "superDistributor": 0.75
+        },
+        {
+          "code": "BBPS_HOSPITAL",
+          "category": "BBPS Civic",
+          "name": "Hospital Bills",
+          "commType": "FLAT",
+          "retailer": 8,
+          "distributor": 2,
+          "superDistributor": 1
+        },
+        {
+          "code": "BBPS_OTT",
+          "category": "BBPS Subscriptions",
+          "name": "OTT & Digital Subscriptions",
+          "commType": "PERCENT",
+          "retailer": 3,
+          "distributor": 0.5,
+          "superDistributor": 0.25
+        },
+        {
+          "code": "BBPS_CLUBS",
+          "category": "BBPS Civic",
+          "name": "Clubs & Associations",
+          "commType": "FLAT",
+          "retailer": 8,
+          "distributor": 2,
+          "superDistributor": 1
+        },
+        {
+          "code": "VCH_AMAZON",
+          "category": "Brand Vouchers",
+          "name": "Amazon Pay Gift Card",
+          "commType": "PERCENT",
+          "retailer": 2.6,
+          "distributor": 0.45,
+          "superDistributor": 0.22
+        },
+        {
+          "code": "VCH_FLIPKART",
+          "category": "Brand Vouchers",
+          "name": "Flipkart Gift Card",
+          "commType": "PERCENT",
+          "retailer": 2.4,
+          "distributor": 0.4,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "VCH_SWIGGY",
+          "category": "Brand Vouchers",
+          "name": "Swiggy Food & Instamart",
+          "commType": "PERCENT",
+          "retailer": 5,
+          "distributor": 0.7,
+          "superDistributor": 0.3
+        },
+        {
+          "code": "VCH_ZOMATO",
+          "category": "Brand Vouchers",
+          "name": "Zomato Food Voucher",
+          "commType": "PERCENT",
+          "retailer": 4.5,
+          "distributor": 0.6,
+          "superDistributor": 0.3
+        },
+        {
+          "code": "VCH_MYNTRA",
+          "category": "Brand Vouchers",
+          "name": "Myntra E-Gift Card",
+          "commType": "PERCENT",
+          "retailer": 6.5,
+          "distributor": 0.9,
+          "superDistributor": 0.4
+        },
+        {
+          "code": "VCH_PLAY",
+          "category": "Brand Vouchers",
+          "name": "Google Play Recharge Code",
+          "commType": "PERCENT",
+          "retailer": 3.2,
+          "distributor": 0.45,
+          "superDistributor": 0.22
+        }
+      ]
+    },
+    {
+      "id": "SCH_MV6PVOAQ",
+      "name": "Test Festive Scheme",
+      "description": "Imported from CSV",
+      "isDefault": false,
+      "createdAt": 1791898127810,
+      "services": [
+        {
+          "code": "MOB_JIO",
+          "category": "Mobile",
+          "name": "Jio 5G",
+          "commType": "PERCENT",
+          "retailer": 3.5,
+          "distributor": 0.5,
+          "superDistributor": 0.2
+        },
+        {
+          "code": "BBPS_ELEC",
+          "category": "BBPS",
+          "name": "Electricity All",
+          "commType": "FLAT",
+          "retailer": 5,
+          "distributor": 1,
+          "superDistributor": 0.5
+        }
+      ]
+    }
+  ],
+  "transactions": [
+    {
+      "id": 5,
+      "userId": 2,
+      "userName": "Mukesh Garg",
+      "userPhone": "9876543210",
+      "serviceType": "MOBILE",
+      "category": "Prepaid",
+      "providerName": "Jio",
+      "targetNumber": "9876543210",
+      "amount": 199,
+      "netAmount": 199,
+      "paymentMethod": "WALLET",
+      "userUpiUtr": "",
+      "status": "SUCCESS",
+      "operatorTrId": "JIO-AUTO-47114441",
+      "adminNotes": "Auto-debited from Wallet. Remaining Balance: ₹1051.00",
+      "createdAt": 1791898116556
+    },
+    {
+      "id": 4,
+      "userId": 2,
+      "userName": "Mukesh Garg",
+      "userPhone": "9876543210",
+      "serviceType": "BILL",
+      "category": "Utility Bill",
+      "providerName": "BSES Rajdhani Power Limited (BRPL) - Delhi",
+      "targetNumber": "1002948194",
+      "amount": 50000,
+      "netAmount": 50000,
+      "paymentMethod": "UPI",
+      "userUpiUtr": "Google Pay (UTR: 492019482910)",
+      "status": "PENDING",
+      "operatorTrId": "",
+      "adminNotes": "Paid via UPI. UTR / Ref: Google Pay (UTR: 492019482910)",
+      "createdAt": 1791898091310
+    },
+    {
+      "id": 3,
+      "userId": 2,
+      "userName": "Mukesh Garg",
+      "userPhone": "9876543210",
+      "serviceType": "BILL",
+      "category": "Utility Bill",
+      "providerName": "BSES Rajdhani Power Limited (BRPL) - Delhi",
+      "targetNumber": "1002948194",
+      "amount": 50000,
+      "netAmount": 50000,
+      "paymentMethod": "WALLET",
+      "userUpiUtr": "",
+      "status": "FAILED",
+      "operatorTrId": "FAILED - INSUFFICIENT BALANCE",
+      "adminNotes": "Payment Failed: Insufficient Wallet Balance. Available: ₹1250.00, Required: ₹50000.00. Shortfall: ₹48750.00.",
+      "createdAt": 1791898086468
+    },
+    {
+      "id": 1,
+      "userId": 2,
+      "userName": "Mukesh Garg",
+      "userPhone": "9876543210",
+      "serviceType": "MOBILE",
+      "category": "Prepaid",
+      "providerName": "Jio",
+      "targetNumber": "9876543210",
+      "amount": 299,
+      "paymentMethod": "UPI",
+      "userUpiUtr": "428710928374",
+      "status": "SUCCESS",
+      "operatorTrId": "JIO-TR-88492019",
+      "adminNotes": "Processed via Jio Core Gateway",
+      "createdAt": 1791786906570
+    },
+    {
+      "id": 2,
+      "userId": 2,
+      "userName": "Mukesh Garg",
+      "userPhone": "9876543210",
+      "serviceType": "DTH",
+      "category": "Monthly Pack",
+      "providerName": "Tata Play",
+      "targetNumber": "1098472910",
+      "amount": 450,
+      "paymentMethod": "CREDIT_CARD",
+      "userUpiUtr": "VISA-••4242",
+      "status": "PENDING",
+      "operatorTrId": "",
+      "adminNotes": "Awaiting Admin TR ID",
+      "createdAt": 1791871506570
+    }
+  ],
+  "vouchers": [
+    {
+      "id": 1,
+      "brandName": "Amazon Pay Gift Card",
+      "category": "Shopping",
+      "discountPercent": 2.5,
+      "denominations": [
+        250,
+        500,
+        1000,
+        2000,
+        5000
+      ],
+      "badge": "Best Seller"
+    },
+    {
+      "id": 2,
+      "brandName": "Flipkart Gift Card",
+      "category": "Shopping",
+      "discountPercent": 2,
+      "denominations": [
+        100,
+        500,
+        1000,
+        2500,
+        5000
+      ],
+      "badge": "Popular"
+    },
+    {
+      "id": 3,
+      "brandName": "Swiggy Food & Instamart",
+      "category": "Food",
+      "discountPercent": 5,
+      "denominations": [
+        100,
+        250,
+        500,
+        1000
+      ],
+      "badge": "5% OFF"
+    },
+    {
+      "id": 4,
+      "brandName": "Zomato Voucher",
+      "category": "Food",
+      "discountPercent": 4,
+      "denominations": [
+        150,
+        250,
+        500,
+        1000
+      ],
+      "badge": "Hot Deal"
+    },
+    {
+      "id": 5,
+      "brandName": "Google Play Code",
+      "category": "Gaming",
+      "discountPercent": 3,
+      "denominations": [
+        100,
+        300,
+        500,
+        1000,
+        1500
+      ],
+      "badge": "Gaming"
+    },
+    {
+      "id": 6,
+      "brandName": "Myntra E-Gift Card",
+      "category": "Fashion",
+      "discountPercent": 6,
+      "denominations": [
+        500,
+        1000,
+        2000,
+        5000
+      ],
+      "badge": "6% OFF"
+    }
+  ],
+  "userVouchers": [
+    {
+      "id": 1,
+      "userId": 2,
+      "userName": "Mukesh Garg",
+      "brandName": "Amazon Pay Gift Card",
+      "denomination": 500,
+      "finalPaid": 487.5,
+      "paymentMethod": "UPI",
+      "status": "ACTIVE",
+      "voucherCode": "AMZN-8839-2910-KPL9",
+      "pinCode": "4921",
+      "expiryDate": "12 Oct 2027",
+      "purchasedAt": 1791869706570
+    }
+  ],
+  "providers": [
+    {
+      "id": 1,
+      "serviceType": "MOBILE",
+      "name": "Jio",
+      "code": "JIO",
+      "commissionPercent": 2.5,
+      "flatCommission": 0,
+      "isActive": true
+    },
+    {
+      "id": 2,
+      "serviceType": "MOBILE",
+      "name": "Airtel",
+      "code": "AIRTEL",
+      "commissionPercent": 2.2,
+      "flatCommission": 0,
+      "isActive": true
+    },
+    {
+      "id": 3,
+      "serviceType": "MOBILE",
+      "name": "Vi",
+      "code": "VI",
+      "commissionPercent": 3.4,
+      "flatCommission": 0,
+      "isActive": true
+    },
+    {
+      "id": 4,
+      "serviceType": "MOBILE",
+      "name": "BSNL",
+      "code": "BSNL",
+      "commissionPercent": 4.5,
+      "flatCommission": 0,
+      "isActive": true
+    },
+    {
+      "id": 5,
+      "serviceType": "DTH",
+      "name": "Tata Play",
+      "code": "TATASKY",
+      "commissionPercent": 2.8,
+      "flatCommission": 0,
+      "isActive": true
+    },
+    {
+      "id": 6,
+      "serviceType": "DTH",
+      "name": "Airtel Digital TV",
+      "code": "AIRTELDTH",
+      "commissionPercent": 2.9,
+      "flatCommission": 0,
+      "isActive": true
+    },
+    {
+      "id": 7,
+      "serviceType": "BILL",
+      "name": "BSES Rajdhani Delhi",
+      "code": "BSES",
+      "commissionPercent": 0.5,
+      "flatCommission": 2.5,
+      "isActive": true
+    },
+    {
+      "id": 8,
+      "serviceType": "BILL",
+      "name": "Delhi Jal Board",
+      "code": "DJB",
+      "commissionPercent": 0,
+      "flatCommission": 3,
+      "isActive": true
+    }
+  ]
+}

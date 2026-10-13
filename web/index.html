@@ -119,19 +119,21 @@
   <main class="container">
     <!-- Top Customer Nav -->
     <div id="customer-nav" class="nav-tabs">
-      <button class="nav-tab active" onclick="showCustomerSection('recharge')">📱 Mobile & DTH</button>
-      <button class="nav-tab" onclick="showCustomerSection('bills')">💡 BBPS Bill Pay</button>
-      <button class="nav-tab" onclick="showCustomerSection('vouchers')">🎁 Brand Vouchers</button>
-      <button class="nav-tab" onclick="showCustomerSection('my-vouchers')">🎟️ My Vouchers (<span id="user-vch-count">1</span>)</button>
-      <button class="nav-tab" onclick="showCustomerSection('passbook')">📜 Passbook</button>
+      <button class="nav-tab active" data-sec="recharge" onclick="showCustomerSection('recharge', this)">📱 Mobile & DTH</button>
+      <button class="nav-tab" data-sec="bills" onclick="showCustomerSection('bills', this)">💡 BBPS Bill Pay</button>
+      <button class="nav-tab" data-sec="vouchers" onclick="showCustomerSection('vouchers', this)">🎁 Brand Vouchers</button>
+      <button class="nav-tab" data-sec="my-vouchers" onclick="showCustomerSection('my-vouchers', this)">🎟️ My Vouchers (<span id="user-vch-count">1</span>)</button>
+      <button class="nav-tab" data-sec="passbook" onclick="showCustomerSection('passbook', this)">📜 Passbook</button>
     </div>
 
     <!-- Top Admin Nav -->
     <div id="admin-nav" class="nav-tabs" style="display: none;">
-      <button class="nav-tab active" onclick="showAdminSection('tx-queue')">⚡ Recharges & TR IDs</button>
-      <button class="nav-tab" onclick="showAdminSection('voucher-queue')">🎟️ Upload Genuine Vouchers</button>
-      <button class="nav-tab" onclick="showAdminSection('users')">👥 User Wallets</button>
-      <button class="nav-tab" onclick="showAdminSection('commissions')">📊 Commissions</button>
+      <button class="nav-tab active" data-sec="tx-queue" onclick="showAdminSection('tx-queue', this)">⚡ Recharges & TR IDs</button>
+      <button class="nav-tab" data-sec="commissions" onclick="showAdminSection('commissions', this)">📊 Commission Schemes</button>
+      <button class="nav-tab" data-sec="batch" onclick="showAdminSection('batch', this)">📁 Batch File Creator</button>
+      <button class="nav-tab" data-sec="users" onclick="showAdminSection('users', this)">👥 User Scheme Assignment</button>
+      <button class="nav-tab" data-sec="voucher-queue" onclick="showAdminSection('voucher-queue', this)">🎟️ Upload Genuine Vouchers</button>
+      <button class="nav-tab" data-sec="gateway" onclick="showAdminSection('gateway', this)">🌐 BBPS Gateway Settings</button>
     </div>
 
     <!-- ================= CUSTOMER PORTAL ================= -->
@@ -407,21 +409,189 @@
         </div>
       </div>
 
-      <!-- ADMIN TAB 3: USERS & WALLET ADJUSTMENT -->
-      <div id="admin-sec-users" class="admin-section" style="display: none;">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">User Accounts & Wallet Balances</div>
+      <!-- ADMIN TAB 2: COMMISSION SCHEMES & ALL SERVICES -->
+      <div id="admin-sec-commissions" class="admin-section" style="display: none;">
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="card-header" style="flex-wrap: wrap; gap: 12px;">
+            <div>
+              <div class="card-title">Commission Schemes Management</div>
+              <div style="font-size: 13px; color: var(--text-muted);">Manage commission rates for all Mobile, DTH, Fastag, BBPS, and Voucher services</div>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+              <select id="admin-scheme-select" class="form-control" style="width: auto; min-width: 220px; font-weight: 700;" onchange="onSchemeSelectChange()"></select>
+              <button class="btn btn-primary" onclick="openCreateSchemeModal()">+ New Scheme</button>
+              <button class="btn btn-secondary" onclick="downloadSchemeBatchCsv()">📥 Download Scheme CSV</button>
+              <button class="btn btn-secondary" onclick="showAdminSection('batch')">📁 Batch Upload</button>
+            </div>
           </div>
+
+          <!-- Active Scheme Details Banner -->
+          <div id="active-scheme-banner" style="background: #F0F6FF; border: 1.5px solid #DBEAFE; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 15px; font-weight: 800; color: var(--primary);" id="banner-scheme-name">Standard Retailer Scheme</div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;" id="banner-scheme-desc">Default commission scheme applied to all direct retail partners</div>
+            </div>
+            <span class="badge badge-success" id="banner-scheme-badge">ACTIVE SCHEME</span>
+          </div>
+
+          <!-- Category Filters & Search -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;" id="comm-category-filters">
+              <button class="denom-chip active" onclick="filterCommCategory('ALL', this)">All Services</button>
+              <button class="denom-chip" onclick="filterCommCategory('Mobile Recharge', this)">Mobile</button>
+              <button class="denom-chip" onclick="filterCommCategory('DTH Recharge', this)">DTH</button>
+              <button class="denom-chip" onclick="filterCommCategory('Fastag', this)">Fastag</button>
+              <button class="denom-chip" onclick="filterCommCategory('BBPS', this)">BBPS Utility</button>
+              <button class="denom-chip" onclick="filterCommCategory('Brand Vouchers', this)">Gift Vouchers</button>
+            </div>
+            <div style="width: 260px;">
+              <input type="text" id="comm-service-search" class="form-control" placeholder="Search service / operator..." oninput="renderAdminSchemeServices()">
+            </div>
+          </div>
+
+          <!-- All Services Commission Table -->
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Category</th>
+                  <th>Service / Operator Name</th>
+                  <th>Type</th>
+                  <th>Retailer Margin</th>
+                  <th>Distributor Margin</th>
+                  <th>Super Dist. Margin</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-scheme-services-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN TAB 3: BATCH FILE SCHEME CREATOR -->
+      <div id="admin-sec-batch" class="admin-section" style="display: none;">
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="card-header">
+            <div>
+              <div class="card-title">📁 Commission Schemes Batch File Manager</div>
+              <div style="font-size: 13px; color: var(--text-muted);">Create or bulk-update commission schemes across all 34+ services instantly via CSV batch file</div>
+            </div>
+            <button class="btn btn-secondary" onclick="downloadTemplateBatchCsv()">
+              📥 Download CSV Template
+            </button>
+          </div>
+
+          <div class="alert alert-warning">
+            <div>
+              <strong>Batch File Format:</strong>
+              <div>CSV header required: <code>Service_Code,Category,Service_Name,Commission_Type,Retailer_Margin,Distributor_Margin,Super_Dist_Margin</code></div>
+              <div style="font-size: 12px; margin-top: 4px;">Commission_Type can be <strong>PERCENT</strong> (e.g. 2.5) or <strong>FLAT</strong> (e.g. 3.0). You can export any existing scheme, edit margins in Excel, and re-upload here.</div>
+            </div>
+          </div>
+
+          <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <label class="form-label">Batch Operation Mode</label>
+              <select id="batch-action-type" class="form-control" onchange="toggleBatchModeInputs()">
+                <option value="CREATE">Create as a New Scheme</option>
+                <option value="UPDATE">Overwrite / Update Existing Scheme</option>
+              </select>
+            </div>
+            <div class="form-group" id="batch-target-scheme-group" style="display: none;">
+              <label class="form-label">Target Scheme to Overwrite</label>
+              <select id="batch-target-scheme-select" class="form-control"></select>
+            </div>
+            <div class="form-group" id="batch-new-scheme-name-group">
+              <label class="form-label">New Scheme Name</label>
+              <input type="text" id="batch-scheme-name" class="form-control" placeholder="e.g. Diwali Super Commission Scheme 2026">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Scheme Description</label>
+              <input type="text" id="batch-scheme-desc" class="form-control" placeholder="e.g. High volume margins for North zone partners">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Upload CSV File</label>
+            <input type="file" id="batch-file-input" class="form-control" accept=".csv,text/csv,text/plain" onchange="handleBatchFileSelect(event)">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Or Paste CSV Content Directly</label>
+            <textarea id="batch-csv-textarea" class="form-control" rows="8" style="font-family: monospace; font-size: 12px;" placeholder="Paste CSV text here..."></textarea>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 14px;">
+            <button class="btn btn-secondary" onclick="previewBatchCsv()">🔍 Preview & Validate CSV</button>
+            <button class="btn btn-primary" onclick="submitBatchImport()">💾 Process & Save Scheme</button>
+          </div>
+
+          <!-- Batch Preview Container -->
+          <div id="batch-preview-container" style="display: none; margin-top: 24px; border-top: 1.5px solid var(--border); padding-top: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h4 style="font-size: 15px; font-weight: 800;">Preview Parsed Services (<span id="batch-preview-count">0</span> rows)</h4>
+              <span class="badge badge-success">VALID FORMAT</span>
+            </div>
+            <div style="overflow-x: auto; max-height: 350px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Category</th>
+                    <th>Service Name</th>
+                    <th>Type</th>
+                    <th>Retailer</th>
+                    <th>Distributor</th>
+                    <th>Super Dist.</th>
+                  </tr>
+                </thead>
+                <tbody id="batch-preview-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN TAB 4: USERS & SCHEME ASSIGNMENT -->
+      <div id="admin-sec-users" class="admin-section" style="display: none;">
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="card-header" style="flex-wrap: wrap; gap: 12px;">
+            <div>
+              <div class="card-title">👥 User Scheme Assignment & Wallets</div>
+              <div style="font-size: 13px; color: var(--text-muted);">Assign commission schemes to individual users or bulk assign by user role</div>
+            </div>
+          </div>
+
+          <!-- Bulk Scheme Assignment Box -->
+          <div style="background: #F8FAFC; border: 1.5px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+            <div style="font-size: 13px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; color: var(--text-muted);">
+              ⚡ Bulk Scheme Assignment
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+              <span style="font-size: 13px; font-weight: 600;">Assign Scheme:</span>
+              <select id="bulk-assign-scheme-select" class="form-control" style="width: auto; min-width: 220px;"></select>
+              <span style="font-size: 13px; font-weight: 600;">to:</span>
+              <select id="bulk-assign-role-select" class="form-control" style="width: auto; min-width: 180px;">
+                <option value="RETAILER">All Retailers</option>
+                <option value="DISTRIBUTOR">All Distributors</option>
+                <option value="SUPER_DISTRIBUTOR">All Super Distributors</option>
+                <option value="ALL">All Users (Non-Admin)</option>
+              </select>
+              <button class="btn btn-primary" onclick="submitBulkAssignScheme()">Apply Bulk Assignment</button>
+            </div>
+          </div>
+
           <div style="overflow-x: auto;">
             <table>
               <thead>
                 <tr>
                   <th>ID</th>
                   <th>Name</th>
-                  <th>Phone</th>
-                  <th>Email</th>
+                  <th>Contact</th>
                   <th>Role</th>
+                  <th>Assigned Commission Scheme</th>
                   <th>Wallet Balance</th>
                   <th>Adjust Funds</th>
                 </tr>
@@ -432,28 +602,71 @@
         </div>
       </div>
 
-      <!-- ADMIN TAB 4: COMMISSIONS -->
-      <div id="admin-sec-commissions" class="admin-section" style="display: none;">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Provider Commission Settings</div>
+      <!-- ADMIN TAB 5: BBPS & UPSTREAM GATEWAY SETTINGS -->
+      <div id="admin-sec-gateway" class="admin-section" style="display: none;">
+        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🌐 Upstream & BBPS Gateway Configuration</div>
+            </div>
+            <div class="alert alert-success">
+              <div>
+                <strong>Active Mode: HYBRID LIVE</strong>
+                <div style="font-size: 12px; margin-top: 2px;">Queries upstream port 5001 / custom BBPS API first. Returns verified live data with non-editable bill amounts.</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Local Upstream Backend Port</label>
+              <input type="number" id="cfg-upstream-port" class="form-control" value="5001" placeholder="5001">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Local Upstream Host</label>
+              <input type="text" id="cfg-upstream-host" class="form-control" value="127.0.0.1" placeholder="127.0.0.1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Custom BBPS API Endpoint (Optional Aggregator)</label>
+              <input type="text" id="cfg-custom-url" class="form-control" placeholder="https://api.yourbbps.in/v1/bill-fetch">
+            </div>
+            <div class="form-group">
+              <label class="form-label">API Secret Key / Partner Token</label>
+              <input type="password" id="cfg-api-key" class="form-control" placeholder="Enter API Token">
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="saveGatewaySettings()">
+              💾 Save Gateway Configuration
+            </button>
           </div>
-          <div style="overflow-x: auto;">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Service</th>
-                  <th>Provider</th>
-                  <th>Code</th>
-                  <th>Commission %</th>
-                  <th>Flat Commission</th>
-                  <th>Active</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="admin-comm-tbody"></tbody>
-            </table>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🧪 Live BBPS Bill Fetch Diagnostic Tool</div>
+            </div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+              Test live bill queries across any utility operator to verify network response and returned parameters.
+            </div>
+            <div class="form-group">
+              <label class="form-label">Utility Category</label>
+              <select id="diag-cat" class="form-control">
+                <option value="Electricity">Electricity</option>
+                <option value="Water">Water</option>
+                <option value="Piped Gas">Piped Gas</option>
+                <option value="LPG Gas">LPG Gas Cylinder</option>
+                <option value="Broadband">Broadband</option>
+                <option value="Mobile Postpaid">Mobile Postpaid</option>
+                <option value="Fastag">Fastag</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Operator / Biller Name</label>
+              <input type="text" id="diag-biller" class="form-control" value="BSES Rajdhani Power Limited (BRPL) - Delhi">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Consumer ID / CA Number</label>
+              <input type="text" id="diag-cid" class="form-control" value="1002948194" placeholder="Enter CA Number">
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; margin-bottom: 14px;" onclick="testAdminBillFetch()">
+              ⚡ Run Diagnostic Bill Query
+            </button>
+            <div id="diag-output-box" style="display: none; background: #0F172A; color: #38BDF8; font-family: monospace; font-size: 11px; padding: 14px; border-radius: 10px; max-height: 200px; overflow-y: auto;"></div>
           </div>
         </div>
       </div>
@@ -617,6 +830,69 @@
         <button class="btn btn-primary" style="flex: 2; padding: 12px;" onclick="saveAdminVoucher()">Upload & Activate for User</button>
       </div>
     </div>
+  <!-- CREATE SCHEME MODAL -->
+  <div class="modal-overlay" id="create-scheme-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 style="font-size: 18px; font-weight: 800;">Create Commission Scheme</h3>
+        <button class="btn btn-secondary" onclick="closeModal('create-scheme-modal')">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Scheme Name *</label>
+        <input type="text" id="new-scheme-modal-name" class="form-control" placeholder="e.g. VIP Retailer Scheme 2026">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <input type="text" id="new-scheme-modal-desc" class="form-control" placeholder="e.g. Special high margins for premier retailers">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Base Margins On Existing Scheme</label>
+        <select id="new-scheme-modal-copy-from" class="form-control"></select>
+      </div>
+      <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+        <input type="checkbox" id="new-scheme-modal-is-default">
+        <label for="new-scheme-modal-is-default" style="font-size: 13px; font-weight: 600; cursor: pointer;">Set as Default Scheme for new users</label>
+      </div>
+      <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="submitCreateSchemeModal()">
+        Create & Open Scheme
+      </button>
+    </div>
+  </div>
+
+  <!-- EDIT SERVICE RATE MODAL -->
+  <div class="modal-overlay" id="edit-service-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 18px; font-weight: 800;" id="edit-svc-modal-title">Edit Service Commission</h3>
+          <p style="font-size: 12px; color: var(--text-muted);" id="edit-svc-modal-subtitle"></p>
+        </div>
+        <button class="btn btn-secondary" onclick="closeModal('edit-service-modal')">✕</button>
+      </div>
+      <input type="hidden" id="edit-svc-modal-code">
+      <div class="form-group">
+        <label class="form-label">Commission Type</label>
+        <select id="edit-svc-modal-type" class="form-control">
+          <option value="PERCENT">PERCENT (%)</option>
+          <option value="FLAT">FLAT (₹)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Retailer Margin</label>
+        <input type="number" step="0.01" id="edit-svc-modal-ret" class="form-control">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Distributor Margin</label>
+        <input type="number" step="0.01" id="edit-svc-modal-dist" class="form-control">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Super Distributor Margin</label>
+        <input type="number" step="0.01" id="edit-svc-modal-super" class="form-control">
+      </div>
+      <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="submitEditServiceRate()">
+        Save Service Rate
+      </button>
+    </div>
   </div>
 
   <script>
@@ -666,7 +942,7 @@
       renderAdminTx();
       renderAdminVouchers();
       renderAdminUsers();
-      renderAdminCommissions();
+      renderAdminSchemes();
     }
 
     function togglePortalMode() {
@@ -689,18 +965,26 @@
       }
     }
 
-    function showCustomerSection(sec) {
+    function showCustomerSection(sec, btn) {
       document.querySelectorAll('#customer-nav .nav-tab').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
+      const targetBtn = btn || document.querySelector(`#customer-nav .nav-tab[data-sec="${sec}"]`) || document.querySelector(`#customer-nav button[onclick*="'${sec}'"]`);
+      if (targetBtn) targetBtn.classList.add('active');
       document.querySelectorAll('#customer-view .section-content').forEach(s => s.style.display = 'none');
-      document.getElementById('sec-' + sec).style.display = 'block';
+      const targetSec = document.getElementById('sec-' + sec);
+      if (targetSec) targetSec.style.display = 'block';
     }
 
-    function showAdminSection(sec) {
+    function showAdminSection(sec, btn) {
       document.querySelectorAll('#admin-nav .nav-tab').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
+      const targetBtn = btn || document.querySelector(`#admin-nav .nav-tab[data-sec="${sec}"]`) || document.querySelector(`#admin-nav button[onclick*="'${sec}'"]`);
+      if (targetBtn) targetBtn.classList.add('active');
       document.querySelectorAll('#admin-view .admin-section').forEach(s => s.style.display = 'none');
-      document.getElementById('admin-sec-' + sec).style.display = 'block';
+      const targetSec = document.getElementById('admin-sec-' + sec);
+      if (targetSec) targetSec.style.display = 'block';
+      if (sec === 'commissions') renderAdminSchemes();
+      if (sec === 'users') renderAdminUsers();
+      if (sec === 'batch') initBatchSection();
+      if (sec === 'gateway') initGatewaySection();
     }
 
     let serviceType = 'MOBILE';
@@ -1524,23 +1808,424 @@
       alert(`Order #${activeUploadingVchId} rejected and refunded if paid via wallet.`);
     }
 
-    function renderAdminUsers() {
-      if (!appState) return;
-      const tbody = document.getElementById('admin-users-tbody');
-      tbody.innerHTML = appState.users.map(u => `
+    // =========================================================================
+    // COMMISSION SCHEMES & ALL SERVICES MANAGEMENT
+    // =========================================================================
+    let activeAdminSchemeId = null;
+    let commCategoryFilter = 'ALL';
+    let parsedBatchServices = [];
+
+    function renderAdminSchemes() {
+      if (!appState || !appState.schemes) return;
+
+      const select = document.getElementById('admin-scheme-select');
+      const copySelect = document.getElementById('new-scheme-modal-copy-from');
+      const targetBatchSelect = document.getElementById('batch-target-scheme-select');
+      const bulkSchemeSelect = document.getElementById('bulk-assign-scheme-select');
+
+      const optionsHtml = appState.schemes.map(s => `
+        <option value="${s.id}" ${s.isDefault ? 'data-default="true"' : ''}>${s.name} ${s.isDefault ? '(Default)' : ''}</option>
+      `).join('');
+
+      if (select) select.innerHTML = optionsHtml;
+      if (copySelect) copySelect.innerHTML = optionsHtml;
+      if (targetBatchSelect) targetBatchSelect.innerHTML = optionsHtml;
+      if (bulkSchemeSelect) bulkSchemeSelect.innerHTML = optionsHtml;
+
+      if (!activeAdminSchemeId || !appState.schemes.some(s => s.id === activeAdminSchemeId)) {
+        const def = appState.schemes.find(s => s.isDefault) || appState.schemes[0];
+        activeAdminSchemeId = def ? def.id : null;
+      }
+
+      if (select && activeAdminSchemeId) {
+        select.value = activeAdminSchemeId;
+      }
+
+      renderAdminSchemeServices();
+    }
+
+    function onSchemeSelectChange() {
+      activeAdminSchemeId = document.getElementById('admin-scheme-select').value;
+      renderAdminSchemeServices();
+    }
+
+    function filterCommCategory(cat, btn) {
+      commCategoryFilter = cat;
+      document.querySelectorAll('#comm-category-filters .denom-chip').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderAdminSchemeServices();
+    }
+
+    function renderAdminSchemeServices() {
+      if (!appState || !appState.schemes) return;
+      const scheme = appState.schemes.find(s => s.id === activeAdminSchemeId) || appState.schemes[0];
+      if (!scheme) return;
+
+      // Update Banner
+      const nameEl = document.getElementById('banner-scheme-name');
+      const descEl = document.getElementById('banner-scheme-desc');
+      const badgeEl = document.getElementById('banner-scheme-badge');
+      if (nameEl) nameEl.innerText = scheme.name;
+      if (descEl) descEl.innerText = scheme.description || 'Configured Commission Scheme';
+      if (badgeEl) {
+        badgeEl.innerText = scheme.isDefault ? 'DEFAULT SCHEME' : 'ACTIVE TIER';
+        badgeEl.className = scheme.isDefault ? 'badge badge-success' : 'badge badge-discount';
+      }
+
+      const search = (document.getElementById('comm-service-search')?.value || '').toLowerCase().trim();
+      const tbody = document.getElementById('admin-scheme-services-tbody');
+      if (!tbody) return;
+
+      const services = (scheme.services || []).filter(s => {
+        const matchesCat = commCategoryFilter === 'ALL' || 
+          (commCategoryFilter === 'BBPS' ? s.category.includes('BBPS') : s.category === commCategoryFilter);
+        const matchesSearch = !search || 
+          s.name.toLowerCase().includes(search) || 
+          s.code.toLowerCase().includes(search) || 
+          s.category.toLowerCase().includes(search);
+        return matchesCat && matchesSearch;
+      });
+
+      tbody.innerHTML = services.map(s => `
         <tr>
-          <td>#${u.id}</td>
-          <td><strong>${u.name}</strong></td>
-          <td>${u.phone}</td>
-          <td>${u.email}</td>
-          <td><span class="badge ${u.role === 'ADMIN' ? 'badge-discount' : 'badge-success'}">${u.role}</span></td>
-          <td><strong style="color: var(--secondary);">₹${u.walletBalance.toFixed(2)}</strong></td>
+          <td><code style="font-weight: 700; color: var(--primary);">${s.code}</code></td>
+          <td><span class="badge ${s.category.includes('BBPS') ? 'badge-pending' : s.category.includes('Mobile') ? 'badge-success' : 'badge-discount'}">${s.category}</span></td>
+          <td><strong>${s.name}</strong></td>
+          <td><span class="badge ${s.commType === 'PERCENT' ? 'badge-discount' : 'badge-success'}">${s.commType === 'PERCENT' ? '% Margin' : '₹ Flat'}</span></td>
+          <td><strong style="color: #065F46;">${s.commType === 'PERCENT' ? s.retailer + '%' : '₹' + s.retailer.toFixed(2)}</strong></td>
+          <td>${s.commType === 'PERCENT' ? s.distributor + '%' : '₹' + s.distributor.toFixed(2)}</td>
+          <td>${s.commType === 'PERCENT' ? s.superDistributor + '%' : '₹' + s.superDistributor.toFixed(2)}</td>
           <td>
-            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="adjustWallet(${u.id}, 500)">+₹500</button>
-            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="adjustWallet(${u.id}, -200)">-₹200</button>
+            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="openEditServiceModal('${s.code}')">
+              ✏️ Edit Rate
+            </button>
           </td>
         </tr>
       `).join('');
+    }
+
+    function openCreateSchemeModal() {
+      const copySelect = document.getElementById('new-scheme-modal-copy-from');
+      if (copySelect && appState && appState.schemes) {
+        copySelect.innerHTML = appState.schemes.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      }
+      document.getElementById('new-scheme-modal-name').value = '';
+      document.getElementById('new-scheme-modal-desc').value = '';
+      document.getElementById('create-scheme-modal').classList.add('open');
+    }
+
+    async function submitCreateSchemeModal() {
+      const name = document.getElementById('new-scheme-modal-name').value.trim();
+      const desc = document.getElementById('new-scheme-modal-desc').value.trim();
+      const copyId = document.getElementById('new-scheme-modal-copy-from').value;
+      const isDef = document.getElementById('new-scheme-modal-is-default').checked;
+
+      if (!name) {
+        alert("Please enter a scheme name.");
+        return;
+      }
+
+      const baseScheme = appState.schemes.find(s => s.id === copyId) || appState.schemes[0];
+      const copiedServices = baseScheme ? JSON.parse(JSON.stringify(baseScheme.services)) : [];
+
+      const res = await fetch(api('api/admin/schemes'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          description: desc,
+          isDefault: isDef,
+          services: copiedServices
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        closeModal('create-scheme-modal');
+        activeAdminSchemeId = data.scheme.id;
+        await loadData();
+        renderAdminSchemes();
+        alert(`✅ Scheme "${name}" created successfully!`);
+      } else {
+        alert("Error: " + (data.error || "Failed to create scheme"));
+      }
+    }
+
+    function openEditServiceModal(code) {
+      const scheme = appState.schemes.find(s => s.id === activeAdminSchemeId) || appState.schemes[0];
+      if (!scheme) return;
+      const svc = scheme.services.find(s => s.code === code);
+      if (!svc) return;
+
+      document.getElementById('edit-svc-modal-title').innerText = `Edit ${svc.name}`;
+      document.getElementById('edit-svc-modal-subtitle').innerText = `Scheme: ${scheme.name} • Code: ${svc.code}`;
+      document.getElementById('edit-svc-modal-code').value = svc.code;
+      document.getElementById('edit-svc-modal-type').value = svc.commType;
+      document.getElementById('edit-svc-modal-ret').value = svc.retailer;
+      document.getElementById('edit-svc-modal-dist').value = svc.distributor;
+      document.getElementById('edit-svc-modal-super').value = svc.superDistributor;
+
+      document.getElementById('edit-service-modal').classList.add('open');
+    }
+
+    async function submitEditServiceRate() {
+      const code = document.getElementById('edit-svc-modal-code').value;
+      const commType = document.getElementById('edit-svc-modal-type').value;
+      const ret = parseFloat(document.getElementById('edit-svc-modal-ret').value);
+      const dist = parseFloat(document.getElementById('edit-svc-modal-dist').value);
+      const superD = parseFloat(document.getElementById('edit-svc-modal-super').value);
+
+      if (isNaN(ret) || isNaN(dist) || isNaN(superD)) {
+        alert("Please enter valid numeric commission margins.");
+        return;
+      }
+
+      const res = await fetch(api('api/admin/schemes/update-service'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          schemeId: activeAdminSchemeId,
+          serviceCode: code,
+          commType,
+          retailer: ret,
+          distributor: dist,
+          superDistributor: superD
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        closeModal('edit-service-modal');
+        await loadData();
+        renderAdminSchemeServices();
+      } else {
+        alert("Error: " + (data.error || "Failed to update service rate"));
+      }
+    }
+
+    function downloadSchemeBatchCsv() {
+      if (!activeAdminSchemeId) return;
+      window.location.href = api(`api/admin/schemes/batch-export?schemeId=${encodeURIComponent(activeAdminSchemeId)}`);
+    }
+
+    function downloadTemplateBatchCsv() {
+      const defId = (appState?.schemes?.[0]?.id) || 'SCH_RETAILER_DEF';
+      window.location.href = api(`api/admin/schemes/batch-export?schemeId=${encodeURIComponent(defId)}`);
+    }
+
+    // =========================================================================
+    // BATCH FILE CREATOR & UPLOADER
+    // =========================================================================
+    function initBatchSection() {
+      const targetSelect = document.getElementById('batch-target-scheme-select');
+      if (targetSelect && appState && appState.schemes) {
+        targetSelect.innerHTML = appState.schemes.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      }
+      toggleBatchModeInputs();
+    }
+
+    function toggleBatchModeInputs() {
+      const action = document.getElementById('batch-action-type').value;
+      const targetGroup = document.getElementById('batch-target-scheme-group');
+      const newNameGroup = document.getElementById('batch-new-scheme-name-group');
+      if (action === 'UPDATE') {
+        if (targetGroup) targetGroup.style.display = 'block';
+        if (newNameGroup) newNameGroup.style.display = 'none';
+      } else {
+        if (targetGroup) targetGroup.style.display = 'none';
+        if (newNameGroup) newNameGroup.style.display = 'block';
+      }
+    }
+
+    function handleBatchFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('batch-csv-textarea').value = e.target.result;
+        previewBatchCsv();
+      };
+      reader.readAsText(file);
+    }
+
+    function previewBatchCsv() {
+      const csv = document.getElementById('batch-csv-textarea').value.trim();
+      if (!csv) {
+        alert("Please paste or upload CSV content to preview.");
+        return;
+      }
+
+      const lines = csv.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+      if (lines.length < 2) {
+        alert("CSV must contain a header line and at least one data row.");
+        return;
+      }
+
+      parsedBatchServices = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+        if (cols.length >= 5) {
+          parsedBatchServices.push({
+            code: cols[0],
+            category: cols[1] || 'General',
+            name: cols[2] || cols[0],
+            commType: (cols[3] || '').toUpperCase() === 'FLAT' ? 'FLAT' : 'PERCENT',
+            retailer: parseFloat(cols[4]) || 0,
+            distributor: parseFloat(cols[5]) || 0,
+            superDistributor: parseFloat(cols[6]) || 0
+          });
+        }
+      }
+
+      if (parsedBatchServices.length === 0) {
+        alert("No valid service rows parsed. Please check the CSV format.");
+        return;
+      }
+
+      const container = document.getElementById('batch-preview-container');
+      const countEl = document.getElementById('batch-preview-count');
+      const tbody = document.getElementById('batch-preview-tbody');
+
+      container.style.display = 'block';
+      countEl.innerText = parsedBatchServices.length;
+      tbody.innerHTML = parsedBatchServices.map(s => `
+        <tr>
+          <td><code>${s.code}</code></td>
+          <td>${s.category}</td>
+          <td><strong>${s.name}</strong></td>
+          <td>${s.commType}</td>
+          <td>${s.retailer}</td>
+          <td>${s.distributor}</td>
+          <td>${s.superDistributor}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function submitBatchImport() {
+      const csv = document.getElementById('batch-csv-textarea').value.trim();
+      const action = document.getElementById('batch-action-type').value;
+      const schemeName = document.getElementById('batch-scheme-name').value.trim();
+      const schemeDesc = document.getElementById('batch-scheme-desc').value.trim();
+      const targetSchemeId = document.getElementById('batch-target-scheme-select')?.value;
+
+      if (!csv) {
+        alert("Please paste or upload CSV content before submitting.");
+        return;
+      }
+
+      if (action === 'CREATE' && !schemeName) {
+        alert("Please provide a name for the new scheme.");
+        return;
+      }
+
+      const res = await fetch(api('api/admin/schemes/batch-import'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          schemeName,
+          schemeDescription: schemeDesc,
+          targetSchemeId,
+          action,
+          csvContent: csv
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert(`🎉 Batch file processed successfully! ${data.importedCount} services configured in scheme "${data.scheme.name}".`);
+        activeAdminSchemeId = data.scheme.id;
+        await loadData();
+        showAdminSection('commissions');
+      } else {
+        alert("Batch Import Error: " + (data.error || "Failed to process batch file"));
+      }
+    }
+
+    // =========================================================================
+    // USER SCHEME ASSIGNMENT & WALLETS
+    // =========================================================================
+    function renderAdminUsers() {
+      if (!appState || !appState.users) return;
+
+      const schemes = appState.schemes || [];
+      const tbody = document.getElementById('admin-users-tbody');
+      if (!tbody) return;
+
+      tbody.innerHTML = appState.users.map(u => {
+        const currentSchemeId = u.schemeId || (schemes.find(s => s.isDefault)?.id) || schemes[0]?.id;
+        const schemeOptions = schemes.map(s => `
+          <option value="${s.id}" ${s.id === currentSchemeId ? 'selected' : ''}>${s.name}</option>
+        `).join('');
+
+        return `
+          <tr>
+            <td>#${u.id}</td>
+            <td><strong>${u.name}</strong></td>
+            <td>${u.phone}<br><span style="font-size: 11px; color: var(--text-muted);">${u.email}</span></td>
+            <td><span class="badge ${u.role === 'ADMIN' ? 'badge-discount' : u.role.includes('DISTRIBUTOR') ? 'badge-pending' : 'badge-success'}">${u.role}</span></td>
+            <td>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <select id="user-scheme-sel-${u.id}" class="form-control" style="padding: 6px 10px; font-size: 12px; width: auto; font-weight: 700;">
+                  ${schemeOptions}
+                </select>
+                <button class="btn btn-primary" style="padding: 6px 10px; font-size: 11px;" onclick="assignUserScheme(${u.id})">
+                  Assign
+                </button>
+              </div>
+            </td>
+            <td><strong style="color: var(--secondary);">₹${u.walletBalance.toFixed(2)}</strong></td>
+            <td>
+              <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="adjustWallet(${u.id}, 500)">+₹500</button>
+              <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="adjustWallet(${u.id}, -200)">-₹200</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const bulkSelect = document.getElementById('bulk-assign-scheme-select');
+      if (bulkSelect && schemes.length > 0) {
+        bulkSelect.innerHTML = schemes.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      }
+    }
+
+    async function assignUserScheme(userId) {
+      const sel = document.getElementById(`user-scheme-sel-${userId}`);
+      if (!sel) return;
+      const schemeId = sel.value;
+
+      const res = await fetch(api('api/admin/user/assign-scheme'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, schemeId })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        await loadData();
+        alert(`✅ User #${userId} (${data.user.name}) assigned to "${data.schemeName}"!`);
+      } else {
+        alert("Error: " + (data.error || "Failed to assign scheme"));
+      }
+    }
+
+    async function submitBulkAssignScheme() {
+      const schemeId = document.getElementById('bulk-assign-scheme-select').value;
+      const role = document.getElementById('bulk-assign-role-select').value;
+
+      const res = await fetch(api('api/admin/user/bulk-assign'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role, schemeId })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        await loadData();
+        renderAdminUsers();
+        alert(`✅ Successfully assigned "${data.schemeName}" to ${data.count} users!`);
+      } else {
+        alert("Error: " + (data.error || "Bulk assignment failed"));
+      }
     }
 
     async function adjustWallet(userId, delta) {
@@ -1552,34 +2237,64 @@
       await loadData();
     }
 
-    function renderAdminCommissions() {
-      if (!appState) return;
-      const tbody = document.getElementById('admin-comm-tbody');
-      tbody.innerHTML = appState.providers.map(p => `
-        <tr>
-          <td>#${p.id}</td>
-          <td>${p.serviceType}</td>
-          <td><strong>${p.name}</strong></td>
-          <td><code>${p.code}</code></td>
-          <td>${p.commissionPercent}%</td>
-          <td>₹${p.flatCommission.toFixed(2)}</td>
-          <td><span class="badge ${p.isActive ? 'badge-success' : 'badge-failed'}">${p.isActive ? 'ACTIVE' : 'INACTIVE'}</span></td>
-          <td>
-            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="editComm(${p.id}, ${p.commissionPercent})">Edit</button>
-          </td>
-        </tr>
-      `).join('');
+    // =========================================================================
+    // GATEWAY & UPSTREAM SETTINGS
+    // =========================================================================
+    function initGatewaySection() {
+      if (!appState || !appState.gatewayConfig) return;
+      const cfg = appState.gatewayConfig;
+      if (cfg.upstreamPort) document.getElementById('cfg-upstream-port').value = cfg.upstreamPort;
+      if (cfg.upstreamHost) document.getElementById('cfg-upstream-host').value = cfg.upstreamHost;
+      if (cfg.customBbpsApiUrl) document.getElementById('cfg-custom-url').value = cfg.customBbpsApiUrl;
+      if (cfg.apiKey) document.getElementById('cfg-api-key').value = cfg.apiKey;
     }
 
-    async function editComm(id, current) {
-      const val = prompt("Enter new commission percentage (%):", current);
-      if (val !== null) {
-        await fetch(api('api/admin/commission'), {
+    async function saveGatewaySettings() {
+      const port = document.getElementById('cfg-upstream-port').value;
+      const host = document.getElementById('cfg-upstream-host').value;
+      const url = document.getElementById('cfg-custom-url').value;
+      const apiKey = document.getElementById('cfg-api-key').value;
+
+      const res = await fetch(api('api/admin/gateway-settings'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          upstreamPort: port,
+          upstreamHost: host,
+          customBbpsApiUrl: url,
+          apiKey: apiKey,
+          mode: 'HYBRID_LIVE'
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        await loadData();
+        alert("✅ BBPS Gateway configuration updated successfully!");
+      } else {
+        alert("Error: " + (data.error || "Failed to save settings"));
+      }
+    }
+
+    async function testAdminBillFetch() {
+      const cat = document.getElementById('diag-cat').value;
+      const biller = document.getElementById('diag-biller').value;
+      const cid = document.getElementById('diag-cid').value.trim();
+      const outBox = document.getElementById('diag-output-box');
+
+      outBox.style.display = 'block';
+      outBox.innerText = 'Querying live BBPS gateway...';
+
+      try {
+        const res = await fetch(api('api/admin/test-bill-fetch'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ providerId: id, commissionPercent: parseFloat(val), flatCommission: 0, isActive: true })
+          body: JSON.stringify({ category: cat, biller, consumerId: cid })
         });
-        await loadData();
+        const data = await res.json();
+        outBox.innerText = JSON.stringify(data, null, 2);
+      } catch (e) {
+        outBox.innerText = "Error: " + e.message;
       }
     }
 
