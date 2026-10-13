@@ -103,7 +103,7 @@
         <div class="brand-title">pay<span>4u</span></div>
       </div>
       <div class="user-pill">
-        <a href="/pay4u.apk" download="pay4u.apk" class="btn btn-primary" style="text-decoration: none; font-size: 13px;">
+        <a href="pay4u.apk" download="pay4u.apk" class="btn btn-primary" style="text-decoration: none; font-size: 13px;">
           📥 Download App (APK)
         </a>
         <div class="wallet-badge" id="wallet-badge">
@@ -597,6 +597,12 @@
   </div>
 
   <script>
+    // Dynamic Base Path for subpath hosting (e.g. /v2/, /pay4u-v2/, or /)
+    const BASE_PATH = window.location.pathname.replace(/\/[^\/]*$/, "") + "/";
+    function api(path) {
+      return BASE_PATH + path.replace(/^\/+/, "");
+    }
+
     let appState = null;
     let currentMode = 'customer'; // 'customer' or 'admin'
     let currentPendingOrder = null;
@@ -607,7 +613,7 @@
 
     async function loadData() {
       try {
-        const res = await fetch('/api/state');
+        const res = await fetch(api('api/state'));
         appState = await res.json();
         updateUI();
       } catch (e) {
@@ -738,7 +744,7 @@
       btn.disabled = true;
 
       try {
-        const res = await fetch('/api/bill/fetch', {
+        const res = await fetch(api('api/bill/fetch'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ category: cat, biller, consumerId })
@@ -959,11 +965,11 @@
       closeModal('checkout-modal');
 
       try {
-        let endpoint = '/api/recharge';
+        let endpoint = api('api/recharge');
         let payload = {};
 
         if (activeCheckoutDetails.type === 'voucher') {
-          endpoint = '/api/voucher/buy';
+          endpoint = api('api/voucher/buy');
           payload = {
             voucherId: activeCheckoutDetails.voucherId,
             denomination: activeCheckoutDetails.denomination,
@@ -1044,7 +1050,7 @@
       const notes = document.getElementById('admin-tr-notes').value;
 
       closeModal('admin-tr-modal');
-      const res = await fetch('/api/admin/tr-id', {
+      const res = await fetch(api('api/admin/tr-id'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transactionId: activeProcessingTxId, operatorTrId: trId, status, notes })
@@ -1092,7 +1098,7 @@
       const notes = document.getElementById('admin-vch-notes').value;
 
       closeModal('admin-voucher-modal');
-      const res = await fetch('/api/admin/upload-voucher', {
+      const res = await fetch(api('api/admin/upload-voucher'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ voucherId: activeUploadingVchId, genuineCode: code, pinCode: pin, expiryDate: exp, notes })
@@ -1103,7 +1109,7 @@
 
     async function rejectAdminVoucher() {
       closeModal('admin-voucher-modal');
-      const res = await fetch('/api/admin/reject-voucher', {
+      const res = await fetch(api('api/admin/reject-voucher'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ voucherId: activeUploadingVchId, reason: "Payment verification failed" })
@@ -1132,7 +1138,7 @@
     }
 
     async function adjustWallet(userId, delta) {
-      await fetch('/api/admin/adjust-balance', {
+      await fetch(api('api/admin/adjust-balance'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, amountDelta: delta })
@@ -1162,7 +1168,7 @@
     async function editComm(id, current) {
       const val = prompt("Enter new commission percentage (%):", current);
       if (val !== null) {
-        await fetch('/api/admin/commission', {
+        await fetch(api('api/admin/commission'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ providerId: id, commissionPercent: parseFloat(val), flatCommission: 0, isActive: true })
