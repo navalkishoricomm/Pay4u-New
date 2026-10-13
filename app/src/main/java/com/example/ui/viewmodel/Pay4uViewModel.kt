@@ -219,12 +219,7 @@ class Pay4uViewModel(application: Application) : AndroidViewModel(application) {
   ) {
     viewModelScope.launch {
       val user = _currentUser.value ?: return@launch
-
-      // Strict Wallet Validation
-      if (paymentMethod == "WALLET" && user.walletBalance < amount) {
-        _uiEvents.emit(UiEvent.ShowSnackbar("Insufficient Wallet Balance! Available: ₹${"%.2f".format(user.walletBalance)}, Required: ₹${"%.2f".format(amount)}"))
-        return@launch
-      }
+      val isWalletShortfall = (paymentMethod == "WALLET" && user.walletBalance < amount)
 
       val provider = allProviders.value.find { it.name.equals(providerName, ignoreCase = true) }
       val commRate = provider?.commissionPercent ?: 2.0
@@ -248,9 +243,11 @@ class Pay4uViewModel(application: Application) : AndroidViewModel(application) {
         paymentMethod = paymentMethod,
         userUpiUtr = if (paymentMethod == "UPI") paymentRef else "",
         upiPaymentMethod = paymentMethod,
-        status = "PENDING", // PENDING manual processing by Admin!
-        operatorTrId = "",
-        adminNotes = if (paymentMethod == "WALLET") "Paid via Wallet (Auto-debited)" else "Payment Ref: $paymentRef",
+        status = if (isWalletShortfall) "FAILED" else "PENDING",
+        operatorTrId = if (isWalletShortfall) "FAILED" else "",
+        adminNotes = if (isWalletShortfall)
+          "Payment Failed: Insufficient Wallet Balance. Available: ₹${"%.2f".format(user.walletBalance)}, Required: ₹${"%.2f".format(amount)}"
+          else if (paymentMethod == "WALLET") "Paid via Wallet (Auto-debited)" else "Payment Ref: $paymentRef",
         processedBy = "",
         createdAt = System.currentTimeMillis()
       )
@@ -258,7 +255,13 @@ class Pay4uViewModel(application: Application) : AndroidViewModel(application) {
       try {
         val txId = repository.createTransaction(tx)
         _uiEvents.emit(UiEvent.TransactionCreated(txId))
-        _uiEvents.emit(UiEvent.ShowSnackbar("Order submitted via $paymentMethod! Admin will verify and update Operator TR ID."))
+        if (isWalletShortfall) {
+          _uiEvents.emit(UiEvent.ShowSnackbar("Payment Failed: Insufficient Wallet Balance! FAILED entry recorded in passbook."))
+        } else if (paymentMethod == "WALLET") {
+          _uiEvents.emit(UiEvent.ShowSnackbar("₹${"%.2f".format(amount)} debited from wallet. Order submitted!"))
+        } else {
+          _uiEvents.emit(UiEvent.ShowSnackbar("Order submitted via UPI! Admin will verify and process."))
+        }
         navigateTo(Screen.TRANSACTION_HISTORY)
       } catch (e: Exception) {
         _uiEvents.emit(UiEvent.ShowSnackbar(e.message ?: "Transaction failed"))

@@ -454,20 +454,23 @@ fun CheckoutPaymentSheet(
 
             Button(
               onClick = {
-                onConfirmPayment("WALLET", "Wallet Debit (Balance Remaining: ₹${"%.2f".format(walletBalance - amount)})")
+                if (isBalanceSufficient) {
+                  onConfirmPayment("WALLET", "Wallet Debit (Balance Remaining: ₹${"%.2f".format(walletBalance - amount)})")
+                } else {
+                  onConfirmPayment("WALLET", "Wallet Debit Failed (Shortfall: ₹${"%.2f".format(shortfall)})")
+                }
               },
-              enabled = isBalanceSufficient,
+              enabled = true,
               modifier = Modifier.fillMaxWidth().height(48.dp).testTag("pay_from_wallet_btn"),
               colors = ButtonDefaults.buttonColors(
-                containerColor = StatusSuccess,
-                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                containerColor = if (isBalanceSufficient) StatusSuccess else StatusFailed
               ),
               shape = RoundedCornerShape(12.dp)
             ) {
               Icon(Icons.Default.AccountBalanceWallet, contentDescription = null)
               Spacer(modifier = Modifier.width(8.dp))
               Text(
-                text = if (isBalanceSufficient) "Pay ₹${"%.0f".format(amount)} from Wallet" else "Insufficient Wallet Balance",
+                text = if (isBalanceSufficient) "Pay ₹${"%.0f".format(amount)} from Wallet" else "Attempt Wallet Payment (Records FAILED)",
                 fontWeight = FontWeight.Bold
               )
             }

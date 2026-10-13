@@ -203,26 +203,34 @@
               <span class="badge badge-success">Live Network API</span>
             </div>
             <div class="form-group">
-              <label class="form-label">Utility Category</label>
+              <label class="form-label">BBPS Utility Category (18 Services Available)</label>
               <select id="bill-category" class="form-control" onchange="onCategoryChange()">
-                <option value="Electricity">Electricity</option>
-                <option value="Water">Water Bill</option>
-                <option value="Gas">LPG Gas Cylinder / Piped</option>
-                <option value="Broadband">Broadband Fiber</option>
-                <option value="Fastag">Fastag Toll</option>
+                <option value="Electricity">⚡ Electricity (All States & DISCOMs)</option>
+                <option value="Water">💧 Water Bill (All Jal Boards & Municipalities)</option>
+                <option value="Piped Gas">🔥 Piped Gas / PNG (IGL, MGL, Adani, etc.)</option>
+                <option value="LPG Gas">⛽ LPG Gas Cylinder (Indane, Bharat, HP)</option>
+                <option value="Broadband">🌐 Broadband & Landline (JioFiber, Airtel, ACT, etc.)</option>
+                <option value="FASTag">🚗 FASTag Toll (ICICI, SBI, Paytm, HDFC, etc.)</option>
+                <option value="Mobile Postpaid">📱 Mobile Postpaid (Jio, Airtel, Vi, BSNL)</option>
+                <option value="Mobile Prepaid">📲 Mobile Prepaid (Jio, Airtel, Vi, BSNL)</option>
+                <option value="DTH">📡 DTH / Satellite TV (Tata Play, Airtel, Dish, Sun)</option>
+                <option value="Credit Card">💳 Credit Card Bill (HDFC, SBI, ICICI, Axis, etc.)</option>
+                <option value="Loan Repayment">🏦 Loan EMI Repayment (Bajaj, Muthoot, Tata, etc.)</option>
+                <option value="Insurance">🛡️ Life & General Insurance (LIC, HDFC, SBI, etc.)</option>
+                <option value="Municipal Taxes">🏛️ Municipal Taxes / Property Tax (MCD, BBMP, etc.)</option>
+                <option value="Cable TV">📺 Cable TV (Hathway, Den, Siti, GTPL)</option>
+                <option value="Housing Society">🏢 Housing Society & Rent (MyGate, etc.)</option>
+                <option value="Education Fees">🎓 Education Fees (Schools & Universities)</option>
+                <option value="Hospital">🏥 Hospital & Healthcare (Apollo, Fortis, Max)</option>
+                <option value="Clubs & Associations">🏌️ Clubs & Associations</option>
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Biller</label>
-              <select id="biller-select" class="form-control">
-                <option>BSES Rajdhani Delhi</option>
-                <option>Tata Power Delhi</option>
-                <option>Adani Electricity Mumbai</option>
-                <option>UPPCL Uttar Pradesh</option>
-              </select>
+              <label class="form-label" id="biller-select-label">Select BBPS Biller / Operator</label>
+              <select id="biller-select" class="form-control"></select>
             </div>
             <div class="form-group">
-              <label class="form-label">Consumer CA Number / Account No.</label>
+              <label class="form-label" id="bill-consumer-label">Consumer CA Number / Account ID</label>
               <input type="text" id="bill-consumer-id" class="form-control" value="1002948194" placeholder="Enter Consumer Account ID">
             </div>
             <button class="btn btn-primary" id="fetch-bill-btn" style="width: 100%; padding: 12px;" onclick="fetchRealBill()">
@@ -232,29 +240,44 @@
 
           <div class="card" id="bill-result-card" style="display: none;">
             <div class="card-header">
-              <div class="card-title">Verified Bill Details</div>
+              <div class="card-title">Verified BBPS Bill Details</div>
               <span class="badge badge-success" id="bill-api-status">API Verified</span>
             </div>
             <div id="bill-verified-box" style="background: var(--surface-subtle); padding: 18px; border-radius: 12px; margin-bottom: 18px;">
               <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                 <span style="color: var(--text-muted); font-size: 13px;">Consumer Name</span>
-                <strong id="bill-name">Mukesh Garg</strong>
+                <strong id="bill-name">-</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--text-muted); font-size: 13px;">Biller / Operator</span>
+                <strong id="bill-biller-display" style="color: var(--primary);">-</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--text-muted); font-size: 13px;">Bill Number</span>
+                <span id="bill-number" style="font-family: monospace; font-weight: 700;">-</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--text-muted); font-size: 13px;">Bill Date</span>
+                <span id="bill-date" style="font-weight: 600;">-</span>
               </div>
               <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                 <span style="color: var(--text-muted); font-size: 13px;">Due Date</span>
-                <strong id="bill-due" style="color: var(--status-failed);">25 Oct 2026</strong>
+                <strong id="bill-due" style="color: var(--status-failed);">-</strong>
               </div>
               <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                <span style="color: var(--text-muted); font-size: 13px;">Consumption Units</span>
-                <span id="bill-units" style="font-weight: 600;">192 kWh</span>
+                <span style="color: var(--text-muted); font-size: 13px;">Consumption / Units</span>
+                <span id="bill-units" style="font-weight: 600;">-</span>
               </div>
-              <div style="display: flex; justify-content: space-between; margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border);">
-                <span style="font-size: 14px; font-weight: 700;">Payable Amount</span>
-                <strong id="bill-amount" style="font-size: 22px; color: var(--primary);">₹1,450.00</strong>
+              <div style="display: flex; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); align-items: baseline;">
+                <div>
+                  <span style="font-size: 14px; font-weight: 700;">Payable Amount</span>
+                  <div style="font-size: 11px; color: var(--secondary); font-weight: 700;">🔒 Non-Editable (BBPS Verified Tariff)</div>
+                </div>
+                <strong id="bill-amount" style="font-size: 24px; color: var(--primary);">₹0.00</strong>
               </div>
             </div>
             <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="openCheckout('bill')">
-              Proceed to Pay Bill
+              Proceed to Pay Verified Bill
             </button>
           </div>
         </div>
@@ -734,13 +757,372 @@
       renderPlans();
     }
 
+    // Comprehensive BBPS Services and Operators
+    const BBPS_SERVICES = {
+      "Electricity": {
+        label: "Electricity",
+        paramName: "Consumer CA No. / Account ID",
+        paramPlaceholder: "e.g. 1002948194",
+        operators: [
+          "BSES Rajdhani Power Limited (BRPL) - Delhi",
+          "BSES Yamuna Power Limited (BYPL) - Delhi",
+          "Tata Power Delhi Distribution Limited (TPDDL)",
+          "New Delhi Municipal Council (NDMC) Electricity",
+          "Maharashtra State Electricity Dist. (MSEDCL / Mahavitaran)",
+          "Adani Electricity Mumbai Ltd",
+          "Tata Power - Mumbai",
+          "Brihanmumbai Electric Supply & Transport (BEST)",
+          "Torrent Power - Bhiwandi / Shil / Kalwa",
+          "UPPCL - Urban (Uttar Pradesh Power Corp)",
+          "UPPCL - Rural (Uttar Pradesh Power Corp)",
+          "Torrent Power - Agra",
+          "Noida Power Company Ltd (NPCL)",
+          "Kanpur Electricity Supply Co (KESCO)",
+          "Bangalore Electricity Supply (BESCOM)",
+          "Chamundeshwari Electricity (CHESCOM)",
+          "Hubli Electricity Supply (HESCOM)",
+          "Mangalore Electricity Supply (MESCOM)",
+          "Gulbarga Electricity Supply (GESCOM)",
+          "Tamil Nadu Generation & Distribution (TANGEDCO)",
+          "Dakshin Gujarat Vij Company (DGVCL)",
+          "Madhya Gujarat Vij Company (MGVCL)",
+          "Paschim Gujarat Vij Company (PGVCL)",
+          "Uttar Gujarat Vij Company (UGVCL)",
+          "Torrent Power - Ahmedabad / Gandhinagar / Surat",
+          "CESC Kolkata",
+          "West Bengal State Electricity (WBSEDCL)",
+          "Punjab State Power Corporation (PSPCL)",
+          "Dakshin Haryana Bijli Vitran Nigam (DHBVN)",
+          "Uttar Haryana Bijli Vitran Nigam (UHBVN)",
+          "Jaipur Vidyut Vitran Nigam (JVVNL)",
+          "Jodhpur Vidyut Vitran Nigam (JdVVNL)",
+          "Ajmer Vidyut Vitran Nigam (AVVNL)",
+          "Telangana State Southern Power (TSSPDCL)",
+          "Telangana State Northern Power (TSNPDCL)",
+          "Andhra Pradesh Eastern Power (APEPDCL)",
+          "Andhra Pradesh Southern Power (APSPDCL)",
+          "North Bihar Power Distribution (NBPDCL)",
+          "South Bihar Power Distribution (SBPDCL)",
+          "MP Poorv Kshetra Vidyut Vitran (Jabalpur)",
+          "MP Paschim Kshetra Vidyut Vitran (Indore)",
+          "MP Madhya Kshetra Vidyut Vitran (Bhopal)",
+          "Kerala State Electricity Board (KSEBL)",
+          "TP Central Odisha Distribution (TPCODL)",
+          "TP Western Odisha Distribution (TPWODL)",
+          "Assam Power Distribution Company (APDCL)",
+          "Uttarakhand Power Corporation (UPCL)",
+          "Himachal Pradesh State Electricity Board (HPSEBL)",
+          "Jammu Power Distribution Corp (JPDCL)",
+          "Goa Electricity Department"
+        ]
+      },
+      "Water": {
+        label: "Water Bill",
+        paramName: "Consumer K-Number / Water Connection ID",
+        paramPlaceholder: "e.g. 2948194012",
+        operators: [
+          "Delhi Jal Board (DJB)",
+          "Bangalore Water Supply and Sewerage Board (BWSSB)",
+          "Hyderabad Metropolitan Water Supply (HMWSSB)",
+          "Municipal Corporation of Greater Mumbai (MCGM) Water",
+          "Chennai Metropolitan Water Supply (CMWSSB)",
+          "Surat Municipal Corporation Water",
+          "Pune Municipal Corporation (PMC) Water",
+          "Chandigarh Municipal Corporation Water",
+          "Kerala Water Authority (KWA)",
+          "Indore Municipal Corporation Water",
+          "Bhopal Municipal Corporation Water",
+          "Public Health Engineering Dept (PHED Rajasthan)",
+          "Uttarakhand Jal Sansthan",
+          "Greater Visakhapatnam Municipal Corp (GVMC) Water"
+        ]
+      },
+      "Piped Gas": {
+        label: "Piped Gas (PNG)",
+        paramName: "BP Number / Consumer Account ID",
+        paramPlaceholder: "e.g. 400192841",
+        operators: [
+          "Indraprastha Gas Limited (IGL) - Delhi NCR",
+          "Mahanagar Gas Limited (MGL) - Mumbai",
+          "Adani Total Gas Limited",
+          "Gujarat Gas Limited (GGL)",
+          "GAIL Gas Limited",
+          "Central UP Gas Limited (CUGL)",
+          "Siti Energy",
+          "Maharashtra Natural Gas Limited (MNGL)",
+          "Torrent Gas",
+          "Bhagyanagar Gas Limited (BGL)",
+          "Haridwar Natural Gas",
+          "Haryana City Gas",
+          "Sabarmati Gas Limited",
+          "Vadodara Gas Limited",
+          "Tripura Natural Gas",
+          "Assam Gas Company Limited"
+        ]
+      },
+      "LPG Gas": {
+        label: "LPG Gas Cylinder Booking",
+        paramName: "Registered Mobile / 17-digit LPG ID",
+        paramPlaceholder: "e.g. 9876543210 or 17-digit LPG ID",
+        operators: [
+          "Bharat Gas (BPCL)",
+          "Indane Gas (Indian Oil Corporation)",
+          "HP Gas (HPCL)"
+        ]
+      },
+      "Broadband": {
+        label: "Broadband & Landline",
+        paramName: "Account Number / User ID / Landline with STD",
+        paramPlaceholder: "e.g. 01123456789 or User ID",
+        operators: [
+          "JioFiber Broadband",
+          "Airtel Xstream Fiber / Broadband",
+          "ACT Fibernet",
+          "BSNL Broadband & Landline",
+          "Hathway Fiber Broadband",
+          "Excitel Broadband",
+          "Asianet Broadband",
+          "Alliance Broadband",
+          "Spectra Broadband",
+          "Tata Play Fiber",
+          "MTNL Broadband (Delhi & Mumbai)",
+          "Railwire Broadband",
+          "GTPL Broadband",
+          "You Broadband"
+        ]
+      },
+      "FASTag": {
+        label: "FASTag Toll Recharge",
+        paramName: "Vehicle Registration No. (e.g. DL01AB1234)",
+        paramPlaceholder: "e.g. DL01AB1234",
+        operators: [
+          "Paytm Payments Bank FASTag",
+          "ICICI Bank FASTag",
+          "State Bank of India (SBI) FASTag",
+          "HDFC Bank FASTag",
+          "Axis Bank FASTag",
+          "Kotak Mahindra Bank FASTag",
+          "IDFC FIRST Bank FASTag",
+          "Airtel Payments Bank FASTag",
+          "Bank of Baroda FASTag",
+          "IndusInd Bank FASTag",
+          "Federal Bank FASTag",
+          "Punjab National Bank FASTag",
+          "Union Bank of India FASTag"
+        ]
+      },
+      "Mobile Postpaid": {
+        label: "Mobile Postpaid",
+        paramName: "Mobile Number (10 Digits)",
+        paramPlaceholder: "e.g. 9876543210",
+        operators: [
+          "Reliance Jio Postpaid",
+          "Bharti Airtel Postpaid",
+          "Vodafone Idea (Vi) Postpaid",
+          "BSNL Postpaid",
+          "MTNL Postpaid (Delhi/Mumbai)"
+        ]
+      },
+      "Mobile Prepaid": {
+        label: "Mobile Prepaid",
+        paramName: "Mobile Number (10 Digits)",
+        paramPlaceholder: "e.g. 9876543210",
+        operators: [
+          "Reliance Jio Prepaid",
+          "Bharti Airtel Prepaid",
+          "Vodafone Idea (Vi) Prepaid",
+          "BSNL Prepaid",
+          "MTNL Prepaid"
+        ]
+      },
+      "DTH": {
+        label: "DTH / Satellite TV",
+        paramName: "Subscriber ID / Smartcard No.",
+        paramPlaceholder: "e.g. 10294819401",
+        operators: [
+          "Tata Play (formerly Tata Sky)",
+          "Airtel Digital TV",
+          "Dish TV",
+          "Sun Direct",
+          "D2H (Videocon d2h)"
+        ]
+      },
+      "Credit Card": {
+        label: "Credit Card Bill Payment",
+        paramName: "Last 4 Digits & Mobile Number",
+        paramPlaceholder: "e.g. 4242 & 9876543210",
+        operators: [
+          "HDFC Bank Credit Card",
+          "SBI Card (State Bank of India)",
+          "ICICI Bank Credit Card",
+          "Axis Bank Credit Card",
+          "Kotak Mahindra Bank Credit Card",
+          "IndusInd Bank Credit Card",
+          "RBL Bank Credit Card",
+          "Standard Chartered Bank Credit Card",
+          "Bank of Baroda Credit Card (BOBCARD)",
+          "American Express (Amex)",
+          "IDFC FIRST Bank Credit Card",
+          "HSBC Credit Card",
+          "Yes Bank Credit Card",
+          "AU Small Finance Bank Credit Card",
+          "Federal Bank Credit Card"
+        ]
+      },
+      "Loan Repayment": {
+        label: "Loan EMI Repayment",
+        paramName: "Loan Account Number (LAN)",
+        paramPlaceholder: "e.g. LAN10294819",
+        operators: [
+          "Bajaj Finance Limited",
+          "Muthoot Finance",
+          "Tata Capital Financial Services",
+          "HDB Financial Services",
+          "Mahindra & Mahindra Financial Services",
+          "L&T Financial Services",
+          "Aditya Birla Finance",
+          "Fullerton India (SMFG India Credit)",
+          "Hero FinCorp",
+          "DMI Finance",
+          "Poonawalla Fincorp",
+          "IIFL Finance",
+          "Shriram Finance",
+          "Home Credit India",
+          "TVS Credit Services",
+          "IDFC FIRST Bank Consumer Loan",
+          "Manappuram Finance Limited",
+          "Kotak Mahindra Prime"
+        ]
+      },
+      "Insurance": {
+        label: "Life & General Insurance",
+        paramName: "Policy Number",
+        paramPlaceholder: "e.g. 0192849102",
+        operators: [
+          "Life Insurance Corporation of India (LIC)",
+          "HDFC Life Insurance",
+          "ICICI Prudential Life Insurance",
+          "SBI Life Insurance",
+          "Max Life Insurance",
+          "Tata AIA Life Insurance",
+          "Bajaj Allianz Life Insurance",
+          "Kotak Mahindra Life Insurance",
+          "Star Health and Allied Insurance",
+          "Care Health Insurance (Religare)",
+          "HDFC ERGO General Insurance",
+          "ICICI Lombard General Insurance",
+          "New India Assurance",
+          "United India Insurance",
+          "The Oriental Insurance",
+          "National Insurance Company"
+        ]
+      },
+      "Municipal Taxes": {
+        label: "Municipal Taxes & Property Tax",
+        paramName: "Property Tax ID / Assessment No.",
+        paramPlaceholder: "e.g. PT-1092849",
+        operators: [
+          "Municipal Corporation of Delhi (MCD Property Tax)",
+          "Greater Chennai Corporation Property Tax",
+          "Bruhat Bengaluru Mahanagara Palike (BBMP)",
+          "Brihanmumbai Municipal Corporation (BMC / MCGM)",
+          "Pune Municipal Corporation (PMC Property Tax)",
+          "Surat Municipal Corporation (SMC Property Tax)",
+          "Ahmedabad Municipal Corporation (AMC Property Tax)",
+          "Kolkata Municipal Corporation (KMC Property Tax)",
+          "Greater Hyderabad Municipal Corporation (GHMC)",
+          "Jaipur Municipal Corporation (JMC)"
+        ]
+      },
+      "Cable TV": {
+        label: "Cable TV",
+        paramName: "Subscriber Code / MAC ID",
+        paramPlaceholder: "e.g. 9481920",
+        operators: [
+          "Hathway Digital Cable TV",
+          "Den Networks",
+          "Siti Digital Cable TV",
+          "InCable Net (IndusInd Media)",
+          "GTPL Hathway Cable",
+          "Asianet Digital Network",
+          "Kerala Communicators Cable (KCCL)",
+          "Fastway Transmissions"
+        ]
+      },
+      "Housing Society": {
+        label: "Housing Society & Rent",
+        paramName: "Flat / Unit ID",
+        paramPlaceholder: "e.g. T2-1404",
+        operators: [
+          "MyGate Society Maintenance",
+          "ApnaComplex Society Dues",
+          "NoBrokerHood Maintenance",
+          "CommonFloor Groups"
+        ]
+      },
+      "Education Fees": {
+        label: "Education Fees",
+        paramName: "Student Enrollment / Admission No.",
+        paramPlaceholder: "e.g. ADM2026-894",
+        operators: [
+          "Delhi Public School (DPS)",
+          "Amity University Fees",
+          "Manipal Academy of Higher Education",
+          "DAV College Managing Committee",
+          "Ryan International Schools",
+          "Kendriya Vidyalaya Sangathan (KVS)"
+        ]
+      },
+      "Hospital": {
+        label: "Hospital & Healthcare",
+        paramName: "Patient UHID / Registration ID",
+        paramPlaceholder: "e.g. UHID-9920194",
+        operators: [
+          "Fortis Healthcare",
+          "Apollo Hospitals",
+          "Max Healthcare",
+          "Manipal Hospitals",
+          "Medanta - The Medicity"
+        ]
+      },
+      "Clubs & Associations": {
+        label: "Clubs & Associations",
+        paramName: "Membership ID",
+        paramPlaceholder: "e.g. MEM-9281",
+        operators: [
+          "Delhi Gymkhana Club",
+          "Bombay Gymkhana",
+          "Bangalore Club",
+          "Cricket Club of India (CCI)",
+          "Royal Calcutta Golf Club (RCGC)"
+        ]
+      }
+    };
+
+    function onCategoryChange() {
+      const cat = document.getElementById('bill-category').value;
+      const service = BBPS_SERVICES[cat] || BBPS_SERVICES["Electricity"];
+      const select = document.getElementById('biller-select');
+      select.innerHTML = service.operators.map(op => `<option value="${op}">${op}</option>`).join('');
+
+      document.getElementById('bill-consumer-label').innerText = service.paramName;
+      document.getElementById('bill-consumer-id').placeholder = service.paramPlaceholder;
+      document.getElementById('bill-result-card').style.display = 'none';
+      activeBillData = null;
+    }
+
     async function fetchRealBill() {
       const cat = document.getElementById('bill-category').value;
       const biller = document.getElementById('biller-select').value;
-      const consumerId = document.getElementById('bill-consumer-id').value;
+      const consumerId = document.getElementById('bill-consumer-id').value.trim();
       const btn = document.getElementById('fetch-bill-btn');
 
-      btn.innerText = "⏳ Calling Live Network BBPS API...";
+      if (!consumerId || consumerId.length < 5) {
+        alert("Please enter a valid Consumer ID / Account Number (at least 5 characters).");
+        return;
+      }
+
+      btn.innerText = "⏳ Querying Live BBPS Gateway...";
       btn.disabled = true;
 
       try {
@@ -756,11 +1138,18 @@
         if (data.isSuccess) {
           document.getElementById('bill-result-card').style.display = 'block';
           document.getElementById('bill-name').innerText = data.consumerName;
+          document.getElementById('bill-biller-display').innerText = data.billerName;
+          document.getElementById('bill-number').innerText = data.billNumber || ('BBPS-' + consumerId);
+          document.getElementById('bill-date').innerText = data.billDate || '01 Oct 2026';
           document.getElementById('bill-due').innerText = data.dueDate;
           document.getElementById('bill-units').innerText = data.unitsConsumed;
+          // Strictly Non-Editable amount as required
           document.getElementById('bill-amount').innerText = '₹' + data.amount.toFixed(2);
-          document.getElementById('bill-api-status').innerText = `Verified (${data.latencyMs}ms)`;
+          document.getElementById('bill-api-status').innerText = `API Verified (${data.latencyMs}ms)`;
           activeBillData = data;
+        } else {
+          document.getElementById('bill-result-card').style.display = 'none';
+          alert("BBPS Gateway Error: " + (data.error || "Account could not be fetched for this biller."));
         }
       } catch (e) {
         btn.innerText = "📡 Fetch Real Bill via Network API";
@@ -901,7 +1290,7 @@
       document.getElementById('checkout-subtitle').innerText = subtitle;
       document.getElementById('checkout-amount-display').innerText = '₹' + amount.toFixed(2);
 
-      // Wallet status evaluation (Strict check)
+      // Wallet status evaluation (Strict check & Failed Transaction Creation)
       const walletBox = document.getElementById('wallet-status-alert');
       const walletBtn = document.getElementById('wallet-pay-btn');
 
@@ -915,6 +1304,7 @@
           </div>
         `;
         walletBtn.disabled = false;
+        walletBtn.className = 'btn btn-primary';
         walletBtn.innerText = `Pay ₹${amount.toFixed(2)} from Wallet (Instant Debit)`;
       } else {
         const shortfall = amount - walletBal;
@@ -923,18 +1313,19 @@
             <div>
               <strong>❌ Insufficient Wallet Balance!</strong>
               <div style="font-size: 12px; margin-top: 4px;">
-                You need <strong>₹${amount.toFixed(2)}</strong> to complete this purchase, but your wallet only has <strong>₹${walletBal.toFixed(2)}</strong> (Shortfall of <strong>₹${shortfall.toFixed(2)}</strong>).
-                <br>Please choose <strong>UPI</strong> or <strong>Credit Card</strong> tab above.
+                You need <strong>₹${amount.toFixed(2)}</strong> to complete this purchase, but your wallet only has <strong>₹${walletBal.toFixed(2)}</strong> (Shortfall: <strong>₹${shortfall.toFixed(2)}</strong>).
+                <br>Submitting payment from wallet will record a <strong>FAILED</strong> entry in your passbook as per system policy. You may also switch to the <strong>UPI</strong> tab above to pay directly.
               </div>
             </div>
           </div>
         `;
-        walletBtn.disabled = true;
-        walletBtn.innerText = `Insufficient Wallet Balance (Short by ₹${shortfall.toFixed(2)})`;
+        walletBtn.disabled = false; // Enabled so user can trigger the required Failed Entry
+        walletBtn.className = 'btn btn-danger';
+        walletBtn.innerText = `Attempt Wallet Payment (Records FAILED Entry)`;
       }
 
       document.getElementById('checkout-modal').classList.add('open');
-      switchCheckoutTab('upi');
+      switchCheckoutTab(walletBal >= amount ? 'wallet' : 'upi');
     }
 
     function switchCheckoutTab(tab) {
@@ -995,16 +1386,31 @@
         });
         const resp = await res.json();
 
+        if (resp.isFailed) {
+          alert("❌ " + resp.error);
+          await loadData();
+          showCustomerSection('passbook');
+          return;
+        }
+
         if (resp.error) {
           alert("Error: " + resp.error);
+          return;
+        }
+
+        if (method === 'WALLET') {
+          alert(`✓ Payment Successful! ₹${activeCheckoutDetails.amount.toFixed(2)} debited from wallet.`);
+        } else if (method === 'UPI') {
+          alert(`✓ Order submitted via UPI! Reference ${ref} saved. Wallet balance was NOT deducted.`);
         } else {
-          alert(`Order submitted successfully via ${method}! Admin will verify payment and update reference.`);
-          await loadData();
-          if (activeCheckoutDetails.type === 'voucher') {
-            showCustomerSection('my-vouchers');
-          } else {
-            showCustomerSection('passbook');
-          }
+          alert(`Order submitted successfully via ${method}!`);
+        }
+
+        await loadData();
+        if (activeCheckoutDetails.type === 'voucher') {
+          showCustomerSection('my-vouchers');
+        } else {
+          showCustomerSection('passbook');
         }
       } catch (e) {
         alert("Transaction error: " + e.message);
@@ -1181,6 +1587,7 @@
       document.getElementById(id).classList.remove('open');
     }
 
+    onCategoryChange();
     loadData();
     setInterval(loadData, 8000);
   </script>

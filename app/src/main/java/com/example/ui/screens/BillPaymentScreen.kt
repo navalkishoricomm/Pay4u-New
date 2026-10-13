@@ -80,25 +80,133 @@ fun BillPaymentScreen(
     "Electricity" to Icons.Default.ElectricalServices,
     "Water" to Icons.Default.WaterDrop,
     "LPG Gas" to Icons.Default.LocalGasStation,
+    "Piped Gas" to Icons.Default.LocalGasStation,
     "Broadband" to Icons.Default.Wifi,
-    "Fastag" to Icons.Default.ReceiptLong
+    "FASTag" to Icons.Default.ReceiptLong,
+    "Credit Card" to Icons.Default.ReceiptLong,
+    "Loan Repayment" to Icons.Default.ReceiptLong,
+    "Insurance" to Icons.Default.ReceiptLong,
+    "Municipal Taxes" to Icons.Default.ReceiptLong,
+    "Cable TV" to Icons.Default.Sensors
   )
 
   var selectedCategory by remember { mutableStateOf("Electricity") }
 
-  val electricityBillers = listOf("BSES Rajdhani Delhi", "Tata Power Delhi", "Adani Electricity Mumbai", "BESCOM Bengaluru", "UPPCL Uttar Pradesh")
-  val waterBillers = listOf("Delhi Jal Board (DJB)", "Bangalore Water Supply (BWSSB)", "Hyderabad Water (HMWSSB)")
-  val gasBillers = listOf("Indane LPG Cylinder", "Bharat Gas (BPCL)", "HP Gas (HPCL)", "Indraprastha Gas (IGL Piped)")
-  val broadbandBillers = listOf("JioFiber Broadband", "Airtel Xstream Fiber", "ACT Fibernet", "Hathway Fiber")
-  val fastagBillers = listOf("Paytm Payments Bank Fastag", "ICICI Bank Fastag", "SBI Fastag", "HDFC Fastag")
+  val electricityBillers = listOf(
+    "BSES Rajdhani Power Limited (BRPL) - Delhi",
+    "BSES Yamuna Power Limited (BYPL) - Delhi",
+    "Tata Power Delhi Distribution (TPDDL)",
+    "Maharashtra State Electricity Dist. (MSEDCL)",
+    "Adani Electricity Mumbai Ltd",
+    "Tata Power - Mumbai",
+    "UPPCL - Urban (Uttar Pradesh Power Corp)",
+    "UPPCL - Rural (Uttar Pradesh Power Corp)",
+    "Bangalore Electricity Supply (BESCOM)",
+    "Tamil Nadu Generation & Dist. (TANGEDCO)",
+    "Dakshin Gujarat Vij Company (DGVCL)",
+    "Torrent Power - Ahmedabad / Surat / Agra",
+    "Punjab State Power Corporation (PSPCL)",
+    "CESC Kolkata",
+    "West Bengal State Electricity (WBSEDCL)",
+    "Telangana State Southern Power (TSSPDCL)",
+    "Kerala State Electricity Board (KSEBL)"
+  )
+  val waterBillers = listOf(
+    "Delhi Jal Board (DJB)",
+    "Bangalore Water Supply and Sewerage (BWSSB)",
+    "Hyderabad Metropolitan Water (HMWSSB)",
+    "Municipal Corp. of Greater Mumbai (MCGM)",
+    "Chennai Metropolitan Water (CMWSSB)",
+    "Pune Municipal Corporation (PMC) Water",
+    "Kerala Water Authority (KWA)"
+  )
+  val lpgBillers = listOf(
+    "Bharat Gas (BPCL)",
+    "Indane Gas (Indian Oil Corporation)",
+    "HP Gas (HPCL)"
+  )
+  val pipedGasBillers = listOf(
+    "Indraprastha Gas Limited (IGL) - Delhi NCR",
+    "Mahanagar Gas Limited (MGL) - Mumbai",
+    "Adani Total Gas Limited",
+    "Gujarat Gas Limited (GGL)",
+    "Central UP Gas Limited (CUGL)",
+    "Maharashtra Natural Gas Limited (MNGL)"
+  )
+  val broadbandBillers = listOf(
+    "JioFiber Broadband",
+    "Airtel Xstream Fiber",
+    "ACT Fibernet",
+    "BSNL Broadband & FTTH",
+    "Hathway Fiber Broadband",
+    "Excitel Broadband",
+    "Tata Play Fiber"
+  )
+  val fastagBillers = listOf(
+    "ICICI Bank FASTag",
+    "State Bank of India (SBI) FASTag",
+    "HDFC Bank FASTag",
+    "Paytm Payments Bank FASTag",
+    "Axis Bank FASTag",
+    "Kotak Mahindra Bank FASTag",
+    "IDFC FIRST Bank FASTag"
+  )
+  val creditCardBillers = listOf(
+    "HDFC Bank Credit Card",
+    "SBI Card",
+    "ICICI Bank Credit Card",
+    "Axis Bank Credit Card",
+    "Kotak Mahindra Bank Credit Card",
+    "IndusInd Bank Credit Card",
+    "RBL Bank Credit Card"
+  )
+  val loanBillers = listOf(
+    "Bajaj Finance Limited",
+    "Muthoot Finance",
+    "Tata Capital Financial Services",
+    "HDB Financial Services",
+    "Mahindra & Mahindra Finance",
+    "L&T Financial Services",
+    "Hero FinCorp",
+    "DMI Finance"
+  )
+  val insuranceBillers = listOf(
+    "Life Insurance Corporation of India (LIC)",
+    "HDFC Life Insurance",
+    "ICICI Prudential Life Insurance",
+    "SBI Life Insurance",
+    "Max Life Insurance",
+    "Star Health and Allied Insurance"
+  )
+  val municipalBillers = listOf(
+    "Municipal Corporation of Delhi (MCD)",
+    "Greater Chennai Corporation Property Tax",
+    "Bruhat Bengaluru Mahanagara Palike (BBMP)",
+    "Brihanmumbai Municipal Corp (BMC / MCGM)",
+    "Pune Municipal Corporation (PMC)"
+  )
+  val cableTvBillers = listOf(
+    "Hathway Digital Cable TV",
+    "Den Networks",
+    "Siti Digital Cable TV",
+    "GTPL Hathway Cable",
+    "Asianet Digital Network"
+  )
 
   val currentBillers = remember(selectedCategory) {
     when (selectedCategory) {
       "Electricity" -> electricityBillers
       "Water" -> waterBillers
-      "LPG Gas" -> gasBillers
+      "LPG Gas" -> lpgBillers
+      "Piped Gas" -> pipedGasBillers
       "Broadband" -> broadbandBillers
-      else -> fastagBillers
+      "FASTag" -> fastagBillers
+      "Credit Card" -> creditCardBillers
+      "Loan Repayment" -> loanBillers
+      "Insurance" -> insuranceBillers
+      "Municipal Taxes" -> municipalBillers
+      "Cable TV" -> cableTvBillers
+      else -> electricityBillers
     }
   }
 
@@ -150,9 +258,16 @@ fun BillPaymentScreen(
                   selectedBiller = when (cat) {
                     "Electricity" -> electricityBillers.first()
                     "Water" -> waterBillers.first()
-                    "LPG Gas" -> gasBillers.first()
+                    "LPG Gas" -> lpgBillers.first()
+                    "Piped Gas" -> pipedGasBillers.first()
                     "Broadband" -> broadbandBillers.first()
-                    else -> fastagBillers.first()
+                    "FASTag" -> fastagBillers.first()
+                    "Credit Card" -> creditCardBillers.first()
+                    "Loan Repayment" -> loanBillers.first()
+                    "Insurance" -> insuranceBillers.first()
+                    "Municipal Taxes" -> municipalBillers.first()
+                    "Cable TV" -> cableTvBillers.first()
+                    else -> electricityBillers.first()
                   }
                   fetchedBill = null
                 },
@@ -240,8 +355,15 @@ fun BillPaymentScreen(
                     "Electricity" -> "Consumer CA Number / Account No."
                     "Water" -> "K-Number / Consumer ID"
                     "LPG Gas" -> "Consumer ID / Registered Mobile"
+                    "Piped Gas" -> "BP Number / Account ID"
                     "Broadband" -> "Broadband Account ID / Landline"
-                    else -> "Vehicle Registration No. / Fastag ID"
+                    "FASTag" -> "Vehicle Registration No."
+                    "Credit Card" -> "Last 4 Digits & Mobile"
+                    "Loan Repayment" -> "Loan Account Number (LAN)"
+                    "Insurance" -> "Policy Number"
+                    "Municipal Taxes" -> "Property Tax Assessment ID"
+                    "Cable TV" -> "Subscriber Code / MAC ID"
+                    else -> "Account / Consumer ID"
                   }
                 )
               },

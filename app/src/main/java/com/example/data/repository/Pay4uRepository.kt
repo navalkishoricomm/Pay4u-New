@@ -54,18 +54,26 @@ class Pay4uRepository(private val database: AppDatabase) {
   fun getTransactionsByStatus(status: String): Flow<List<TransactionEntity>> = transactionDao.getTransactionsByStatus(status)
 
   suspend fun createTransaction(transaction: TransactionEntity): Long {
-    // If paying from Wallet, strictly validate and deduct
+    var finalTx = transaction
+    // If paying from Wallet:
     if (transaction.paymentMethod == "WALLET") {
       val user = userDao.getUserById(transaction.userId).firstOrNull()
         ?: throw Exception("User not found")
       if (user.walletBalance < transaction.netAmount) {
-        throw Exception("Insufficient Wallet Balance! Available: ₹${"%.2f".format(user.walletBalance)}, Required: ₹${"%.2f".format(transaction.netAmount)}")
+        // Insufficient wallet balance: create FAILED entry instead of pending!
+        finalTx = transaction.copy(
+          status = "FAILED",
+          operatorTrId = "FAILED",
+          adminNotes = "Payment Failed: Insufficient Wallet Balance. Available: ₹${"%.2f".format(user.walletBalance)}, Required: ₹${"%.2f".format(transaction.netAmount)}"
+        )
+      } else {
+        // Sufficient balance: Deduct correctly from wallet
+        val updatedBalance = user.walletBalance - transaction.netAmount
+        userDao.updateWalletBalance(user.id, updatedBalance)
       }
-      val updatedBalance = user.walletBalance - transaction.netAmount
-      userDao.updateWalletBalance(user.id, updatedBalance)
     }
-
-    return transactionDao.insertTransaction(transaction)
+    // If paying via UPI: Wallet balance is NOT deducted!
+    return transactionDao.insertTransaction(finalTx)
   }
 
   suspend fun updateOperatorTrId(
@@ -122,19 +130,15 @@ class Pay4uRepository(private val database: AppDatabase) {
     val discountAmt = denomination * (voucher.discountPercent / 100.0)
     val finalPayable = denomination - discountAmt
 
-    // 1. Strict Wallet Balance Validation
-    if (paymentMethod == "WALLET") {
-      val freshUser = userDao.getUserById(user.id).firstOrNull() ?: user
-      if (freshUser.walletBalance < finalPayable) {
-        return Result.failure(
-          Exception("Insufficient Wallet Balance! Available: ₹${"%.2f".format(freshUser.walletBalance)}, Required: ₹${"%.2f".format(finalPayable)}. Please choose UPI or Credit Card.")
-        )
-      }
-      // Deduct from wallet
+    val freshUser = userDao.getUserById(user.id).firstOrNull() ?: user
+    val isFailedDueToWallet = (paymentMethod == "WALLET" && freshUser.walletBalance < finalPayable)
+
+    if (paymentMethod == "WALLET" && !isFailedDueToWallet) {
+      // Deduct from wallet only when sufficient
       userDao.updateWalletBalance(user.id, freshUser.walletBalance - finalPayable)
     }
 
-    // 2. Create Transaction in PENDING state
+    // 2. Create Transaction: FAILED if wallet shortfall, else PENDING
     val tx = TransactionEntity(
       userId = user.id,
       userName = user.name,
@@ -151,15 +155,17 @@ class Pay4uRepository(private val database: AppDatabase) {
       paymentMethod = paymentMethod,
       userUpiUtr = if (paymentMethod == "UPI") paymentRef else "",
       upiPaymentMethod = paymentMethod,
-      status = "PENDING", // PENDING ADMIN MANUAL VERIFICATION & GENUINE VOUCHER UPLOAD!
-      operatorTrId = "",
-      adminNotes = "Awaiting admin payment review & genuine voucher code upload",
+      status = if (isFailedDueToWallet) "FAILED" else "PENDING",
+      operatorTrId = if (isFailedDueToWallet) "FAILED" else "",
+      adminNotes = if (isFailedDueToWallet)
+        "Order Failed: Insufficient Wallet Balance. Available: ₹${"%.2f".format(freshUser.walletBalance)}, Required: ₹${"%.2f".format(finalPayable)}"
+        else "Awaiting admin payment review & genuine voucher code upload",
       processedBy = "",
       createdAt = System.currentTimeMillis()
     )
     val txId = transactionDao.insertTransaction(tx)
 
-    // 3. Create Pending User Voucher Record (No fake generated code!)
+    // 3. Create User Voucher Record
     val userVoucher = UserVoucherEntity(
       userId = user.id,
       userName = user.name,
@@ -169,16 +175,21 @@ class Pay4uRepository(private val database: AppDatabase) {
       denomination = denomination,
       finalPaid = finalPayable,
       paymentMethod = paymentMethod,
-      voucherCode = "", // Admin will enter the genuine code!
+      voucherCode = "",
       pinCode = "",
       expiryDate = "",
-      status = "PENDING", // PENDING ADMIN UPLOAD
-      adminNotes = "Order placed. Awaiting admin upload.",
+      status = if (isFailedDueToWallet) "FAILED" else "PENDING",
+      adminNotes = if (isFailedDueToWallet) "Order failed due to insufficient wallet balance." else "Order placed. Awaiting admin upload.",
       purchasedAt = System.currentTimeMillis(),
       approvedAt = null,
       isUsed = false
     )
     userVoucherDao.insertUserVoucher(userVoucher)
+
+    if (isFailedDueToWallet) {
+      return Result.failure(Exception("Insufficient Wallet Balance! Available: ₹${"%.2f".format(freshUser.walletBalance)}, Required: ₹${"%.2f".format(finalPayable)}. Transaction recorded as FAILED."))
+    }
+
     return Result.success(txId)
   }
 
