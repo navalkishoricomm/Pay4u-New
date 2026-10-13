@@ -12,6 +12,7 @@
       "name": "Master Admin",
       "phone": "9999999999",
       "email": "admin@pay4u.in",
+      "password": "admin",
       "role": "ADMIN",
       "walletBalance": 25000,
       "schemeId": "SCH_VIP_SUPER"
@@ -21,6 +22,7 @@
       "name": "Mukesh Garg",
       "phone": "9876543210",
       "email": "mukgarg11@gmail.com",
+      "password": "123456",
       "role": "RETAILER",
       "walletBalance": 1051,
       "schemeId": "SCH_RETAILER_DEF"
@@ -30,6 +32,7 @@
       "name": "Apex Telecom (Distributor)",
       "phone": "9811223344",
       "email": "apex@pay4u.in",
+      "password": "123456",
       "role": "DISTRIBUTOR",
       "walletBalance": 8400,
       "schemeId": "SCH_DIST_GOLD"
@@ -39,6 +42,7 @@
       "name": "North Super Distribution Ltd",
       "phone": "9988776655",
       "email": "northsuper@pay4u.in",
+      "password": "123456",
       "role": "SUPER_DISTRIBUTOR",
       "walletBalance": 45000,
       "schemeId": "SCH_VIP_SUPER"
@@ -1075,9 +1079,9 @@
       "amount": 450,
       "paymentMethod": "CREDIT_CARD",
       "userUpiUtr": "VISA-••4242",
-      "status": "PENDING",
-      "operatorTrId": "",
-      "adminNotes": "Awaiting Admin TR ID",
+      "status": "SUCCESS",
+      "operatorTrId": "TATA-TR-41564159",
+      "adminNotes": "Approved & marked SUCCESS by Admin",
       "createdAt": 1791871506570
     }
   ],

@@ -92,6 +92,11 @@
     th { text-align: left; padding: 12px 14px; background: #F8FAFC; color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--border); }
     td { padding: 14px; border-bottom: 1px solid var(--border); }
     tr:hover td { background: #F8FAFD; }
+    .log-card { border: 1.5px solid #FECACA; background: #FFF5F5; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; transition: all 0.2s; }
+    .log-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; flex-wrap: wrap; gap: 6px; }
+    .log-url { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #991B1B; word-break: break-all; }
+    .log-details { background: #0F172A; color: #38BDF8; font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 10px 14px; border-radius: 8px; margin-top: 8px; max-height: 220px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+    @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   </style>
 </head>
 <body>
@@ -103,22 +108,126 @@
         <div class="brand-title">pay<span>4u</span></div>
       </div>
       <div class="user-pill">
+        <button class="btn btn-secondary" id="global-error-btn" style="display:none; padding: 6px 12px; font-size: 12px; border: 1.5px solid #EF4444; color: #DC2626; background: #FEF2F2;" onclick="openErrorLogModal()">
+          🚨 API Errors (<span id="global-error-count">0</span>)
+        </button>
         <a href="pay4u.apk" download="pay4u.apk" class="btn btn-primary" style="text-decoration: none; font-size: 13px;">
           📥 Download App (APK)
         </a>
-        <div class="wallet-badge" id="wallet-badge">
-          <span>₹</span> <span id="wallet-balance-val">1,250.00</span>
+        <div class="wallet-badge" id="wallet-badge" style="display: none;">
+          <span>₹</span> <span id="wallet-balance-val">0.00</span>
         </div>
-        <button class="btn btn-admin" id="portal-toggle-btn" onclick="togglePortalMode()">
+        <div id="header-user-info" style="display: none; align-items: center; gap: 8px;">
+          <span id="header-user-name" style="font-size: 13px; font-weight: 700; color: var(--text-main);"></span>
+          <span class="badge badge-success" id="header-user-role" style="font-size: 10px;">RETAILER</span>
+        </div>
+        <button class="btn btn-admin" id="portal-toggle-btn" style="display: none;" onclick="togglePortalMode()">
           ⚙️ Admin Panel
+        </button>
+        <button class="btn btn-secondary" id="btn-logout" style="display: none; padding: 6px 12px; font-size: 12px;" onclick="logoutUser()">
+          🚪 Logout
+        </button>
+        <button class="btn btn-primary" id="btn-header-login" style="display: inline-flex; padding: 7px 14px; font-size: 13px;" onclick="showAuthView()">
+          🔐 Sign In / Register
         </button>
       </div>
     </div>
   </header>
 
   <main class="container">
+    <!-- Floating Universal Toast -->
+    <div id="app-toast" style="display: none; position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 10000; background: #0F172A; color: #fff; padding: 12px 24px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); font-size: 14px; font-weight: 600; text-align: center; max-width: 90vw; animation: slideUp 0.25s ease;">
+      <span id="app-toast-text"></span>
+    </div>
+
+    <!-- ================= AUTH VIEW (LOGIN & SIGNUP) ================= -->
+    <div id="auth-view" style="display: none; max-width: 480px; margin: 30px auto;">
+      <div class="card" style="box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 16px; padding: 26px;">
+        <div style="text-align: center; margin-bottom: 22px;">
+          <div style="font-size: 38px; margin-bottom: 6px;">⚡</div>
+          <h2 style="font-size: 22px; font-weight: 800; color: var(--primary);">pay4u Partner Portal</h2>
+          <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Sign in or register to access recharge, BBPS bills and instant commissions.</p>
+        </div>
+
+        <!-- Auth Tabs -->
+        <div class="modal-tabs" style="margin-bottom: 20px;">
+          <button class="modal-tab active" id="auth-tab-login" onclick="switchAuthTab('login')">🔐 Sign In</button>
+          <button class="modal-tab" id="auth-tab-signup" onclick="switchAuthTab('signup')">📝 Create Partner Account</button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="auth-login-box">
+          <div class="form-group">
+            <label class="form-label">Mobile Number or Email *</label>
+            <input type="text" id="login-identifier" class="form-control" placeholder="e.g. 9876543210 or admin@pay4u.in">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input type="password" id="login-password" class="form-control" placeholder="Enter your password">
+          </div>
+          <button class="btn btn-primary" id="btn-login-submit" style="width: 100%; padding: 12px; font-size: 15px;" onclick="handleLogin()">
+            Sign In to Portal
+          </button>
+
+          <!-- Quick Demo Logins -->
+          <div style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed var(--border);">
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px;">
+              🚀 Quick Demo Accounts (One-Click Sign In):
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <button type="button" class="btn btn-secondary" style="justify-content: space-between; font-size: 12px; padding: 9px 12px;" onclick="quickLoginDemo('9876543210', '123456')">
+                <span>👤 <strong>Mukesh Garg</strong> (Retailer)</span>
+                <span class="badge badge-success">Retailer</span>
+              </button>
+              <button type="button" class="btn btn-secondary" style="justify-content: space-between; font-size: 12px; padding: 9px 12px;" onclick="quickLoginDemo('9811223344', '123456')">
+                <span>🏢 <strong>Apex Telecom</strong> (Distributor)</span>
+                <span class="badge badge-pending">Distributor</span>
+              </button>
+              <button type="button" class="btn btn-secondary" style="justify-content: space-between; font-size: 12px; padding: 9px 12px;" onclick="quickLoginDemo('9999999999', 'admin')">
+                <span>👑 <strong>Master Admin</strong> (Administrator)</span>
+                <span class="badge" style="background:#FDE68A; color:#B45309;">Admin</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Signup Form -->
+        <div id="auth-signup-box" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" id="signup-name" class="form-control" placeholder="e.g. Ramesh Kumar">
+          </div>
+          <div class="form-group">
+            <label class="form-label">10-Digit Mobile Number *</label>
+            <input type="tel" id="signup-phone" class="form-control" placeholder="e.g. 9812345678" maxlength="10">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address (Optional)</label>
+            <input type="email" id="signup-email" class="form-control" placeholder="e.g. ramesh@gmail.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Partner Role *</label>
+            <select id="signup-role" class="form-control">
+              <option value="RETAILER">Retailer (Direct Recharge & High BBPS Margin)</option>
+              <option value="DISTRIBUTOR">Distributor (B2B Partner & Downline Margin)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input type="password" id="signup-password" class="form-control" placeholder="Minimum 4 characters">
+          </div>
+          <button class="btn btn-primary" id="btn-signup-submit" style="width: 100%; padding: 12px; font-size: 15px;" onclick="handleSignup()">
+            Create Partner Account
+          </button>
+          <div style="font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 12px;">
+            ✨ New accounts receive a ₹250.00 wallet signup credit!
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Top Customer Nav -->
-    <div id="customer-nav" class="nav-tabs">
+    <div id="customer-nav" class="nav-tabs" style="display: none;">
       <button class="nav-tab active" data-sec="recharge" onclick="showCustomerSection('recharge', this)">📱 Mobile & DTH</button>
       <button class="nav-tab" data-sec="bills" onclick="showCustomerSection('bills', this)">💡 BBPS Bill Pay</button>
       <button class="nav-tab" data-sec="vouchers" onclick="showCustomerSection('vouchers', this)">🎁 Brand Vouchers</button>
@@ -134,10 +243,11 @@
       <button class="nav-tab" data-sec="users" onclick="showAdminSection('users', this)">👥 User Scheme Assignment</button>
       <button class="nav-tab" data-sec="voucher-queue" onclick="showAdminSection('voucher-queue', this)">🎟️ Upload Genuine Vouchers</button>
       <button class="nav-tab" data-sec="gateway" onclick="showAdminSection('gateway', this)">🌐 BBPS Gateway Settings</button>
+      <button class="nav-tab" data-sec="logs" onclick="showAdminSection('logs', this)">🚨 API Error Logs (<span id="admin-error-nav-count">0</span>)</button>
     </div>
 
     <!-- ================= CUSTOMER PORTAL ================= -->
-    <div id="customer-view">
+    <div id="customer-view" style="display: none;">
 
       <!-- SECTION 1: RECHARGE -->
       <div id="sec-recharge" class="section-content">
@@ -255,8 +365,16 @@
                 <strong id="bill-biller-display" style="color: var(--primary);">-</strong>
               </div>
               <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--text-muted); font-size: 13px;">Official BBPS Biller ID</span>
+                <code id="bill-biller-id" style="font-weight: 700; color: #475569;">-</code>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                 <span style="color: var(--text-muted); font-size: 13px;">Bill Number</span>
                 <span id="bill-number" style="font-family: monospace; font-weight: 700;">-</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--text-muted); font-size: 13px;">Bill Cycle / Period</span>
+                <span id="bill-period" style="font-weight: 600;">-</span>
               </div>
               <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                 <span style="color: var(--text-muted); font-size: 13px;">Bill Date</span>
@@ -270,12 +388,34 @@
                 <span style="color: var(--text-muted); font-size: 13px;">Consumption / Units</span>
                 <span id="bill-units" style="font-weight: 600;">-</span>
               </div>
+
+              <!-- Tariff Breakdown -->
+              <div id="bill-breakdown-box" style="margin-top: 10px; padding: 10px 12px; background: #fff; border-radius: 8px; border: 1px solid var(--border); font-size: 12px;">
+                <div style="font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">Tariff Breakdown</div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                  <span>Base Energy / Service Charges:</span>
+                  <span id="bill-bk-energy">₹0.00</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                  <span>Fixed Meter Rent & Charges:</span>
+                  <span id="bill-bk-fixed">₹0.00</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Electricity Duty / GST / Cess:</span>
+                  <span id="bill-bk-tax">₹0.00</span>
+                </div>
+              </div>
+
               <div style="display: flex; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); align-items: baseline;">
                 <div>
                   <span style="font-size: 14px; font-weight: 700;">Payable Amount</span>
                   <div style="font-size: 11px; color: var(--secondary); font-weight: 700;">🔒 Non-Editable (BBPS Verified Tariff)</div>
                 </div>
                 <strong id="bill-amount" style="font-size: 24px; color: var(--primary);">₹0.00</strong>
+              </div>
+
+              <div style="font-size: 11px; color: #047857; background: #D1FAE5; padding: 6px 12px; border-radius: 8px; margin-top: 12px; display: flex; align-items: center; gap: 6px;">
+                <span>🇮🇳</span> <span>NPCI Bharat BillPay (BBPS) Central Switch Certified</span>
               </div>
             </div>
             <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="openCheckout('bill')">
@@ -668,6 +808,37 @@
             </button>
             <div id="diag-output-box" style="display: none; background: #0F172A; color: #38BDF8; font-family: monospace; font-size: 11px; padding: 14px; border-radius: 10px; max-height: 200px; overflow-y: auto;"></div>
           </div>
+      <!-- ADMIN TAB 6: API ERROR LOGS & NETWORK INSPECTOR -->
+      <div id="admin-sec-logs" class="admin-section" style="display: none;">
+        <div class="card">
+          <div class="card-header" style="flex-wrap: wrap; gap: 12px;">
+            <div>
+              <div class="card-title">🚨 Global API Request & Error Inspector</div>
+              <div style="font-size: 13px; color: var(--text-muted);">Real-time capture of all failed backend fetch requests, HTTP status codes, and error traces</div>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-secondary" onclick="copyAllErrorLogs()">📋 Copy Diagnostic Dump</button>
+              <button class="btn btn-secondary" onclick="simulateTestApiError()">🧪 Test Interceptor (Simulate 500)</button>
+              <button class="btn btn-danger" onclick="clearApiErrorLogs()">🗑️ Clear Logs</button>
+            </div>
+          </div>
+
+          <div id="admin-logs-summary-banner" style="background: #F8FAFC; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <span style="font-size: 14px; font-weight: 700;">Active Interceptor Status:</span>
+              <span class="badge badge-success" style="margin-left: 6px;">MONITORING LIVE</span>
+              <span style="font-size: 12px; color: var(--text-muted); margin-left: 10px;">Total Failures Logged: <strong id="admin-logs-total-count">0</strong></span>
+            </div>
+            <div>
+              <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="renderAdminErrorLogs()">🔄 Refresh View</button>
+            </div>
+          </div>
+
+          <div id="admin-logs-list-container">
+            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+              ✅ No API request failures recorded yet. All backend requests are running healthy!
+            </div>
+          </div>
         </div>
       </div>
 
@@ -895,6 +1066,50 @@
     </div>
   </div>
 
+  <!-- API ERROR LOG DETAILS MODAL -->
+  <div class="modal-overlay" id="api-error-log-modal">
+    <div class="modal" style="max-width: 680px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 18px; font-weight: 800; color: #DC2626;">🚨 API Request Failure Logs</h3>
+          <p style="font-size: 12px; color: var(--text-muted);">Intercepted network errors, bad gateways, and failed responses</p>
+        </div>
+        <button class="btn btn-secondary" onclick="closeModal('api-error-log-modal')">✕</button>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+        <span style="font-size: 13px; font-weight: 700;">Captured Failures (<span id="modal-error-count">0</span>)</span>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary" style="padding: 5px 12px; font-size: 12px;" onclick="copyAllErrorLogs()">📋 Copy All Logs</button>
+          <button class="btn btn-secondary" style="padding: 5px 12px; font-size: 12px;" onclick="simulateTestApiError()">🧪 Test Log</button>
+          <button class="btn btn-danger" style="padding: 5px 12px; font-size: 12px;" onclick="clearApiErrorLogs()">🗑️ Clear</button>
+        </div>
+      </div>
+
+      <div id="modal-error-logs-container" style="max-height: 520px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;"></div>
+    </div>
+  </div>
+
+  <!-- FLOATING API ERROR TOAST NOTIFICATION -->
+  <div id="api-error-toast" style="display: none; position: fixed; bottom: 24px; right: 24px; z-index: 9999; max-width: 440px; background: #0F172A; color: #fff; padding: 16px 20px; border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.35); border-left: 6px solid #EF4444; font-size: 13px; animation: slideUp 0.3s ease;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 16px;">⚠️</span>
+        <strong style="color: #F87171; font-size: 14px;">Backend API Request Failed</strong>
+      </div>
+      <span style="cursor: pointer; color: #94A3B8; font-size: 18px; line-height: 1;" onclick="closeApiErrorToast()">✕</span>
+    </div>
+    <div id="api-error-toast-msg" style="font-size: 12px; color: #CBD5E1; margin-bottom: 12px; font-family: monospace; word-break: break-all;"></div>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; background: #EF4444; border-color: #EF4444;" onclick="openErrorLogModal()">
+        🔍 Inspect Raw Error Log
+      </button>
+      <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px; color: #fff; border-color: #475569;" onclick="copyLatestErrorLog()">
+        📋 Copy Log
+      </button>
+    </div>
+  </div>
+
   <script>
     // Dynamic Base Path for subpath hosting (e.g. /v2/, /pay4u-v2/, or /)
     const BASE_PATH = window.location.pathname.replace(/\/[^\/]*$/, "") + "/";
@@ -902,7 +1117,339 @@
       return BASE_PATH + path.replace(/^\/+/, "");
     }
 
+    // =========================================================================
+    // GLOBAL API REQUEST INTERCEPTOR & ERROR LOGGER
+    // =========================================================================
+    const globalApiErrorLogs = [];
+    const originalFetch = window.fetch;
+
+    function getHttpStatusText(status) {
+      const map = {
+        400: 'Bad Request',
+        401: 'Unauthorized',
+        403: 'Forbidden',
+        404: 'Not Found (Endpoint or Route Missing)',
+        408: 'Request Timeout',
+        500: 'Internal Server Error',
+        502: 'Bad Gateway (Upstream Server Unreachable)',
+        503: 'Service Unavailable',
+        504: 'Gateway Timeout'
+      };
+      return map[status] || `HTTP ${status}`;
+    }
+
+    window.fetch = async function(...args) {
+      const startTime = Date.now();
+      const rawUrl = typeof args[0] === 'string' ? args[0] : (args[0]?.url || String(args[0]));
+      const options = args[1] || {};
+      const method = (options.method || 'GET').toUpperCase();
+      let reqBody = options.body;
+
+      let parsedReqBody = reqBody;
+      if (typeof reqBody === 'string') {
+        try { parsedReqBody = JSON.parse(reqBody); } catch (_) {}
+      }
+
+      try {
+        const response = await originalFetch.apply(this, args);
+        const durationMs = Date.now() - startTime;
+
+        // 1. Intercept HTTP error status codes (4xx, 5xx)
+        if (!response.ok) {
+          let rawText = "";
+          let parsedJson = null;
+          try {
+            const clone = response.clone();
+            rawText = await clone.text();
+            try { parsedJson = JSON.parse(rawText); } catch (_) {}
+          } catch (_) {
+            rawText = "[Could not read response stream]";
+          }
+
+          const errMsg = (parsedJson && (parsedJson.error || parsedJson.message)) ||
+            `${response.status} ${response.statusText || getHttpStatusText(response.status)}`;
+
+          const errorEntry = {
+            id: 'ERR_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+            timestamp: new Date().toISOString(),
+            timeStr: new Date().toLocaleTimeString(),
+            method,
+            url: rawUrl,
+            status: response.status,
+            statusText: response.statusText || getHttpStatusText(response.status),
+            durationMs,
+            requestPayload: parsedReqBody,
+            responseRaw: rawText,
+            responseJson: parsedJson,
+            errorMessage: errMsg,
+            type: response.status >= 500 ? 'SERVER_ERROR' : 'CLIENT_ERROR',
+            originalArgs: args
+          };
+
+          recordApiError(errorEntry);
+        } else {
+          // 2. Intercept business-level error payloads returned with 200 OK (e.g. isSuccess: false or isFailed: true)
+          try {
+            const clone = response.clone();
+            const cloneJson = await clone.json();
+            if (cloneJson && (cloneJson.isSuccess === false || cloneJson.isFailed === true)) {
+              const errorEntry = {
+                id: 'ERR_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                timestamp: new Date().toISOString(),
+                timeStr: new Date().toLocaleTimeString(),
+                method,
+                url: rawUrl,
+                status: 200,
+                statusText: "OK (API Business Logic Error)",
+                durationMs,
+                requestPayload: parsedReqBody,
+                responseRaw: JSON.stringify(cloneJson, null, 2),
+                responseJson: cloneJson,
+                errorMessage: cloneJson.error || "Operation failed on server",
+                type: 'BUSINESS_LOGIC_ERROR',
+                originalArgs: args
+              };
+              recordApiError(errorEntry);
+            }
+          } catch (_) {
+            // Not a JSON response or already consumed, ignore
+          }
+        }
+
+        return response;
+      } catch (networkError) {
+        // 3. Intercept Network / Connection Failures (e.g. server down, CORS, offline, net::ERR_CONNECTION_REFUSED)
+        const durationMs = Date.now() - startTime;
+        const errorEntry = {
+          id: 'ERR_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          timestamp: new Date().toISOString(),
+          timeStr: new Date().toLocaleTimeString(),
+          method,
+          url: rawUrl,
+          status: 0,
+          statusText: "NETWORK_FAILED",
+          durationMs,
+          requestPayload: parsedReqBody,
+          responseRaw: networkError.stack || networkError.message,
+          responseJson: null,
+          errorMessage: networkError.message || "Failed to fetch / Connection refused",
+          type: 'NETWORK_FAILURE',
+          originalArgs: args
+        };
+
+        recordApiError(errorEntry);
+        throw networkError;
+      }
+    };
+
+    function recordApiError(entry) {
+      if (entry.id !== 'dummy') {
+        globalApiErrorLogs.unshift(entry);
+        if (globalApiErrorLogs.length > 50) globalApiErrorLogs.pop();
+      }
+
+      // Update badge counts in UI
+      const count = globalApiErrorLogs.length;
+      const btn = document.getElementById('global-error-btn');
+      const countSpan = document.getElementById('global-error-count');
+      const navCountSpan = document.getElementById('admin-error-nav-count');
+      const totalCountSpan = document.getElementById('admin-logs-total-count');
+      const modalCountSpan = document.getElementById('modal-error-count');
+
+      if (btn) btn.style.display = count > 0 ? 'inline-flex' : 'none';
+      if (countSpan) countSpan.innerText = count;
+      if (navCountSpan) navCountSpan.innerText = count;
+      if (totalCountSpan) totalCountSpan.innerText = count;
+      if (modalCountSpan) modalCountSpan.innerText = count;
+
+      if (entry.id !== 'dummy') {
+        showApiErrorToast(entry);
+      }
+
+      renderErrorLogsList('modal-error-logs-container');
+      renderAdminErrorLogs();
+    }
+
+    function showApiErrorToast(entry) {
+      const toast = document.getElementById('api-error-toast');
+      const msg = document.getElementById('api-error-toast-msg');
+      if (!toast || !msg) return;
+
+      msg.innerText = `[${entry.method} ${entry.url}] (${entry.status || 'NET'}): ${entry.errorMessage}`;
+      toast.style.display = 'block';
+
+      if (window._apiToastTimer) clearTimeout(window._apiToastTimer);
+      window._apiToastTimer = setTimeout(() => {
+        closeApiErrorToast();
+      }, 10000);
+    }
+
+    function closeApiErrorToast() {
+      const toast = document.getElementById('api-error-toast');
+      if (toast) toast.style.display = 'none';
+    }
+
+    function openErrorLogModal() {
+      closeApiErrorToast();
+      renderErrorLogsList('modal-error-logs-container');
+      const modal = document.getElementById('api-error-log-modal');
+      if (modal) modal.classList.add('open');
+    }
+
+    function renderErrorLogsList(containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      if (globalApiErrorLogs.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 30px; color: var(--text-muted); background: #F8FAFC; border-radius: 12px;">
+            ✅ No API request failures recorded. Everything is operating normally.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = globalApiErrorLogs.map(err => {
+        const statusBadgeClass = err.status >= 500 || err.status === 0 ? 'badge-failed' : 'badge-discount';
+        const formattedPayload = err.requestPayload ? (typeof err.requestPayload === 'object' ? JSON.stringify(err.requestPayload, null, 2) : String(err.requestPayload)) : 'None';
+        const formattedResponse = err.responseRaw || 'Empty response body';
+
+        return `
+          <div class="log-card" id="log-card-${err.id}">
+            <div class="log-header">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span class="badge ${statusBadgeClass}">
+                  ${err.status ? 'HTTP ' + err.status : 'NETWORK ERROR'}
+                </span>
+                <span style="font-weight: 800; font-size: 13px; color: #1E293B;">${err.method}</span>
+                <span class="log-url">${err.url}</span>
+              </div>
+              <span style="font-size: 11px; color: var(--text-muted);">${err.timeStr} (${err.durationMs}ms)</span>
+            </div>
+
+            <div style="font-size: 13px; font-weight: 700; color: #B91C1C; margin-bottom: 6px;">
+              ⚠️ ${err.errorMessage}
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+              <button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="toggleLogDetails('${err.id}')">
+                Toggle Technical Details ▾
+              </button>
+              <button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="copySingleErrorLog('${err.id}')">
+                📋 Copy Error
+              </button>
+              ${err.originalArgs ? `
+                <button class="btn btn-primary" style="padding: 3px 8px; font-size: 11px;" onclick="retryFailedRequest('${err.id}')">
+                  🔄 Retry Request
+                </button>
+              ` : ''}
+            </div>
+
+            <div id="log-details-${err.id}" style="display: none; margin-top: 10px;">
+              <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 2px;">REQUEST PAYLOAD:</div>
+              <div class="log-details" style="margin-bottom: 8px;">${formattedPayload}</div>
+              
+              <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 2px;">RAW RESPONSE FROM SERVER / NGINX:</div>
+              <div class="log-details">${formattedResponse}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleLogDetails(id) {
+      const el = document.getElementById(`log-details-${id}`);
+      if (el) {
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+      }
+    }
+
+    function renderAdminErrorLogs() {
+      renderErrorLogsList('admin-logs-list-container');
+    }
+
+    function copySingleErrorLog(id) {
+      const err = globalApiErrorLogs.find(e => e.id === id);
+      if (!err) return;
+      const text = JSON.stringify(err, null, 2);
+      navigator.clipboard.writeText(text).then(() => {
+        alert("✅ Error log copied to clipboard!");
+      });
+    }
+
+    function copyLatestErrorLog() {
+      if (globalApiErrorLogs.length === 0) {
+        alert("No errors to copy.");
+        return;
+      }
+      copySingleErrorLog(globalApiErrorLogs[0].id);
+    }
+
+    function copyAllErrorLogs() {
+      if (globalApiErrorLogs.length === 0) {
+        alert("No errors recorded.");
+        return;
+      }
+      const dump = {
+        app: "Pay4U Web Panel",
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+        online: navigator.onLine,
+        exportedAt: new Date().toISOString(),
+        totalErrors: globalApiErrorLogs.length,
+        errors: globalApiErrorLogs
+      };
+      navigator.clipboard.writeText(JSON.stringify(dump, null, 2)).then(() => {
+        alert("✅ Diagnostic dump of all API error logs copied to clipboard!");
+      });
+    }
+
+    function clearApiErrorLogs() {
+      globalApiErrorLogs.length = 0;
+      recordApiError({ id: 'dummy' });
+      renderErrorLogsList('modal-error-logs-container');
+      renderAdminErrorLogs();
+      closeApiErrorToast();
+      const btn = document.getElementById('global-error-btn');
+      if (btn) btn.style.display = 'none';
+      alert("Error logs cleared.");
+    }
+
+    async function retryFailedRequest(id) {
+      const err = globalApiErrorLogs.find(e => e.id === id);
+      if (!err || !err.originalArgs) {
+        alert("Cannot retry this request.");
+        return;
+      }
+      try {
+        alert(`Retrying ${err.method} ${err.url}...`);
+        const res = await originalFetch.apply(window, err.originalArgs);
+        if (res.ok) {
+          alert(`✅ Retry succeeded! HTTP ${res.status}`);
+          await loadData();
+        } else {
+          alert(`❌ Retry failed with HTTP ${res.status}`);
+        }
+      } catch (e) {
+        alert("❌ Retry failed: " + e.message);
+      }
+    }
+
+    function simulateTestApiError() {
+      fetch(api('api/non-existent-diagnostic-endpoint-' + Date.now()), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ testDiagnostic: true, time: new Date().toISOString() })
+      }).catch(() => {});
+    }
+
     let appState = null;
+    let currentUser = null;
+    try {
+      const savedAuth = localStorage.getItem('pay4u_auth_session');
+      if (savedAuth) currentUser = JSON.parse(savedAuth);
+    } catch (e) { currentUser = null; }
+
     let currentMode = 'customer'; // 'customer' or 'admin'
     let currentPendingOrder = null;
     let activeVoucherDenoms = {};
@@ -910,10 +1457,163 @@
     let activeProcessingTxId = null;
     let activeUploadingVchId = null;
 
+    let toastTimer = null;
+    function showToast(msg, type = 'info') {
+      const toast = document.getElementById('app-toast');
+      const text = document.getElementById('app-toast-text');
+      if (!toast || !text) return;
+      text.innerText = msg;
+      toast.style.background = type === 'success' ? '#065F46' : type === 'danger' ? '#991B1B' : '#0F172A';
+      toast.style.border = type === 'success' ? '1px solid #10B981' : type === 'danger' ? '1px solid #EF4444' : '1px solid #334155';
+      toast.style.display = 'block';
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3500);
+    }
+
+    function switchAuthTab(tab) {
+      document.getElementById('auth-tab-login').className = tab === 'login' ? 'modal-tab active' : 'modal-tab';
+      document.getElementById('auth-tab-signup').className = tab === 'signup' ? 'modal-tab active' : 'modal-tab';
+      document.getElementById('auth-login-box').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('auth-signup-box').style.display = tab === 'signup' ? 'block' : 'none';
+    }
+
+    function showAuthView() {
+      currentMode = 'customer';
+      document.getElementById('auth-view').style.display = 'block';
+      document.getElementById('customer-nav').style.display = 'none';
+      document.getElementById('admin-nav').style.display = 'none';
+      document.getElementById('customer-view').style.display = 'none';
+      document.getElementById('admin-view').style.display = 'none';
+      document.getElementById('header-user-info').style.display = 'none';
+      document.getElementById('wallet-badge').style.display = 'none';
+      document.getElementById('portal-toggle-btn').style.display = 'none';
+      document.getElementById('btn-logout').style.display = 'none';
+      document.getElementById('btn-header-login').style.display = 'inline-flex';
+    }
+
+    async function handleLogin() {
+      const identifier = document.getElementById('login-identifier').value.trim();
+      const password = document.getElementById('login-password').value.trim();
+      const btn = document.getElementById('btn-login-submit');
+
+      if (!identifier) {
+        showToast("Please enter your Mobile Number or Email.", "danger");
+        return;
+      }
+      if (!password) {
+        showToast("Please enter your password.", "danger");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Signing in...";
+
+      try {
+        const res = await fetch(api('api/auth/login'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier, password })
+        });
+        const data = await res.json();
+        btn.disabled = false;
+        btn.innerText = "Sign In to Portal";
+
+        if (data.success && data.user) {
+          currentUser = data.user;
+          localStorage.setItem('pay4u_auth_session', JSON.stringify(currentUser));
+          showToast(`Welcome, ${currentUser.name}! Signed in as ${currentUser.role}.`, "success");
+          if (currentUser.role === 'ADMIN') {
+            currentMode = 'admin';
+          } else {
+            currentMode = 'customer';
+          }
+          await loadData();
+        } else {
+          showToast("❌ " + (data.error || "Login failed. Check credentials."), "danger");
+        }
+      } catch (e) {
+        btn.disabled = false;
+        btn.innerText = "Sign In to Portal";
+        showToast("❌ Error: " + e.message, "danger");
+      }
+    }
+
+    async function quickLoginDemo(ident, pass) {
+      document.getElementById('login-identifier').value = ident;
+      document.getElementById('login-password').value = pass;
+      await handleLogin();
+    }
+
+    async function handleSignup() {
+      const name = document.getElementById('signup-name').value.trim();
+      const phone = document.getElementById('signup-phone').value.trim();
+      const email = document.getElementById('signup-email').value.trim();
+      const role = document.getElementById('signup-role').value;
+      const password = document.getElementById('signup-password').value.trim();
+      const btn = document.getElementById('btn-signup-submit');
+
+      if (!name || name.length < 2) {
+        showToast("Please enter your full name.", "danger");
+        return;
+      }
+      if (!phone || phone.length < 10) {
+        showToast("Please enter a valid 10-digit mobile number.", "danger");
+        return;
+      }
+      if (!password || password.length < 4) {
+        showToast("Password must be at least 4 characters.", "danger");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Creating Account...";
+
+      try {
+        const res = await fetch(api('api/auth/register'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, phone, email, role, password })
+        });
+        const data = await res.json();
+        btn.disabled = false;
+        btn.innerText = "Create Partner Account";
+
+        if (data.success && data.user) {
+          currentUser = data.user;
+          localStorage.setItem('pay4u_auth_session', JSON.stringify(currentUser));
+          showToast(`✓ Account created! Welcome, ${currentUser.name}.`, "success");
+          currentMode = 'customer';
+          await loadData();
+        } else {
+          showToast("❌ " + (data.error || "Registration failed"), "danger");
+        }
+      } catch (e) {
+        btn.disabled = false;
+        btn.innerText = "Create Partner Account";
+        showToast("❌ " + e.message, "danger");
+      }
+    }
+
+    function logoutUser() {
+      currentUser = null;
+      localStorage.removeItem('pay4u_auth_session');
+      showToast("Signed out successfully.", "info");
+      updateUI();
+    }
+
     async function loadData() {
       try {
-        const res = await fetch(api('api/state'));
+        const res = await fetch(api('api/state?_t=' + Date.now()), { cache: 'no-store' });
         appState = await res.json();
+        if (currentUser && appState.users) {
+          const fresh = appState.users.find(u => u.id === currentUser.id);
+          if (fresh) {
+            currentUser = fresh;
+            localStorage.setItem('pay4u_auth_session', JSON.stringify(fresh));
+          }
+        }
         updateUI();
       } catch (e) {
         console.error("API error", e);
@@ -922,32 +1622,54 @@
 
     function updateUI() {
       if (!appState) return;
-      const user = appState.users.find(u => u.id === 2);
-      if (user) {
-        document.getElementById('wallet-balance-val').innerText = user.walletBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+      if (!currentUser) {
+        // GUEST / NOT LOGGED IN: SHOW AUTHENTICATION VIEW ONLY
+        document.getElementById('auth-view').style.display = 'block';
+        document.getElementById('customer-nav').style.display = 'none';
+        document.getElementById('admin-nav').style.display = 'none';
+        document.getElementById('customer-view').style.display = 'none';
+        document.getElementById('admin-view').style.display = 'none';
+
+        document.getElementById('wallet-badge').style.display = 'none';
+        document.getElementById('header-user-info').style.display = 'none';
+        document.getElementById('portal-toggle-btn').style.display = 'none';
+        document.getElementById('btn-logout').style.display = 'none';
+        document.getElementById('btn-header-login').style.display = 'inline-flex';
+        return;
       }
-      document.getElementById('user-vch-count').innerText = appState.userVouchers.filter(v => v.userId === 2).length;
+
+      // AUTHENTICATED SESSION
+      document.getElementById('auth-view').style.display = 'none';
+      document.getElementById('btn-header-login').style.display = 'none';
+      document.getElementById('btn-logout').style.display = 'inline-flex';
+      document.getElementById('header-user-info').style.display = 'flex';
+      document.getElementById('header-user-name').innerText = currentUser.name;
+      document.getElementById('header-user-role').innerText = currentUser.role;
+      document.getElementById('header-user-role').className = 'badge ' + (currentUser.role === 'ADMIN' ? 'badge-failed' : currentUser.role === 'DISTRIBUTOR' ? 'badge-pending' : 'badge-success');
+
+      document.getElementById('wallet-badge').style.display = 'flex';
+      document.getElementById('wallet-balance-val').innerText = (currentUser.walletBalance || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+      if (currentUser.role === 'ADMIN') {
+        document.getElementById('portal-toggle-btn').style.display = 'inline-flex';
+      } else {
+        document.getElementById('portal-toggle-btn').style.display = 'none';
+        currentMode = 'customer'; // Strictly enforce customer portal for non-admins
+      }
+
+      const userVchCount = appState.userVouchers ? appState.userVouchers.filter(v => v.userId === currentUser.id).length : 0;
+      document.getElementById('user-vch-count').innerText = userVchCount;
 
       // KPIs
-      const totalVol = appState.transactions.reduce((acc, t) => acc + t.amount, 0);
+      const totalVol = appState.transactions ? appState.transactions.reduce((acc, t) => acc + t.amount, 0) : 0;
       document.getElementById('kpi-vol').innerText = '₹' + totalVol.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-      document.getElementById('kpi-pending-tx').innerText = appState.transactions.filter(t => t.status === 'PENDING').length;
-      document.getElementById('kpi-pending-vch').innerText = appState.userVouchers.filter(v => v.status === 'PENDING').length;
-      document.getElementById('kpi-users').innerText = appState.users.length;
+      document.getElementById('kpi-pending-tx').innerText = appState.transactions ? appState.transactions.filter(t => t.status === 'PENDING').length : 0;
+      document.getElementById('kpi-pending-vch').innerText = appState.userVouchers ? appState.userVouchers.filter(v => v.status === 'PENDING').length : 0;
+      document.getElementById('kpi-users').innerText = appState.users ? appState.users.length : 0;
 
-      renderPlans();
-      renderVouchers();
-      renderMyVouchers();
-      renderPassbook();
-      renderAdminTx();
-      renderAdminVouchers();
-      renderAdminUsers();
-      renderAdminSchemes();
-    }
-
-    function togglePortalMode() {
-      if (currentMode === 'customer') {
-        currentMode = 'admin';
+      // View switching
+      if (currentMode === 'admin' && currentUser.role === 'ADMIN') {
         document.getElementById('customer-view').style.display = 'none';
         document.getElementById('customer-nav').style.display = 'none';
         document.getElementById('admin-view').style.display = 'block';
@@ -963,6 +1685,24 @@
         document.getElementById('portal-toggle-btn').innerHTML = '⚙️ Admin Panel';
         document.getElementById('portal-toggle-btn').className = 'btn btn-admin';
       }
+
+      renderPlans();
+      renderVouchers();
+      renderMyVouchers();
+      renderPassbook();
+      renderAdminTx();
+      renderAdminVouchers();
+      renderAdminUsers();
+      renderAdminSchemes();
+    }
+
+    function togglePortalMode() {
+      if (!currentUser || currentUser.role !== 'ADMIN') {
+        showToast("Access restricted: Administrator role required.", "danger");
+        return;
+      }
+      currentMode = currentMode === 'customer' ? 'admin' : 'customer';
+      updateUI();
     }
 
     function showCustomerSection(sec, btn) {
@@ -985,6 +1725,7 @@
       if (sec === 'users') renderAdminUsers();
       if (sec === 'batch') initBatchSection();
       if (sec === 'gateway') initGatewaySection();
+      if (sec === 'logs') renderAdminErrorLogs();
     }
 
     let serviceType = 'MOBILE';
@@ -1423,17 +2164,35 @@
           document.getElementById('bill-result-card').style.display = 'block';
           document.getElementById('bill-name').innerText = data.consumerName;
           document.getElementById('bill-biller-display').innerText = data.billerName;
+          if (document.getElementById('bill-biller-id')) {
+            document.getElementById('bill-biller-id').innerText = data.billerId || 'BBPS-CENTRAL';
+          }
           document.getElementById('bill-number').innerText = data.billNumber || ('BBPS-' + consumerId);
+          if (document.getElementById('bill-period')) {
+            document.getElementById('bill-period').innerText = data.billPeriod || '01 Oct 2026 - 31 Oct 2026';
+          }
           document.getElementById('bill-date').innerText = data.billDate || '01 Oct 2026';
           document.getElementById('bill-due').innerText = data.dueDate;
           document.getElementById('bill-units').innerText = data.unitsConsumed;
+          
+          if (data.breakdown) {
+            if (document.getElementById('bill-bk-energy')) document.getElementById('bill-bk-energy').innerText = '₹' + data.breakdown.energyCharges;
+            if (document.getElementById('bill-bk-fixed')) document.getElementById('bill-bk-fixed').innerText = '₹' + data.breakdown.fixedCharges;
+            if (document.getElementById('bill-bk-tax')) document.getElementById('bill-bk-tax').innerText = '₹' + data.breakdown.taxes;
+          } else {
+            if (document.getElementById('bill-bk-energy')) document.getElementById('bill-bk-energy').innerText = '₹' + (data.amount * 0.85).toFixed(2);
+            if (document.getElementById('bill-bk-fixed')) document.getElementById('bill-bk-fixed').innerText = '₹' + (data.amount * 0.08).toFixed(2);
+            if (document.getElementById('bill-bk-tax')) document.getElementById('bill-bk-tax').innerText = '₹' + (data.amount * 0.07).toFixed(2);
+          }
+
           // Strictly Non-Editable amount as required
           document.getElementById('bill-amount').innerText = '₹' + data.amount.toFixed(2);
-          document.getElementById('bill-api-status').innerText = `API Verified (${data.latencyMs}ms)`;
+          document.getElementById('bill-api-status').innerText = `BBPS Verified (${data.latencyMs}ms)`;
           activeBillData = data;
+          showToast(`✓ Authentic BBPS bill fetched for ${data.consumerName}!`, "success");
         } else {
           document.getElementById('bill-result-card').style.display = 'none';
-          alert("BBPS Gateway Error: " + (data.error || "Account could not be fetched for this biller."));
+          showToast("BBPS Gateway Error: " + (data.error || "Account could not be fetched for this biller."), "danger");
         }
       } catch (e) {
         btn.innerText = "📡 Fetch Real Bill via Network API";
@@ -1490,9 +2249,13 @@
     }
 
     function renderMyVouchers() {
-      if (!appState) return;
+      if (!appState || !appState.userVouchers) return;
       const grid = document.getElementById('my-vouchers-grid');
-      const list = appState.userVouchers.filter(v => v.userId === 2);
+      const uid = currentUser ? currentUser.id : 2;
+      const list = (currentUser && currentUser.role === 'ADMIN')
+        ? appState.userVouchers 
+        : appState.userVouchers.filter(v => v.userId === uid);
+
       if (list.length === 0) {
         grid.innerHTML = `<div class="card" style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">No vouchers purchased yet. Choose from the 'Brand Vouchers' tab!</div>`;
         return;
@@ -1525,9 +2288,19 @@
     }
 
     function renderPassbook() {
-      if (!appState) return;
+      if (!appState || !appState.transactions) return;
       const tbody = document.getElementById('passbook-tbody');
-      tbody.innerHTML = appState.transactions.map(t => `
+      const uid = currentUser ? currentUser.id : 2;
+      const list = (currentUser && currentUser.role === 'ADMIN')
+        ? appState.transactions 
+        : appState.transactions.filter(t => t.userId === uid);
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 24px;">No transaction records found for your account yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(t => `
         <tr>
           <td>#${t.id}</td>
           <td><strong>${t.serviceType}</strong> (${t.providerName})</td>
@@ -1544,8 +2317,13 @@
     // CHECKOUT FLOW
     let activeCheckoutDetails = {};
     function openCheckout(type, vId, denom, payable, brandName) {
-      const user = appState.users.find(u => u.id === 2);
-      const walletBal = user.walletBalance;
+      if (!currentUser) {
+        showToast("Please sign in or create an account first.", "danger");
+        showAuthView();
+        return;
+      }
+      const user = (appState && appState.users && appState.users.find(u => u.id === currentUser.id)) || currentUser;
+      const walletBal = user.walletBalance || 0;
 
       let amount = 0;
       let title = "";
@@ -1649,7 +2427,8 @@
             voucherId: activeCheckoutDetails.voucherId,
             denomination: activeCheckoutDetails.denomination,
             paymentMethod: method,
-            paymentRef: ref
+            paymentRef: ref,
+            userId: currentUser ? currentUser.id : 2
           };
         } else {
           payload = {
@@ -1659,7 +2438,8 @@
             targetNumber: activeCheckoutDetails.target,
             amount: activeCheckoutDetails.amount,
             paymentMethod: method,
-            paymentRef: ref
+            paymentRef: ref,
+            userId: currentUser ? currentUser.id : 2
           };
         }
 
@@ -1671,23 +2451,23 @@
         const resp = await res.json();
 
         if (resp.isFailed) {
-          alert("❌ " + resp.error);
+          showToast("❌ " + resp.error, "danger");
           await loadData();
           showCustomerSection('passbook');
           return;
         }
 
         if (resp.error) {
-          alert("Error: " + resp.error);
+          showToast("Error: " + resp.error, "danger");
           return;
         }
 
         if (method === 'WALLET') {
-          alert(`✓ Payment Successful! ₹${activeCheckoutDetails.amount.toFixed(2)} debited from wallet.`);
+          showToast(`✓ Payment Successful! ₹${activeCheckoutDetails.amount.toFixed(2)} debited from wallet.`, "success");
         } else if (method === 'UPI') {
-          alert(`✓ Order submitted via UPI! Reference ${ref} saved. Wallet balance was NOT deducted.`);
+          showToast(`✓ Order submitted via UPI! Reference saved.`, "success");
         } else {
-          alert(`Order submitted successfully via ${method}!`);
+          showToast(`Order submitted successfully via ${method}!`, "success");
         }
 
         await loadData();
@@ -1697,30 +2477,119 @@
           showCustomerSection('passbook');
         }
       } catch (e) {
-        alert("Transaction error: " + e.message);
+        showToast("Transaction error: " + e.message, "danger");
       }
     }
 
-    // ADMIN TAB RENDERS
+    // ADMIN TAB RENDERS: RECHARGES & TR IDS WITH INSTANT 1-CLICK SUCCESS/FAIL
     function renderAdminTx() {
-      if (!appState) return;
+      if (!appState || !appState.transactions) return;
       const tbody = document.getElementById('admin-tx-tbody');
-      tbody.innerHTML = appState.transactions.map(t => `
-        <tr>
+      tbody.innerHTML = appState.transactions.map(t => {
+        const isPending = t.status === 'PENDING';
+        const isSuccess = t.status === 'SUCCESS';
+        const isFailed = t.status === 'FAILED';
+
+        return `
+        <tr id="admin-tx-row-${t.id}">
           <td>#${t.id}</td>
           <td><strong>${t.userName}</strong> (${t.userPhone})</td>
           <td>${t.serviceType} (${t.providerName}) • ${t.targetNumber}</td>
           <td><strong>₹${t.amount.toFixed(2)}</strong></td>
           <td>${t.paymentMethod}</td>
-          <td><span class="badge ${t.status === 'SUCCESS' ? 'badge-success' : t.status === 'PENDING' ? 'badge-pending' : 'badge-failed'}">${t.status}</span></td>
-          <td><code>${t.operatorTrId || '-'}</code></td>
           <td>
-            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="openAdminTrModal(${t.id}, '${t.providerName}', '${t.targetNumber}', ${t.amount})">
-              ${t.status === 'PENDING' ? 'Process & Enter TR' : 'Edit TR'}
-            </button>
+            <span class="badge ${isSuccess ? 'badge-success' : isPending ? 'badge-pending' : 'badge-failed'}" id="admin-tx-badge-${t.id}">
+              ${t.status}
+            </span>
+          </td>
+          <td><code id="admin-tx-tr-${t.id}">${t.operatorTrId || '-'}</code></td>
+          <td style="white-space: nowrap;">
+            <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
+              ${isPending ? `
+                <button class="btn btn-success" style="padding: 5px 9px; font-size: 11px;" onclick="quickUpdateTxStatus(${t.id}, 'SUCCESS')" title="Approve & Mark Success">
+                  ✅ Success
+                </button>
+                <button class="btn btn-danger" style="padding: 5px 9px; font-size: 11px;" onclick="quickUpdateTxStatus(${t.id}, 'FAILED')" title="Mark Failed & Refund Wallet">
+                  ❌ Fail
+                </button>
+                <button class="btn btn-secondary" style="padding: 5px 9px; font-size: 11px;" onclick="openAdminTrModal(${t.id}, '${t.providerName}', '${t.targetNumber}', ${t.amount})">
+                  ✏️ TR ID
+                </button>
+              ` : isSuccess ? `
+                <button class="btn btn-danger" style="padding: 5px 9px; font-size: 11px;" onclick="quickUpdateTxStatus(${t.id}, 'FAILED')" title="Turn to Failed">
+                  ❌ Mark Fail
+                </button>
+                <button class="btn btn-secondary" style="padding: 5px 9px; font-size: 11px;" onclick="openAdminTrModal(${t.id}, '${t.providerName}', '${t.targetNumber}', ${t.amount})">
+                  Edit TR
+                </button>
+              ` : `
+                <button class="btn btn-success" style="padding: 5px 9px; font-size: 11px;" onclick="quickUpdateTxStatus(${t.id}, 'SUCCESS')" title="Turn to Success">
+                  ✅ Mark Success
+                </button>
+                <button class="btn btn-secondary" style="padding: 5px 9px; font-size: 11px;" onclick="openAdminTrModal(${t.id}, '${t.providerName}', '${t.targetNumber}', ${t.amount})">
+                  Edit TR
+                </button>
+              `}
+            </div>
           </td>
         </tr>
-      `).join('');
+      `}).join('');
+    }
+
+    // Instant 1-Click Status Update for Admin (Reflects immediately without full page reload!)
+    async function quickUpdateTxStatus(txId, newStatus) {
+      if (!appState || !appState.transactions) return;
+      const tx = appState.transactions.find(t => t.id === txId);
+      if (!tx) return;
+
+      const prevStatus = tx.status;
+      const prevTr = tx.operatorTrId;
+
+      // 1. OPTIMISTIC IMMEDIATE UI UPDATE (Reflects instantly in 0 milliseconds!)
+      tx.status = newStatus;
+      if (newStatus === 'SUCCESS') {
+        if (!tx.operatorTrId || tx.operatorTrId.includes('FAILED')) {
+          tx.operatorTrId = `${(tx.providerName || 'OPR').replace(/[^a-zA-Z]/g, '').slice(0, 4).toUpperCase()}-TR-${Math.floor(10000000 + Math.random() * 90000000)}`;
+        }
+      } else if (newStatus === 'FAILED') {
+        tx.operatorTrId = 'FAILED - REJECTED BY ADMIN';
+      }
+
+      // Re-render admin table and customer passbook immediately!
+      renderAdminTx();
+      renderPassbook();
+      showToast(`⚡ Order #${txId} status changed to ${newStatus}! Syncing with database...`, newStatus === 'SUCCESS' ? 'success' : 'danger');
+
+      // 2. Transmit to server API
+      try {
+        const res = await fetch(api('api/admin/tx-status'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transactionId: txId, status: newStatus, operatorTrId: tx.operatorTrId })
+        });
+        const data = await res.json();
+        if (data && data.success) {
+          if (data.transactions) appState.transactions = data.transactions;
+          if (data.users) appState.users = data.users;
+          renderAdminTx();
+          renderPassbook();
+          updateUI();
+          showToast(`✓ Order #${txId} is now ${newStatus}! Database updated.`, 'success');
+        } else {
+          // Revert if error
+          tx.status = prevStatus;
+          tx.operatorTrId = prevTr;
+          renderAdminTx();
+          renderPassbook();
+          showToast(`❌ Update failed: ${data.error || 'Server error'}`, 'danger');
+        }
+      } catch (e) {
+        tx.status = prevStatus;
+        tx.operatorTrId = prevTr;
+        renderAdminTx();
+        renderPassbook();
+        showToast(`❌ Network error: ${e.message}`, 'danger');
+      }
     }
 
     function openAdminTrModal(txId, provider, target, amount) {
@@ -1735,18 +2604,43 @@
     }
 
     async function saveAdminTrId() {
-      const trId = document.getElementById('admin-tr-id-val').value;
+      const trId = document.getElementById('admin-tr-id-val').value.trim();
       const status = document.getElementById('admin-tr-status').value;
-      const notes = document.getElementById('admin-tr-notes').value;
+      const notes = document.getElementById('admin-tr-notes').value.trim();
 
       closeModal('admin-tr-modal');
-      const res = await fetch(api('api/admin/tr-id'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transactionId: activeProcessingTxId, operatorTrId: trId, status, notes })
-      });
-      await loadData();
-      alert(`Transaction #${activeProcessingTxId} updated with TR ID: ${trId}!`);
+
+      // Optimistic update
+      const tx = appState.transactions.find(t => t.id === activeProcessingTxId);
+      if (tx) {
+        tx.operatorTrId = trId;
+        tx.status = status;
+        tx.adminNotes = notes;
+        renderAdminTx();
+        renderPassbook();
+        updateUI();
+      }
+
+      showToast(`⚡ Updating Transaction #${activeProcessingTxId} with TR ID...`, 'info');
+
+      try {
+        const res = await fetch(api('api/admin/tr-id'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transactionId: activeProcessingTxId, operatorTrId: trId, status, notes })
+        });
+        const data = await res.json();
+        if (data && data.transactions) {
+          appState.transactions = data.transactions;
+          if (data.users) appState.users = data.users;
+          renderAdminTx();
+          renderPassbook();
+          updateUI();
+        }
+        showToast(`✓ Transaction #${activeProcessingTxId} updated with TR ID: ${trId}!`, 'success');
+      } catch (e) {
+        showToast(`❌ Error: ${e.message}`, 'danger');
+      }
     }
 
     function renderAdminVouchers() {
