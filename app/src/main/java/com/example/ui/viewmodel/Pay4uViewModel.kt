@@ -97,13 +97,7 @@ class Pay4uViewModel(application: Application) : AndroidViewModel(application) {
       if (user != null) repository.getUserVouchers(user.id) else flowOf(emptyList())
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // Auto-login default user Mukesh Garg
-    viewModelScope.launch {
-      val defaultUser = repository.login("9876543210", "user123")
-      if (defaultUser != null) {
-        _currentUser.value = defaultUser
-      }
-    }
+    // User session starts unauthenticated to require login/signup on launch
 
     // Keep currentUser synchronized with DB updates (e.g. wallet balance changes)
     viewModelScope.launch {

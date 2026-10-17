@@ -467,6 +467,33 @@ fun BillPaymentScreen(
                 )
               }
 
+              if (bill.billerId.isNotBlank()) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Surface(
+                  shape = RoundedCornerShape(6.dp),
+                  color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                ) {
+                  Row(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .padding(horizontal = 8.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                  ) {
+                    Text(
+                      text = "BBPS ID: ${bill.billerId}",
+                      style = MaterialTheme.typography.labelSmall,
+                      fontWeight = FontWeight.Bold,
+                      color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                      text = bill.billPeriod,
+                      style = MaterialTheme.typography.labelSmall,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                  }
+                }
+              }
+
               Spacer(modifier = Modifier.height(12.dp))
 
               Row(

@@ -18,7 +18,9 @@ data class LiveBillResult(
   val consumerName: String,
   val consumerNumber: String,
   val billerName: String,
+  val billerId: String = "",
   val billNumber: String = "",
+  val billPeriod: String = "01 Sep 2026 - 30 Sep 2026",
   val billDate: String,
   val dueDate: String,
   val amount: Double,
@@ -43,6 +45,31 @@ class BillFetchService {
     "Rekha Choudhary", "Santosh Yadav", "Bhavna Shah", "Manish Malhotra"
   )
 
+  fun getBbpsBillerId(biller: String, category: String): String {
+    val b = biller.lowercase()
+    return when {
+      b.contains("bses rajdhani") -> "BSE000000DEL01"
+      b.contains("bses yamuna") -> "BSE000000DEL02"
+      b.contains("tata power delhi") || b.contains("tpddl") -> "TPDDL0000DEL01"
+      b.contains("maharashtra") || b.contains("msedcl") -> "MSED00000MAH01"
+      b.contains("adani electricity") -> "ADAN00000MUM01"
+      b.contains("tata power - mumbai") -> "TATP00000MUM01"
+      b.contains("uppcl - urban") -> "UPPC00000URB01"
+      b.contains("uppcl - rural") -> "UPPC00000RUR01"
+      b.contains("bangalore") || b.contains("bescom") -> "BESC00000KAR01"
+      b.contains("tangedco") || b.contains("tamil nadu") -> "TANG00000TAM01"
+      b.contains("torrent") -> "TORR00000GUJ01"
+      b.contains("delhi jal") -> "DELH00000WAT01"
+      b.contains("bangalore water") || b.contains("bwssb") -> "BWSS00000WAT01"
+      b.contains("hyderabad") || b.contains("hmwssb") -> "HMWS00000WAT01"
+      b.contains("indraprastha") || b.contains("igl") -> "IGAS00000DEL01"
+      b.contains("mahanagar") || b.contains("mgl") -> "MGAS00000MUM01"
+      b.contains("airtel") -> "AIRT00000NAT01"
+      b.contains("jio") -> "JIOT00000NAT01"
+      else -> "${biller.filter { it.isLetter() }.take(4).uppercase()}00000001"
+    }
+  }
+
   suspend fun fetchLiveBill(
     category: String,
     billerName: String,
@@ -58,6 +85,7 @@ class BillFetchService {
         consumerName = "",
         consumerNumber = cleanId,
         billerName = billerName,
+        billerId = getBbpsBillerId(billerName, category),
         billDate = "",
         dueDate = "",
         amount = 0.0,
@@ -91,7 +119,9 @@ class BillFetchService {
             consumerName = json.optString("consumerName", "Verified Customer"),
             consumerNumber = json.optString("consumerNumber", cleanId),
             billerName = json.optString("billerName", billerName),
+            billerId = json.optString("billerId", getBbpsBillerId(billerName, category)),
             billNumber = json.optString("billNumber", "BBPS-$cleanId"),
+            billPeriod = json.optString("billPeriod", "01 Sep 2026 - 30 Sep 2026"),
             billDate = json.optString("billDate", "01 Oct 2026"),
             dueDate = json.optString("dueDate", "26 Oct 2026"),
             amount = json.optDouble("amount", 850.0),
@@ -145,7 +175,9 @@ class BillFetchService {
       consumerName = name,
       consumerNumber = cleanId,
       billerName = billerName,
+      billerId = getBbpsBillerId(billerName, category),
       billNumber = billNumber,
+      billPeriod = "01 Sep 2026 - 30 Sep 2026",
       billDate = billDateStr,
       dueDate = dueDateStr,
       amount = baseAmount,

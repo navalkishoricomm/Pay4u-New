@@ -1533,16 +1533,19 @@ const server = http.createServer(async (req, res) => {
 
   // Serve APK download directly for users
   if (pathname === '/pay4u.apk' || pathname === '/download' || pathname === '/download/apk') {
-    const rootApkPath = path.join(__dirname, '..', 'pay4u.apk');
+    const gradleApkPath = path.join(__dirname, '..', 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk');
     const localApkPath = path.join(__dirname, 'pay4u.apk');
-    const targetApk = fs.existsSync(localApkPath) ? localApkPath : (fs.existsSync(rootApkPath) ? rootApkPath : null);
+    const rootApkPath = path.join(__dirname, '..', 'pay4u.apk');
+    const targetApk = fs.existsSync(gradleApkPath) ? gradleApkPath : (fs.existsSync(localApkPath) ? localApkPath : (fs.existsSync(rootApkPath) ? rootApkPath : null));
 
     if (targetApk) {
       const stat = fs.statSync(targetApk);
       res.writeHead(200, {
         'Content-Type': 'application/vnd.android.package-archive',
         'Content-Length': stat.size,
-        'Content-Disposition': 'attachment; filename="pay4u.apk"'
+        'Content-Disposition': 'attachment; filename="pay4u.apk"',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        'Pragma': 'no-cache'
       });
       return fs.createReadStream(targetApk).pipe(res);
     } else {

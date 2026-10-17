@@ -83,9 +83,9 @@ fun AuthScreen(
 ) {
   var isSignUp by remember { mutableStateOf(false) }
   var name by remember { mutableStateOf("") }
-  var phone by remember { mutableStateOf("9876543210") }
+  var phone by remember { mutableStateOf("") }
   var email by remember { mutableStateOf("") }
-  var password by remember { mutableStateOf("user123") }
+  var password by remember { mutableStateOf("") }
 
   var errorMessage by remember { mutableStateOf<String?>(null) }
   val scope = rememberCoroutineScope()

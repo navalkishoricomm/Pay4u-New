@@ -244,7 +244,14 @@ fun AdminDashboardScreen(
       when (selectedTab) {
         0 -> AdminTransactionsTab(
           transactions = allTransactions,
-          onProcessTransaction = { txToProcess = it }
+          onProcessTransaction = { txToProcess = it },
+          onQuickSuccess = { tx ->
+            val autoTrId = "OPR-" + (System.currentTimeMillis() % 100000000).toString()
+            viewModel.adminUpdateTransaction(tx.id, autoTrId, "SUCCESS", "Approved by Admin instantly")
+          },
+          onQuickFail = { tx ->
+            viewModel.adminUpdateTransaction(tx.id, "FAILED", "FAILED", "Marked Failed by Admin. Refund processed if paid via wallet.")
+          }
         )
         1 -> AdminVoucherOrdersTab(
           vouchers = allUserVouchers,
@@ -366,7 +373,9 @@ private fun AdminKpiTile(
 @Composable
 private fun AdminTransactionsTab(
   transactions: List<TransactionEntity>,
-  onProcessTransaction: (TransactionEntity) -> Unit
+  onProcessTransaction: (TransactionEntity) -> Unit,
+  onQuickSuccess: (TransactionEntity) -> Unit,
+  onQuickFail: (TransactionEntity) -> Unit
 ) {
   var filterStatus by remember { mutableStateOf("PENDING") }
   val statusOptions = listOf("PENDING", "ALL", "SUCCESS", "FAILED")
@@ -436,7 +445,9 @@ private fun AdminTransactionsTab(
         items(filteredList) { tx ->
           AdminTransactionItemCard(
             transaction = tx,
-            onProcess = { onProcessTransaction(tx) }
+            onProcess = { onProcessTransaction(tx) },
+            onQuickSuccess = { onQuickSuccess(tx) },
+            onQuickFail = { onQuickFail(tx) }
           )
         }
       }
@@ -447,7 +458,9 @@ private fun AdminTransactionsTab(
 @Composable
 fun AdminTransactionItemCard(
   transaction: TransactionEntity,
-  onProcess: () -> Unit
+  onProcess: () -> Unit,
+  onQuickSuccess: () -> Unit,
+  onQuickFail: () -> Unit
 ) {
   val dateFormat = SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault())
   val dateStr = dateFormat.format(Date(transaction.createdAt))
@@ -560,28 +573,65 @@ fun AdminTransactionItemCard(
 
       Spacer(modifier = Modifier.height(10.dp))
 
-      Button(
-        onClick = onProcess,
-        modifier = Modifier
-          .fillMaxWidth()
-          .height(38.dp)
-          .testTag("admin_process_btn_${transaction.id}"),
-        colors = ButtonDefaults.buttonColors(
-          containerColor = if (transaction.status == "PENDING") StatusPending else MaterialTheme.colorScheme.primary
-        ),
-        shape = RoundedCornerShape(10.dp)
-      ) {
-        Icon(
-          imageVector = if (transaction.status == "PENDING") Icons.Default.HourglassTop else Icons.Default.Edit,
-          contentDescription = null,
-          modifier = Modifier.size(16.dp)
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-          text = if (transaction.status == "PENDING") "Process Recharge & Enter TR ID" else "Edit TR ID / Status",
-          fontWeight = FontWeight.Bold,
-          fontSize = 12.sp
-        )
+      if (transaction.status == "PENDING") {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Button(
+            onClick = onQuickSuccess,
+            modifier = Modifier
+              .weight(1f)
+              .height(38.dp)
+              .testTag("admin_quick_success_${transaction.id}"),
+            colors = ButtonDefaults.buttonColors(containerColor = StatusSuccess),
+            shape = RoundedCornerShape(10.dp)
+          ) {
+            Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(15.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Success", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+          }
+
+          Button(
+            onClick = onQuickFail,
+            modifier = Modifier
+              .weight(1f)
+              .height(38.dp)
+              .testTag("admin_quick_fail_${transaction.id}"),
+            colors = ButtonDefaults.buttonColors(containerColor = StatusFailed),
+            shape = RoundedCornerShape(10.dp)
+          ) {
+            Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(15.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Fail", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+          }
+
+          OutlinedButton(
+            onClick = onProcess,
+            modifier = Modifier
+              .height(38.dp)
+              .testTag("admin_process_btn_${transaction.id}"),
+            shape = RoundedCornerShape(10.dp)
+          ) {
+            Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(15.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("TR ID", fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
+          }
+        }
+      } else {
+        OutlinedButton(
+          onClick = onProcess,
+          modifier = Modifier
+            .fillMaxWidth()
+            .height(38.dp)
+            .testTag("admin_process_btn_${transaction.id}"),
+          shape = RoundedCornerShape(10.dp)
+        ) {
+          Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+          Spacer(modifier = Modifier.width(6.dp))
+          Text("Edit TR ID / Status Notes", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+        }
       }
     }
   }
