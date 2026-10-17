@@ -86,6 +86,15 @@ interface ServiceProviderDao {
 
   @Query("UPDATE service_providers SET commissionPercent = :commissionPercent, flatCommission = :flatCommission, isActive = :isActive WHERE id = :id")
   suspend fun updateCommission(id: Long, commissionPercent: Double, flatCommission: Double, isActive: Boolean)
+
+  @Query("DELETE FROM service_providers WHERE id = :id")
+  suspend fun deleteProvider(id: Long)
+
+  @Query("UPDATE service_providers SET isActive = :isActive WHERE id = :id")
+  suspend fun toggleActive(id: Long, isActive: Boolean)
+
+  @Query("UPDATE service_providers SET name = :name, code = :code, serviceType = :serviceType, commissionPercent = :commissionPercent, flatCommission = :flatCommission, isActive = :isActive, helperNote = :helperNote WHERE id = :id")
+  suspend fun updateProviderFull(id: Long, name: String, code: String, serviceType: String, commissionPercent: Double, flatCommission: Double, isActive: Boolean, helperNote: String)
 }
 
 @Dao

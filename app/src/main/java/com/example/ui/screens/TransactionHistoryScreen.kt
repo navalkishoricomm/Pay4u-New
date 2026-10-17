@@ -22,10 +22,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.ElectricalServices
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.HourglassTop
@@ -318,6 +320,35 @@ fun TransactionDetailCard(
               )
             }
           }
+        }
+      }
+
+      Spacer(modifier = Modifier.height(6.dp))
+
+      // Payment Source Pill (Wallet vs UPI with UTR)
+      Surface(
+        shape = RoundedCornerShape(6.dp),
+        color = if (transaction.paymentMethod == "WALLET") StatusSuccess.copy(alpha = 0.12f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+      ) {
+        Row(
+          modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Icon(
+            imageVector = if (transaction.paymentMethod == "WALLET") Icons.Default.AccountBalanceWallet else Icons.Default.QrCode2,
+            contentDescription = null,
+            tint = if (transaction.paymentMethod == "WALLET") StatusSuccess else MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(13.dp)
+          )
+          Spacer(modifier = Modifier.width(5.dp))
+          Text(
+            text = if (transaction.paymentMethod == "WALLET") "Paid via Wallet (Auto-debited)"
+                   else "Paid via UPI • UTR: ${transaction.userUpiUtr.ifBlank { "Recorded" }}",
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = if (transaction.paymentMethod == "WALLET") StatusSuccess else MaterialTheme.colorScheme.primary,
+            fontSize = 11.sp
+          )
         }
       }
 

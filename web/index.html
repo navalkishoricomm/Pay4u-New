@@ -159,7 +159,7 @@
         <div id="auth-login-box">
           <div class="form-group">
             <label class="form-label">Mobile Number or Email *</label>
-            <input type="text" id="login-identifier" class="form-control" placeholder="e.g. 9876543210 or admin@pay4u.in">
+            <input type="text" id="login-identifier" class="form-control" placeholder="Enter your registered mobile number or email">
           </div>
           <div class="form-group">
             <label class="form-label">Password *</label>
@@ -168,27 +168,6 @@
           <button class="btn btn-primary" id="btn-login-submit" style="width: 100%; padding: 12px; font-size: 15px;" onclick="handleLogin()">
             Sign In to Portal
           </button>
-
-          <!-- Quick Demo Logins -->
-          <div style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed var(--border);">
-            <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px;">
-              🚀 Quick Demo Accounts (One-Click Sign In):
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <button type="button" class="btn btn-secondary" style="justify-content: space-between; font-size: 12px; padding: 9px 12px;" onclick="quickLoginDemo('9876543210', '123456')">
-                <span>👤 <strong>Mukesh Garg</strong> (Retailer)</span>
-                <span class="badge badge-success">Retailer</span>
-              </button>
-              <button type="button" class="btn btn-secondary" style="justify-content: space-between; font-size: 12px; padding: 9px 12px;" onclick="quickLoginDemo('9811223344', '123456')">
-                <span>🏢 <strong>Apex Telecom</strong> (Distributor)</span>
-                <span class="badge badge-pending">Distributor</span>
-              </button>
-              <button type="button" class="btn btn-secondary" style="justify-content: space-between; font-size: 12px; padding: 9px 12px;" onclick="quickLoginDemo('9999999999', 'admin')">
-                <span>👑 <strong>Master Admin</strong> (Administrator)</span>
-                <span class="badge" style="background:#FDE68A; color:#B45309;">Admin</span>
-              </button>
-            </div>
-          </div>
         </div>
 
         <!-- Signup Form -->
@@ -266,7 +245,7 @@
             </div>
             <div class="form-group">
               <label class="form-label" id="lbl-target">Mobile Number (10 Digits)</label>
-              <input type="text" id="target-number" class="form-control" value="9876543210" placeholder="e.g. 9876543210">
+              <input type="text" id="target-number" class="form-control" placeholder="Enter 10-digit mobile number">
             </div>
             <div class="form-group">
               <label class="form-label">Operator</label>
@@ -343,7 +322,7 @@
             </div>
             <div class="form-group">
               <label class="form-label" id="bill-consumer-label">Consumer CA Number / Account ID</label>
-              <input type="text" id="bill-consumer-id" class="form-control" value="1002948194" placeholder="Enter Consumer Account ID">
+              <input type="text" id="bill-consumer-id" class="form-control" placeholder="Enter Consumer Account ID">
             </div>
             <button class="btn btn-primary" id="fetch-bill-btn" style="width: 100%; padding: 12px;" onclick="fetchRealBill()">
               📡 Fetch Real Bill via Network API
@@ -458,7 +437,7 @@
                   <th>Service</th>
                   <th>Target / Account</th>
                   <th>Amount</th>
-                  <th>Payment Method</th>
+                  <th>Payment Source</th>
                   <th>Status</th>
                   <th>Operator TR ID (Admin)</th>
                   <th>Time</th>
@@ -560,6 +539,7 @@
             <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
               <select id="admin-scheme-select" class="form-control" style="width: auto; min-width: 220px; font-weight: 700;" onchange="onSchemeSelectChange()"></select>
               <button class="btn btn-primary" onclick="openCreateSchemeModal()">+ New Scheme</button>
+              <button class="btn btn-primary" style="background: #059669; border-color: #059669;" onclick="openAddOperatorModal()">➕ Add Operator</button>
               <button class="btn btn-secondary" onclick="downloadSchemeBatchCsv()">📥 Download Scheme CSV</button>
               <button class="btn btn-secondary" onclick="showAdminSection('batch')">📁 Batch Upload</button>
             </div>
@@ -596,12 +576,13 @@
                 <tr>
                   <th>Code</th>
                   <th>Category</th>
-                  <th>Service / Operator Name</th>
+                  <th>Operator / Service Name</th>
+                  <th>Status</th>
                   <th>Type</th>
                   <th>Retailer Margin</th>
                   <th>Distributor Margin</th>
                   <th>Super Dist. Margin</th>
-                  <th>Action</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="admin-scheme-services-tbody"></tbody>
@@ -866,7 +847,6 @@
       <div class="modal-tabs">
         <button class="modal-tab active" id="tab-btn-upi" onclick="switchCheckoutTab('upi')">UPI</button>
         <button class="modal-tab" id="tab-btn-wallet" onclick="switchCheckoutTab('wallet')">Wallet Balance</button>
-        <button class="modal-tab" id="tab-btn-card" onclick="switchCheckoutTab('card')">Credit Card</button>
       </div>
 
       <!-- TAB 1: UPI -->
@@ -888,11 +868,9 @@
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">12-Digit UPI Ref / UTR Number</label>
-          <div style="display: flex; gap: 8px;">
-            <input type="text" id="upi-utr-input" class="form-control" placeholder="e.g. 428901847291">
-            <button class="btn btn-secondary" onclick="autoFillUtr()">Demo UTR</button>
-          </div>
+          <label class="form-label">Authentic UPI Ref / UTR / Transaction ID *</label>
+          <input type="text" id="upi-utr-input" class="form-control" placeholder="Enter 12-digit UTR from UPI app (e.g. 428901847291)" required>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">⚠️ Please enter the real Transaction ID (UTR) generated in your UPI app. Blank or mock IDs are strictly disallowed.</div>
         </div>
         <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="confirmOrder('UPI')">
           Submit UPI Payment
@@ -904,31 +882,6 @@
         <div id="wallet-status-alert"></div>
         <button class="btn btn-primary" id="wallet-pay-btn" style="width: 100%; padding: 12px;" onclick="confirmOrder('WALLET')">
           Pay from Wallet Balance
-        </button>
-      </div>
-
-      <!-- TAB 3: CREDIT CARD -->
-      <div id="pay-sec-card" style="display: none;">
-        <div class="form-group">
-          <label class="form-label">Card Number</label>
-          <input type="text" id="cc-number" class="form-control" value="4532 8921 7734 4242">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Name on Card</label>
-          <input type="text" id="cc-name" class="form-control" value="Mukesh Garg">
-        </div>
-        <div style="display: flex; gap: 10px;">
-          <div class="form-group" style="flex: 1;">
-            <label class="form-label">Expiry (MM/YY)</label>
-            <input type="text" id="cc-expiry" class="form-control" value="08/29">
-          </div>
-          <div class="form-group" style="flex: 1;">
-            <label class="form-label">CVV</label>
-            <input type="password" id="cc-cvv" class="form-control" value="882" maxlength="4">
-          </div>
-        </div>
-        <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="confirmOrder('CREDIT_CARD')">
-          Proceed to 3D Secure Verification
         </button>
       </div>
 
@@ -1030,38 +983,115 @@
     </div>
   </div>
 
-  <!-- EDIT SERVICE RATE MODAL -->
+  <!-- EDIT OPERATOR & COMMISSION MODAL -->
   <div class="modal-overlay" id="edit-service-modal">
     <div class="modal">
       <div class="modal-header">
         <div>
-          <h3 style="font-size: 18px; font-weight: 800;" id="edit-svc-modal-title">Edit Service Commission</h3>
+          <h3 style="font-size: 18px; font-weight: 800;" id="edit-svc-modal-title">Edit Operator Details & Margin</h3>
           <p style="font-size: 12px; color: var(--text-muted);" id="edit-svc-modal-subtitle"></p>
         </div>
         <button class="btn btn-secondary" onclick="closeModal('edit-service-modal')">✕</button>
       </div>
       <input type="hidden" id="edit-svc-modal-code">
       <div class="form-group">
-        <label class="form-label">Commission Type</label>
+        <label class="form-label">Operator / Service Name *</label>
+        <input type="text" id="edit-svc-modal-name" class="form-control" placeholder="e.g. Reliance Jio">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category *</label>
+        <input type="text" id="edit-svc-modal-category" class="form-control" placeholder="e.g. Mobile Recharge or BBPS - Electricity">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Commission / Margin Type</label>
         <select id="edit-svc-modal-type" class="form-control">
           <option value="PERCENT">PERCENT (%)</option>
           <option value="FLAT">FLAT (₹)</option>
         </select>
       </div>
-      <div class="form-group">
-        <label class="form-label">Retailer Margin</label>
-        <input type="number" step="0.01" id="edit-svc-modal-ret" class="form-control">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+        <div class="form-group">
+          <label class="form-label">Retailer Margin</label>
+          <input type="number" step="0.01" id="edit-svc-modal-ret" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Distributor</label>
+          <input type="number" step="0.01" id="edit-svc-modal-dist" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Super Dist.</label>
+          <input type="number" step="0.01" id="edit-svc-modal-super" class="form-control">
+        </div>
+      </div>
+      <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #F8FAFC; border-radius: 8px; border: 1px solid var(--border);">
+        <div>
+          <div style="font-weight: 700; font-size: 13px;">Operator Status: Active (Enabled)</div>
+          <div style="font-size: 11px; color: var(--text-muted);">Uncheck to disable operator from appearing in user recharge lists</div>
+        </div>
+        <input type="checkbox" id="edit-svc-modal-active" style="width: 20px; height: 20px; cursor: pointer;">
+      </div>
+      <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="submitEditOperator()">
+        Save Operator Updates
+      </button>
+    </div>
+  </div>
+
+  <!-- ADD NEW OPERATOR MODAL -->
+  <div class="modal-overlay" id="add-operator-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 18px; font-weight: 800;">➕ Add New Operator / Service</h3>
+          <p style="font-size: 12px; color: var(--text-muted);">Add new telecom operator, DTH provider, or BBPS utility biller</p>
+        </div>
+        <button class="btn btn-secondary" onclick="closeModal('add-operator-modal')">✕</button>
       </div>
       <div class="form-group">
-        <label class="form-label">Distributor Margin</label>
-        <input type="number" step="0.01" id="edit-svc-modal-dist" class="form-control">
+        <label class="form-label">Category *</label>
+        <select id="add-op-category" class="form-control">
+          <option value="Mobile Recharge">Mobile Recharge</option>
+          <option value="DTH Recharge">DTH Recharge</option>
+          <option value="BBPS - Electricity">BBPS - Electricity</option>
+          <option value="BBPS - Water">BBPS - Water</option>
+          <option value="BBPS - Piped Gas">BBPS - Piped Gas</option>
+          <option value="BBPS - Fastag">BBPS - Fastag</option>
+          <option value="BBPS - Broadband">BBPS - Broadband</option>
+          <option value="BBPS - LPG Gas">BBPS - LPG Gas</option>
+          <option value="Brand Vouchers">Brand Vouchers</option>
+          <option value="BBPS - Municipal Tax">BBPS - Municipal Tax</option>
+        </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Super Distributor Margin</label>
-        <input type="number" step="0.01" id="edit-svc-modal-super" class="form-control">
+        <label class="form-label">Operator / Service Name *</label>
+        <input type="text" id="add-op-name" class="form-control" placeholder="e.g. Torrent Power Dahej">
       </div>
-      <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="submitEditServiceRate()">
-        Save Service Rate
+      <div class="form-group">
+        <label class="form-label">Operator Code (Unique Identifier) *</label>
+        <input type="text" id="add-op-code" class="form-control" placeholder="e.g. ELEC_TORR_DAHEJ">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Margin Calculation Type</label>
+        <select id="add-op-type" class="form-control">
+          <option value="PERCENT">PERCENT (%)</option>
+          <option value="FLAT">FLAT (₹)</option>
+        </select>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+        <div class="form-group">
+          <label class="form-label">Retailer Margin</label>
+          <input type="number" step="0.01" id="add-op-ret" class="form-control" value="2.0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Distributor</label>
+          <input type="number" step="0.01" id="add-op-dist" class="form-control" value="0.3">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Super Dist.</label>
+          <input type="number" step="0.01" id="add-op-super" class="form-control" value="0.15">
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width: 100%; padding: 12px; background: #059669; border-color: #059669;" onclick="submitAddOperator()">
+        Create & Add Operator
       </button>
     </div>
   </div>
@@ -1115,6 +1145,11 @@
     const BASE_PATH = window.location.pathname.replace(/\/[^\/]*$/, "") + "/";
     function api(path) {
       return BASE_PATH + path.replace(/^\/+/, "");
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
     }
 
     // =========================================================================
@@ -1789,56 +1824,104 @@
         paramName: "Consumer CA No. / Account ID",
         paramPlaceholder: "e.g. 1002948194",
         operators: [
+          // Delhi NCR
           "BSES Rajdhani Power Limited (BRPL) - Delhi",
           "BSES Yamuna Power Limited (BYPL) - Delhi",
           "Tata Power Delhi Distribution Limited (TPDDL)",
           "New Delhi Municipal Council (NDMC) Electricity",
+          "Military Engineer Services (MES) - Delhi Cantt",
+          // Maharashtra
           "Maharashtra State Electricity Dist. (MSEDCL / Mahavitaran)",
           "Adani Electricity Mumbai Ltd",
           "Tata Power - Mumbai",
           "Brihanmumbai Electric Supply & Transport (BEST)",
           "Torrent Power - Bhiwandi / Shil / Kalwa",
+          // Uttar Pradesh
           "UPPCL - Urban (Uttar Pradesh Power Corp)",
           "UPPCL - Rural (Uttar Pradesh Power Corp)",
           "Torrent Power - Agra",
           "Noida Power Company Ltd (NPCL)",
           "Kanpur Electricity Supply Co (KESCO)",
+          // Karnataka
           "Bangalore Electricity Supply (BESCOM)",
           "Chamundeshwari Electricity (CHESCOM)",
           "Hubli Electricity Supply (HESCOM)",
           "Mangalore Electricity Supply (MESCOM)",
           "Gulbarga Electricity Supply (GESCOM)",
-          "Tamil Nadu Generation & Distribution (TANGEDCO)",
+          "Hukkeri Rural Electric Co-operative Society (HRECS)",
+          // Gujarat
           "Dakshin Gujarat Vij Company (DGVCL)",
           "Madhya Gujarat Vij Company (MGVCL)",
           "Paschim Gujarat Vij Company (PGVCL)",
           "Uttar Gujarat Vij Company (UGVCL)",
           "Torrent Power - Ahmedabad / Gandhinagar / Surat",
+          "Torrent Power - Dahej",
+          "GIFT Power Company Limited (GIFT City)",
+          // Tamil Nadu & Puducherry
+          "Tamil Nadu Generation & Distribution (TANGEDCO)",
+          "Electricity Department Puducherry",
+          // West Bengal
           "CESC Kolkata",
           "West Bengal State Electricity (WBSEDCL)",
+          "India Power Corporation Limited (IPCL - Asansol)",
+          // Punjab, Haryana & Chandigarh
           "Punjab State Power Corporation (PSPCL)",
           "Dakshin Haryana Bijli Vitran Nigam (DHBVN)",
           "Uttar Haryana Bijli Vitran Nigam (UHBVN)",
+          "Chandigarh Electricity Department",
+          // Rajasthan
           "Jaipur Vidyut Vitran Nigam (JVVNL)",
           "Jodhpur Vidyut Vitran Nigam (JdVVNL)",
           "Ajmer Vidyut Vitran Nigam (AVVNL)",
+          "Kota Electricity Distribution Limited (KEDL)",
+          "Bharatpur Electricity Services Limited (BESL)",
+          "Bikaner Electricity Supply Limited (BKESL)",
+          // Telangana & Andhra Pradesh
           "Telangana State Southern Power (TSSPDCL)",
           "Telangana State Northern Power (TSNPDCL)",
           "Andhra Pradesh Eastern Power (APEPDCL)",
           "Andhra Pradesh Southern Power (APSPDCL)",
+          "Andhra Pradesh Central Power (APCPDCL)",
+          // Bihar & Jharkhand
           "North Bihar Power Distribution (NBPDCL)",
           "South Bihar Power Distribution (SBPDCL)",
+          "Jharkhand Bijli Vitran Nigam (JBVNL)",
+          "Jamshedpur Utilities & Services Company (JUSCO / Tata Steel)",
+          "Damodar Valley Corporation (DVC)",
+          // Madhya Pradesh & Chhattisgarh
           "MP Poorv Kshetra Vidyut Vitran (Jabalpur)",
           "MP Paschim Kshetra Vidyut Vitran (Indore)",
           "MP Madhya Kshetra Vidyut Vitran (Bhopal)",
-          "Kerala State Electricity Board (KSEBL)",
+          "Chhattisgarh State Power Distribution (CSPDCL)",
+          // Odisha
           "TP Central Odisha Distribution (TPCODL)",
           "TP Western Odisha Distribution (TPWODL)",
-          "Assam Power Distribution Company (APDCL)",
+          "TP Southern Odisha Distribution (TPSODL)",
+          "TP Northern Odisha Distribution (TPNODL)",
+          // Kerala & Goa
+          "Kerala State Electricity Board (KSEBL)",
+          "Goa Electricity Department",
+          // Uttarakhand & Himachal Pradesh
           "Uttarakhand Power Corporation (UPCL)",
           "Himachal Pradesh State Electricity Board (HPSEBL)",
+          // Jammu, Kashmir & Ladakh
           "Jammu Power Distribution Corp (JPDCL)",
-          "Goa Electricity Department"
+          "Kashmir Power Distribution Corp (KPDCL)",
+          "Ladakh Power Development Department (LPDD)",
+          // North East & Hill States
+          "Assam Power Distribution Company (APDCL)",
+          "Tripura State Electricity Corporation (TSECL)",
+          "Meghalaya Power Distribution Corp (MePDCL)",
+          "Manipur State Power Distribution (MSPDCL)",
+          "Sikkim Power Distribution (SPDC)",
+          "Nagaland Department of Power (DoPN)",
+          "Power & Electricity Department Mizoram (PEDM)",
+          "Department of Power Arunachal Pradesh (DoPAP)",
+          // Union Territories
+          "DNH Power Distribution Company (DNHPDCL)",
+          "Daman and Diu Electricity Department",
+          "Andaman and Nicobar Electricity Department",
+          "Lakshadweep Electricity Department"
         ]
       },
       "Water": {
@@ -2300,18 +2383,24 @@
         return;
       }
 
-      tbody.innerHTML = list.map(t => `
+      tbody.innerHTML = list.map(t => {
+        const isWallet = t.paymentMethod === 'WALLET';
+        const sourceBadge = isWallet
+          ? `<span class="badge" style="background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; font-size: 11px;">💰 Wallet Balance</span>`
+          : `<span class="badge" style="background: #DBEAFE; color: #1E40AF; border: 1px solid #BFDBFE; font-size: 11px;">📱 UPI: ${escapeHtml((t.paymentRef || '').replace(/.*UTR:\s*/i, 'UTR: ') || 'Verified')}</span>`;
+
+        return `
         <tr>
           <td>#${t.id}</td>
-          <td><strong>${t.serviceType}</strong> (${t.providerName})</td>
-          <td>${t.targetNumber}</td>
+          <td><strong>${escapeHtml(t.serviceType)}</strong> (${escapeHtml(t.providerName)})</td>
+          <td>${escapeHtml(t.targetNumber)}</td>
           <td><strong>₹${t.amount.toFixed(2)}</strong></td>
-          <td><span class="badge badge-discount">${t.paymentMethod}</span></td>
+          <td>${sourceBadge}</td>
           <td><span class="badge ${t.status === 'SUCCESS' ? 'badge-success' : t.status === 'PENDING' ? 'badge-pending' : 'badge-failed'}">${t.status}</span></td>
-          <td><code style="font-weight: 700; color: var(--secondary);">${t.operatorTrId || '<span style="color: var(--text-muted);">Awaiting Admin</span>'}</code></td>
+          <td><code style="font-weight: 700; color: var(--secondary);">${t.operatorTrId ? escapeHtml(t.operatorTrId) : '<span style="color: var(--text-muted);">Awaiting Admin</span>'}</code></td>
           <td style="font-size: 11px; color: var(--text-muted);">${new Date(t.createdAt).toLocaleTimeString()}</td>
         </tr>
-      `).join('');
+      `;}).join('');
     }
 
     // CHECKOUT FLOW
@@ -2392,27 +2481,36 @@
 
     function switchCheckoutTab(tab) {
       document.querySelectorAll('.modal-tab').forEach(b => b.classList.remove('active'));
-      document.getElementById('tab-btn-' + tab).classList.add('active');
+      const activeBtn = document.getElementById('tab-btn-' + tab);
+      if (activeBtn) activeBtn.classList.add('active');
 
       document.getElementById('pay-sec-upi').style.display = tab === 'upi' ? 'block' : 'none';
       document.getElementById('pay-sec-wallet').style.display = tab === 'wallet' ? 'block' : 'none';
-      document.getElementById('pay-sec-card').style.display = tab === 'card' ? 'block' : 'none';
-    }
-
-    function autoFillUtr() {
-      document.getElementById('upi-utr-input').value = '4' + Math.floor(10000000000 + Math.random() * 90000000000);
     }
 
     async function confirmOrder(method) {
       let ref = "";
       if (method === 'UPI') {
         const app = document.getElementById('upi-app-select').value;
-        const utr = document.getElementById('upi-utr-input').value || ('4' + Math.floor(10000000000 + Math.random() * 90000000000));
+        const utrInput = document.getElementById('upi-utr-input');
+        const utr = (utrInput ? utrInput.value : '').trim();
+        
+        if (!utr) {
+          alert("❌ UPI Transaction ID / UTR cannot be blank. Please enter the authentic Transaction ID from your UPI payment app.");
+          if (utrInput) utrInput.focus();
+          return;
+        }
+        if (utr.length < 6) {
+          alert("❌ Please enter a valid UPI Transaction ID / UTR (minimum 6 characters).");
+          if (utrInput) utrInput.focus();
+          return;
+        }
         ref = `${app} (UTR: ${utr})`;
       } else if (method === 'WALLET') {
         ref = "Wallet Balance Debit";
-      } else if (method === 'CREDIT_CARD') {
-        ref = "Credit Card (•••• 4242) - 3D Secure Verified";
+      } else {
+        alert("Selected payment method is not supported.");
+        return;
       }
 
       closeModal('checkout-modal');
@@ -2780,22 +2878,190 @@
         return matchesCat && matchesSearch;
       });
 
-      tbody.innerHTML = services.map(s => `
-        <tr>
-          <td><code style="font-weight: 700; color: var(--primary);">${s.code}</code></td>
-          <td><span class="badge ${s.category.includes('BBPS') ? 'badge-pending' : s.category.includes('Mobile') ? 'badge-success' : 'badge-discount'}">${s.category}</span></td>
-          <td><strong>${s.name}</strong></td>
+      tbody.innerHTML = services.map(s => {
+        const isActive = s.isActive !== false;
+        return `
+        <tr style="${isActive ? '' : 'opacity: 0.65; background: #FFF1F2;'}">
+          <td><code style="font-weight: 700; color: var(--primary);">${escapeHtml(s.code)}</code></td>
+          <td><span class="badge ${s.category.includes('BBPS') ? 'badge-pending' : s.category.includes('Mobile') ? 'badge-success' : 'badge-discount'}">${escapeHtml(s.category)}</span></td>
+          <td><strong>${escapeHtml(s.name)}</strong></td>
+          <td>
+            <span class="badge ${isActive ? 'badge-success' : 'badge-failed'}">
+              ${isActive ? 'ACTIVE' : 'DISABLED'}
+            </span>
+          </td>
           <td><span class="badge ${s.commType === 'PERCENT' ? 'badge-discount' : 'badge-success'}">${s.commType === 'PERCENT' ? '% Margin' : '₹ Flat'}</span></td>
           <td><strong style="color: #065F46;">${s.commType === 'PERCENT' ? s.retailer + '%' : '₹' + s.retailer.toFixed(2)}</strong></td>
           <td>${s.commType === 'PERCENT' ? s.distributor + '%' : '₹' + s.distributor.toFixed(2)}</td>
           <td>${s.commType === 'PERCENT' ? s.superDistributor + '%' : '₹' + s.superDistributor.toFixed(2)}</td>
           <td>
-            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="openEditServiceModal('${s.code}')">
-              ✏️ Edit Rate
-            </button>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="toggleOperatorActive('${s.code}', ${!isActive})">
+                ${isActive ? '🔴 Disable' : '🟢 Enable'}
+              </button>
+              <button class="btn btn-primary" style="padding: 4px 8px; font-size: 11px;" onclick="openEditOperatorModal('${s.code}')">
+                ✏️ Edit
+              </button>
+              <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteOperator('${s.code}', '${escapeHtml(s.name).replace(/'/g, "\\'")}')">
+                🗑️
+              </button>
+            </div>
           </td>
         </tr>
-      `).join('');
+      `;}).join('');
+    }
+
+    function openAddOperatorModal() {
+      document.getElementById('add-op-name').value = '';
+      document.getElementById('add-op-code').value = '';
+      document.getElementById('add-op-ret').value = '2.0';
+      document.getElementById('add-op-dist').value = '0.3';
+      document.getElementById('add-op-super').value = '0.15';
+      document.getElementById('add-operator-modal').classList.add('open');
+    }
+
+    async function submitAddOperator() {
+      const category = document.getElementById('add-op-category').value;
+      const name = document.getElementById('add-op-name').value.trim();
+      const code = document.getElementById('add-op-code').value.trim();
+      const commType = document.getElementById('add-op-type').value;
+      const ret = parseFloat(document.getElementById('add-op-ret').value);
+      const dist = parseFloat(document.getElementById('add-op-dist').value);
+      const superD = parseFloat(document.getElementById('add-op-super').value);
+
+      if (!name || !code) {
+        alert("Please enter Operator Name and Operator Code.");
+        return;
+      }
+
+      const res = await fetch(api('api/admin/schemes/add-service'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          schemeId: activeAdminSchemeId,
+          code, category, name, commType,
+          retailer: ret, distributor: dist, superDistributor: superD,
+          isActive: true
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        closeModal('add-operator-modal');
+        await loadData();
+        renderAdminSchemeServices();
+        showToast(`✓ Operator ${name} (${code}) added successfully!`, 'success');
+      } else {
+        alert("Error adding operator: " + (data.error || "Failed"));
+      }
+    }
+
+    function openEditOperatorModal(code) {
+      const scheme = appState.schemes.find(s => s.id === activeAdminSchemeId) || appState.schemes[0];
+      if (!scheme) return;
+      const svc = scheme.services.find(s => s.code === code);
+      if (!svc) return;
+
+      document.getElementById('edit-svc-modal-title').innerText = `Edit ${svc.name}`;
+      document.getElementById('edit-svc-modal-subtitle').innerText = `Scheme: ${scheme.name} • Code: ${svc.code}`;
+      document.getElementById('edit-svc-modal-code').value = svc.code;
+      document.getElementById('edit-svc-modal-name').value = svc.name;
+      document.getElementById('edit-svc-modal-category').value = svc.category;
+      document.getElementById('edit-svc-modal-type').value = svc.commType;
+      document.getElementById('edit-svc-modal-ret').value = svc.retailer;
+      document.getElementById('edit-svc-modal-dist').value = svc.distributor;
+      document.getElementById('edit-svc-modal-super').value = svc.superDistributor;
+      document.getElementById('edit-svc-modal-active').checked = svc.isActive !== false;
+
+      document.getElementById('edit-service-modal').classList.add('open');
+    }
+
+    async function submitEditOperator() {
+      const code = document.getElementById('edit-svc-modal-code').value;
+      const name = document.getElementById('edit-svc-modal-name').value.trim();
+      const category = document.getElementById('edit-svc-modal-category').value.trim();
+      const commType = document.getElementById('edit-svc-modal-type').value;
+      const ret = parseFloat(document.getElementById('edit-svc-modal-ret').value);
+      const dist = parseFloat(document.getElementById('edit-svc-modal-dist').value);
+      const superD = parseFloat(document.getElementById('edit-svc-modal-super').value);
+      const isActive = document.getElementById('edit-svc-modal-active').checked;
+
+      if (!name) {
+        alert("Operator name cannot be empty.");
+        return;
+      }
+
+      const res = await fetch(api('api/admin/schemes/update-service'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          schemeId: activeAdminSchemeId,
+          serviceCode: code,
+          name, category, commType,
+          retailer: ret, distributor: dist, superDistributor: superD,
+          isActive
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        closeModal('edit-service-modal');
+        await loadData();
+        renderAdminSchemeServices();
+        showToast(`✓ Operator ${name} updated successfully!`, 'success');
+      } else {
+        alert("Error: " + (data.error || "Failed to update operator"));
+      }
+    }
+
+    async function toggleOperatorActive(code, newActive) {
+      try {
+        const res = await fetch(api('api/admin/schemes/toggle-service'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            schemeId: activeAdminSchemeId,
+            serviceCode: code,
+            isActive: newActive
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          await loadData();
+          renderAdminSchemeServices();
+          showToast(`Operator ${code} is now ${newActive ? 'ACTIVE (Enabled)' : 'DISABLED'}!`, newActive ? 'success' : 'warning');
+        } else {
+          alert("Error: " + (data.error || "Failed to toggle operator status"));
+        }
+      } catch (e) {
+        alert("Network error: " + e.message);
+      }
+    }
+
+    async function deleteOperator(code, name) {
+      if (!confirm(`Are you sure you want to remove operator "${name}" (${code})?\nThis operator will be removed from recharge and bill payment lists.`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch(api('api/admin/schemes/delete-service'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            schemeId: activeAdminSchemeId,
+            serviceCode: code
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          await loadData();
+          renderAdminSchemeServices();
+          showToast(`🗑️ Operator "${name}" (${code}) deleted!`, 'info');
+        } else {
+          alert("Error: " + (data.error || "Failed to delete operator"));
+        }
+      } catch (e) {
+        alert("Network error: " + e.message);
+      }
     }
 
     function openCreateSchemeModal() {
@@ -2842,58 +3108,6 @@
         alert(`✅ Scheme "${name}" created successfully!`);
       } else {
         alert("Error: " + (data.error || "Failed to create scheme"));
-      }
-    }
-
-    function openEditServiceModal(code) {
-      const scheme = appState.schemes.find(s => s.id === activeAdminSchemeId) || appState.schemes[0];
-      if (!scheme) return;
-      const svc = scheme.services.find(s => s.code === code);
-      if (!svc) return;
-
-      document.getElementById('edit-svc-modal-title').innerText = `Edit ${svc.name}`;
-      document.getElementById('edit-svc-modal-subtitle').innerText = `Scheme: ${scheme.name} • Code: ${svc.code}`;
-      document.getElementById('edit-svc-modal-code').value = svc.code;
-      document.getElementById('edit-svc-modal-type').value = svc.commType;
-      document.getElementById('edit-svc-modal-ret').value = svc.retailer;
-      document.getElementById('edit-svc-modal-dist').value = svc.distributor;
-      document.getElementById('edit-svc-modal-super').value = svc.superDistributor;
-
-      document.getElementById('edit-service-modal').classList.add('open');
-    }
-
-    async function submitEditServiceRate() {
-      const code = document.getElementById('edit-svc-modal-code').value;
-      const commType = document.getElementById('edit-svc-modal-type').value;
-      const ret = parseFloat(document.getElementById('edit-svc-modal-ret').value);
-      const dist = parseFloat(document.getElementById('edit-svc-modal-dist').value);
-      const superD = parseFloat(document.getElementById('edit-svc-modal-super').value);
-
-      if (isNaN(ret) || isNaN(dist) || isNaN(superD)) {
-        alert("Please enter valid numeric commission margins.");
-        return;
-      }
-
-      const res = await fetch(api('api/admin/schemes/update-service'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          schemeId: activeAdminSchemeId,
-          serviceCode: code,
-          commType,
-          retailer: ret,
-          distributor: dist,
-          superDistributor: superD
-        })
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        closeModal('edit-service-modal');
-        await loadData();
-        renderAdminSchemeServices();
-      } else {
-        alert("Error: " + (data.error || "Failed to update service rate"));
       }
     }
 

@@ -265,44 +265,6 @@ fun AuthScreen(
         }
       }
 
-      Spacer(modifier = Modifier.height(20.dp))
-
-      // Demo quick switchers
-      Text(
-        text = "Quick Demo Accounts:",
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-      )
-
-      Spacer(modifier = Modifier.height(8.dp))
-
-      Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        OutlinedButton(
-          onClick = {
-            viewModel.login("9876543210", "user123") { success, _ ->
-              if (success) onLoginSuccess()
-            }
-          },
-          modifier = Modifier.testTag("demo_customer_login_btn")
-        ) {
-          Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(16.dp))
-          Spacer(modifier = Modifier.width(4.dp))
-          Text("Customer (Mukesh)", fontSize = 11.sp)
-        }
-
-        OutlinedButton(
-          onClick = {
-            viewModel.login("9999999999", "admin") { success, _ ->
-              if (success) onLoginSuccess()
-            }
-          },
-          modifier = Modifier.testTag("demo_admin_login_btn")
-        ) {
-          Icon(Icons.Default.AdminPanelSettings, contentDescription = null, modifier = Modifier.size(16.dp))
-          Spacer(modifier = Modifier.width(4.dp))
-          Text("Admin (Master)", fontSize = 11.sp)
-        }
-      }
     }
   }
 }

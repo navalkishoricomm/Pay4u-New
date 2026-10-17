@@ -111,8 +111,20 @@ abstract class AppDatabase : RoomDatabase() {
         ServiceProviderEntity(serviceType = "DTH", name = "Sun Direct", code = "SUNDIRECT", commissionPercent = 3.5, flatCommission = 0.0, isActive = true, helperNote = "Smart Card Number 11-digit"),
         ServiceProviderEntity(serviceType = "DTH", name = "D2H (Videocon)", code = "D2H", commissionPercent = 3.0, flatCommission = 0.0, isActive = true, helperNote = "Customer ID 8-10 digits"),
 
-        // Bill Payments
-        ServiceProviderEntity(serviceType = "BILL", name = "Electricity (Tata / BSES / State Boards)", code = "ELECTRICITY", commissionPercent = 0.5, flatCommission = 2.0, isActive = true, helperNote = "BBPS Bill payment hub"),
+        // Bill Payments - Electricity & Utilities
+        ServiceProviderEntity(serviceType = "BILL", name = "Electricity (All BBPS Boards)", code = "ELECTRICITY", commissionPercent = 0.5, flatCommission = 2.0, isActive = true, helperNote = "BBPS Bill payment hub"),
+        ServiceProviderEntity(serviceType = "BILL", name = "BSES Rajdhani Power (BRPL Delhi)", code = "BSES_DELHI", commissionPercent = 0.5, flatCommission = 2.5, isActive = true, helperNote = "Delhi NCR Electricity"),
+        ServiceProviderEntity(serviceType = "BILL", name = "BSES Yamuna Power (BYPL Delhi)", code = "BSES_YAMUNA", commissionPercent = 0.5, flatCommission = 2.5, isActive = true, helperNote = "Delhi NCR Electricity"),
+        ServiceProviderEntity(serviceType = "BILL", name = "Tata Power Delhi (TPDDL)", code = "TPDDL", commissionPercent = 0.5, flatCommission = 2.5, isActive = true, helperNote = "Delhi Electricity"),
+        ServiceProviderEntity(serviceType = "BILL", name = "Maharashtra State Electricity (MSEDCL)", code = "MSEDCL", commissionPercent = 0.4, flatCommission = 2.0, isActive = true, helperNote = "Mahavitaran Maharashtra"),
+        ServiceProviderEntity(serviceType = "BILL", name = "Adani Electricity Mumbai", code = "ADANI_ELEC", commissionPercent = 0.4, flatCommission = 2.5, isActive = true, helperNote = "Mumbai Electricity"),
+        ServiceProviderEntity(serviceType = "BILL", name = "UPPCL - Uttar Pradesh Power Corp", code = "UPPCL", commissionPercent = 0.5, flatCommission = 2.0, isActive = true, helperNote = "UP Urban & Rural"),
+        ServiceProviderEntity(serviceType = "BILL", name = "Bangalore Electricity Supply (BESCOM)", code = "BESCOM", commissionPercent = 0.5, flatCommission = 2.0, isActive = true, helperNote = "Karnataka Electricity"),
+        ServiceProviderEntity(serviceType = "BILL", name = "Tamil Nadu Generation & Dist (TANGEDCO)", code = "TANGEDCO", commissionPercent = 0.5, flatCommission = 2.0, isActive = true, helperNote = "Tamil Nadu Electricity"),
+        ServiceProviderEntity(serviceType = "BILL", name = "Punjab State Power Corp (PSPCL)", code = "PSPCL", commissionPercent = 0.5, flatCommission = 2.0, isActive = true, helperNote = "Punjab Electricity"),
+        ServiceProviderEntity(serviceType = "BILL", name = "Jaipur Vidyut Vitran (JVVNL)", code = "JVVNL", commissionPercent = 0.5, flatCommission = 2.0, isActive = true, helperNote = "Rajasthan Electricity"),
+        ServiceProviderEntity(serviceType = "BILL", name = "West Bengal State Electricity (WBSEDCL)", code = "WBSEDCL", commissionPercent = 0.5, flatCommission = 2.0, isActive = true, helperNote = "West Bengal Electricity"),
+        ServiceProviderEntity(serviceType = "BILL", name = "Kerala State Electricity Board (KSEBL)", code = "KSEBL", commissionPercent = 0.5, flatCommission = 2.0, isActive = true, helperNote = "Kerala Electricity"),
         ServiceProviderEntity(serviceType = "BILL", name = "Water Bill (Municipal Boards)", code = "WATER", commissionPercent = 0.0, flatCommission = 3.0, isActive = true, helperNote = "Municipal water authority hub"),
         ServiceProviderEntity(serviceType = "BILL", name = "LPG Gas Cylinder / Piped Gas", code = "GAS", commissionPercent = 0.0, flatCommission = 2.5, isActive = true, helperNote = "Indane, Bharat, HP & IGL"),
         ServiceProviderEntity(serviceType = "BILL", name = "Broadband & Fiber", code = "BROADBAND", commissionPercent = 1.0, flatCommission = 0.0, isActive = true, helperNote = "JioFiber, Airtel Xstream, ACT"),

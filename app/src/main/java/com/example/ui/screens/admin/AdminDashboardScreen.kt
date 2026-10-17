@@ -3,6 +3,8 @@ package com.example.ui.screens.admin
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +28,7 @@ import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material.icons.filled.Paid
@@ -104,7 +107,7 @@ fun AdminDashboardScreen(
     "Recharges ($pendingTxCount)",
     "Vouchers ($pendingVouchersCount)",
     "Users",
-    "Commissions"
+    "Operators & Margins"
   )
 
   // Dialog states
@@ -264,7 +267,9 @@ fun AdminDashboardScreen(
         3 -> AdminCommissionsTab(
           providers = allProviders,
           onEditProvider = { providerToEdit = it },
-          onAddProvider = { showAddProviderDialog = true }
+          onAddProvider = { showAddProviderDialog = true },
+          onToggleActive = { provider, active -> viewModel.adminToggleProvider(provider.id, active, provider.name) },
+          onDeleteProvider = { provider -> viewModel.adminDeleteProvider(provider.id, provider.name) }
         )
       }
     }
@@ -310,13 +315,13 @@ fun AdminDashboardScreen(
     )
   }
 
-  // Dialog: Edit Commission
+  // Dialog: Edit Operator Details & Margins
   providerToEdit?.let { provider ->
-    AdminEditCommissionDialog(
+    AdminEditProviderDialog(
       provider = provider,
       onDismiss = { providerToEdit = null },
-      onConfirm = { commPercent, flatComm, isActive ->
-        viewModel.adminUpdateCommission(provider.id, commPercent, flatComm, isActive)
+      onConfirm = { name, code, serviceType, commPercent, flatComm, isActive, note ->
+        viewModel.adminUpdateProviderFull(provider.id, name, code, serviceType, commPercent, flatComm, isActive, note)
         providerToEdit = null
       }
     )
@@ -1157,8 +1162,12 @@ fun AdminAdjustBalanceDialog(
 private fun AdminCommissionsTab(
   providers: List<ServiceProviderEntity>,
   onEditProvider: (ServiceProviderEntity) -> Unit,
-  onAddProvider: () -> Unit
+  onAddProvider: () -> Unit,
+  onToggleActive: (ServiceProviderEntity, Boolean) -> Unit,
+  onDeleteProvider: (ServiceProviderEntity) -> Unit
 ) {
+  var providerToDelete by remember { mutableStateOf<ServiceProviderEntity?>(null) }
+
   Column(modifier = Modifier.fillMaxSize()) {
     Row(
       modifier = Modifier
@@ -1168,7 +1177,7 @@ private fun AdminCommissionsTab(
       verticalAlignment = Alignment.CenterVertically
     ) {
       Text(
-        text = "Commission & Service Providers",
+        text = "Operators & Commission (${providers.size})",
         style = MaterialTheme.typography.titleSmall,
         fontWeight = FontWeight.Bold
       )
@@ -1176,11 +1185,11 @@ private fun AdminCommissionsTab(
       Button(
         onClick = onAddProvider,
         shape = RoundedCornerShape(10.dp),
-        modifier = Modifier.height(36.dp)
+        modifier = Modifier.height(36.dp).testTag("admin_add_provider_btn")
       ) {
         Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
         Spacer(modifier = Modifier.width(4.dp))
-        Text("Add Provider", fontSize = 11.sp)
+        Text("Add Operator", fontSize = 11.sp)
       }
     }
 
@@ -1194,79 +1203,169 @@ private fun AdminCommissionsTab(
             .fillMaxWidth()
             .testTag("admin_provider_card_${provider.id}"),
           shape = RoundedCornerShape(14.dp),
-          colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+          colors = CardDefaults.cardColors(
+            containerColor = if (provider.isActive) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+          ),
           elevation = CardDefaults.cardElevation(1.dp)
         ) {
-          Row(
-            modifier = Modifier
-              .fillMaxWidth()
-              .padding(14.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-          ) {
-            Column(modifier = Modifier.weight(1f)) {
-              Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(provider.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.width(6.dp))
-                Surface(
-                  shape = RoundedCornerShape(4.dp),
-                  color = MaterialTheme.colorScheme.surfaceVariant
-                ) {
+          Column(modifier = Modifier.padding(14.dp)) {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically
+            ) {
+              Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                   Text(
-                    text = provider.serviceType,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontSize = 9.sp,
-                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                    text = provider.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = if (provider.isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                  )
+                  Spacer(modifier = Modifier.width(6.dp))
+                  Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                  ) {
+                    Text(
+                      text = "${provider.serviceType} • ${provider.code}",
+                      style = MaterialTheme.typography.labelSmall,
+                      fontSize = 9.sp,
+                      fontWeight = FontWeight.Bold,
+                      color = MaterialTheme.colorScheme.primary,
+                      modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                    )
+                  }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                  Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = if (provider.isActive) StatusSuccess.copy(alpha = 0.15f) else StatusFailed.copy(alpha = 0.15f)
+                  ) {
+                    Text(
+                      text = if (provider.isActive) "ACTIVE" else "DISABLED",
+                      style = MaterialTheme.typography.labelSmall,
+                      fontSize = 9.sp,
+                      fontWeight = FontWeight.Bold,
+                      color = if (provider.isActive) StatusSuccess else StatusFailed,
+                      modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
+                    )
+                  }
+                  Spacer(modifier = Modifier.width(8.dp))
+                  Text(
+                    text = "Margin: ${provider.commissionPercent}% ${if (provider.flatCommission > 0) "+ ₹${provider.flatCommission} Flat" else ""}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = BrandSecondary
                   )
                 }
               }
-              Spacer(modifier = Modifier.height(4.dp))
-              Text(
-                text = "Commission: ${provider.commissionPercent}% ${if (provider.flatCommission > 0) "+ ₹${provider.flatCommission} Flat" else ""}",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                color = BrandSecondary
-              )
-              if (provider.helperNote.isNotBlank()) {
-                Text(
-                  text = provider.helperNote,
-                  style = MaterialTheme.typography.bodySmall,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant,
-                  fontSize = 11.sp
+
+              Row(verticalAlignment = Alignment.CenterVertically) {
+                // Quick Toggle Active Switch
+                Switch(
+                  checked = provider.isActive,
+                  onCheckedChange = { onToggleActive(provider, it) },
+                  modifier = Modifier.testTag("admin_toggle_provider_${provider.id}")
                 )
+                IconButton(onClick = { onEditProvider(provider) }, modifier = Modifier.testTag("admin_edit_provider_${provider.id}")) {
+                  Icon(Icons.Default.Edit, contentDescription = "Edit Operator", tint = MaterialTheme.colorScheme.primary)
+                }
+                IconButton(onClick = { providerToDelete = provider }, modifier = Modifier.testTag("admin_delete_provider_${provider.id}")) {
+                  Icon(Icons.Default.Delete, contentDescription = "Remove Operator", tint = MaterialTheme.colorScheme.error)
+                }
               }
             }
 
-            IconButton(onClick = { onEditProvider(provider) }) {
-              Icon(Icons.Default.Edit, contentDescription = "Edit Commission", tint = MaterialTheme.colorScheme.primary)
+            if (provider.helperNote.isNotBlank()) {
+              Spacer(modifier = Modifier.height(4.dp))
+              Text(
+                text = provider.helperNote,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 11.sp
+              )
             }
           }
         }
       }
     }
   }
+
+  // Delete Confirmation Dialog
+  providerToDelete?.let { prov ->
+    AlertDialog(
+      onDismissRequest = { providerToDelete = null },
+      title = { Text("Delete Operator?") },
+      text = { Text("Are you sure you want to remove operator '${prov.name}' (${prov.code})? Users will no longer see this operator in recharge or bill payment lists.") },
+      confirmButton = {
+        Button(
+          onClick = {
+            onDeleteProvider(prov)
+            providerToDelete = null
+          },
+          colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+        ) {
+          Text("Delete Operator")
+        }
+      },
+      dismissButton = {
+        OutlinedButton(onClick = { providerToDelete = null }) { Text("Cancel") }
+      }
+    )
+  }
 }
 
-// Dialog: Edit Commission
+// Dialog: Edit Operator Details, Margins/Discounts & Status
 @Composable
-fun AdminEditCommissionDialog(
+fun AdminEditProviderDialog(
   provider: ServiceProviderEntity,
   onDismiss: () -> Unit,
-  onConfirm: (percent: Double, flat: Double, isActive: Boolean) -> Unit
+  onConfirm: (name: String, code: String, serviceType: String, percent: Double, flat: Double, isActive: Boolean, note: String) -> Unit
 ) {
+  var name by remember { mutableStateOf(provider.name) }
+  var code by remember { mutableStateOf(provider.code) }
+  var serviceType by remember { mutableStateOf(provider.serviceType) }
   var percentText by remember { mutableStateOf(provider.commissionPercent.toString()) }
   var flatText by remember { mutableStateOf(provider.flatCommission.toString()) }
   var isActive by remember { mutableStateOf(provider.isActive) }
+  var note by remember { mutableStateOf(provider.helperNote) }
 
   AlertDialog(
     onDismissRequest = onDismiss,
-    title = { Text("Edit Commission for ${provider.name}") },
+    title = { Text("Edit Operator: ${provider.name}") },
     text = {
-      Column {
+      Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        OutlinedTextField(
+          value = name,
+          onValueChange = { name = it },
+          label = { Text("Operator / Biller Name") },
+          singleLine = true,
+          modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          OutlinedTextField(
+            value = code,
+            onValueChange = { code = it.uppercase() },
+            label = { Text("Operator Code") },
+            singleLine = true,
+            modifier = Modifier.weight(1f)
+          )
+          OutlinedTextField(
+            value = serviceType,
+            onValueChange = { serviceType = it.uppercase() },
+            label = { Text("Type (MOBILE/DTH/BILL)") },
+            singleLine = true,
+            modifier = Modifier.weight(1f)
+          )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
           value = percentText,
           onValueChange = { percentText = it },
-          label = { Text("Commission Percentage (%)") },
+          label = { Text("Margin / Discount Percentage (%)") },
           placeholder = { Text("e.g. 2.5") },
           keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
           singleLine = true,
@@ -1276,9 +1375,17 @@ fun AdminEditCommissionDialog(
         OutlinedTextField(
           value = flatText,
           onValueChange = { flatText = it },
-          label = { Text("Flat Commission (₹)") },
+          label = { Text("Flat Margin / Surcharge (₹)") },
           placeholder = { Text("e.g. 2.0") },
           keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+          singleLine = true,
+          modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+          value = note,
+          onValueChange = { note = it },
+          label = { Text("Admin Note / Info") },
           singleLine = true,
           modifier = Modifier.fillMaxWidth()
         )
@@ -1288,7 +1395,7 @@ fun AdminEditCommissionDialog(
           horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically
         ) {
-          Text("Provider Active State:")
+          Text("Operator Active (Enabled):", fontWeight = FontWeight.SemiBold)
           Switch(checked = isActive, onCheckedChange = { isActive = it })
         }
       }
@@ -1297,9 +1404,9 @@ fun AdminEditCommissionDialog(
       Button(onClick = {
         val pct = percentText.toDoubleOrNull() ?: provider.commissionPercent
         val flat = flatText.toDoubleOrNull() ?: provider.flatCommission
-        onConfirm(pct, flat, isActive)
+        onConfirm(name.trim(), code.trim(), serviceType.trim(), pct, flat, isActive, note.trim())
       }) {
-        Text("Save Changes")
+        Text("Save Operator")
       }
     },
     dismissButton = {

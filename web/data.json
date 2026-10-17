@@ -153,7 +153,128 @@
           "commType": "FLAT",
           "retailer": 2.5,
           "distributor": 0.5,
-          "superDistributor": 0.25
+          "superDistributor": 0.25,
+          "isActive": true
+        },
+        {
+          "code": "BBPS_ELEC_BRPL",
+          "category": "BBPS Bills",
+          "name": "BSES Rajdhani Power Limited (BRPL) - Delhi",
+          "commType": "FLAT",
+          "retailer": 2.5,
+          "distributor": 0.5,
+          "superDistributor": 0.25,
+          "isActive": true
+        },
+        {
+          "code": "BBPS_ELEC_BYPL",
+          "category": "BBPS Bills",
+          "name": "BSES Yamuna Power Limited (BYPL) - Delhi",
+          "commType": "FLAT",
+          "retailer": 2.5,
+          "distributor": 0.5,
+          "superDistributor": 0.25,
+          "isActive": true
+        },
+        {
+          "code": "BBPS_ELEC_TPDDL",
+          "category": "BBPS Bills",
+          "name": "Tata Power Delhi Distribution (TPDDL)",
+          "commType": "FLAT",
+          "retailer": 2.5,
+          "distributor": 0.5,
+          "superDistributor": 0.25,
+          "isActive": true
+        },
+        {
+          "code": "BBPS_ELEC_MSEDCL",
+          "category": "BBPS Bills",
+          "name": "Maharashtra State Electricity (MSEDCL)",
+          "commType": "FLAT",
+          "retailer": 2.0,
+          "distributor": 0.4,
+          "superDistributor": 0.2,
+          "isActive": true
+        },
+        {
+          "code": "BBPS_ELEC_ADANI",
+          "category": "BBPS Bills",
+          "name": "Adani Electricity Mumbai Ltd",
+          "commType": "FLAT",
+          "retailer": 2.5,
+          "distributor": 0.5,
+          "superDistributor": 0.25,
+          "isActive": true
+        },
+        {
+          "code": "BBPS_ELEC_UPPCL",
+          "category": "BBPS Bills",
+          "name": "UPPCL (Uttar Pradesh Power Corp Urban/Rural)",
+          "commType": "FLAT",
+          "retailer": 2.0,
+          "distributor": 0.4,
+          "superDistributor": 0.2,
+          "isActive": true
+        },
+        {
+          "code": "BBPS_ELEC_BESCOM",
+          "category": "BBPS Bills",
+          "name": "Bangalore Electricity Supply (BESCOM)",
+          "commType": "FLAT",
+          "retailer": 2.0,
+          "distributor": 0.4,
+          "superDistributor": 0.2,
+          "isActive": true
+        },
+        {
+          "code": "BBPS_ELEC_TANGEDCO",
+          "category": "BBPS Bills",
+          "name": "Tamil Nadu Generation & Distribution (TANGEDCO)",
+          "commType": "FLAT",
+          "retailer": 2.0,
+          "distributor": 0.4,
+          "superDistributor": 0.2,
+          "isActive": true
+        },
+        {
+          "code": "BBPS_ELEC_PSPCL",
+          "category": "BBPS Bills",
+          "name": "Punjab State Power Corporation (PSPCL)",
+          "commType": "FLAT",
+          "retailer": 2.0,
+          "distributor": 0.4,
+          "superDistributor": 0.2,
+          "isActive": true
+        },
+        {
+          "code": "BBPS_ELEC_JVVNL",
+          "category": "BBPS Bills",
+          "name": "Jaipur Vidyut Vitran Nigam (JVVNL)",
+          "commType": "FLAT",
+          "retailer": 2.0,
+          "distributor": 0.4,
+          "superDistributor": 0.2,
+          "isActive": true
+        },
+        {
+          "code": "BBPS_ELEC_WBSEDCL",
+          "category": "BBPS Bills",
+          "name": "West Bengal State Electricity (WBSEDCL)",
+          "commType": "FLAT",
+          "retailer": 2.0,
+          "distributor": 0.4,
+          "superDistributor": 0.2,
+          "isActive": true
+        },
+        {
+          "code": "BBPS_ELEC_KSEBL",
+          "category": "BBPS Bills",
+          "name": "Kerala State Electricity Board (KSEBL)",
+          "commType": "FLAT",
+          "retailer": 2.0,
+          "distributor": 0.4,
+          "superDistributor": 0.2,
+          "isActive": true
         },
         {
           "code": "BBPS_WATER",

@@ -349,6 +349,36 @@ class Pay4uViewModel(application: Application) : AndroidViewModel(application) {
     }
   }
 
+  fun adminUpdateProviderFull(
+    providerId: Long,
+    name: String,
+    code: String,
+    serviceType: String,
+    commissionPercent: Double,
+    flatCommission: Double,
+    isActive: Boolean,
+    note: String
+  ) {
+    viewModelScope.launch {
+      repository.updateProviderFull(providerId, name, code, serviceType, commissionPercent, flatCommission, isActive, note)
+      _uiEvents.emit(UiEvent.ShowSnackbar("Operator $name updated successfully."))
+    }
+  }
+
+  fun adminToggleProvider(providerId: Long, isActive: Boolean, name: String) {
+    viewModelScope.launch {
+      repository.toggleProviderActive(providerId, isActive)
+      _uiEvents.emit(UiEvent.ShowSnackbar("Operator $name ${if (isActive) "ENABLED" else "DISABLED"}."))
+    }
+  }
+
+  fun adminDeleteProvider(providerId: Long, name: String) {
+    viewModelScope.launch {
+      repository.deleteProvider(providerId)
+      _uiEvents.emit(UiEvent.ShowSnackbar("Operator $name removed."))
+    }
+  }
+
   fun adminAddProvider(
     serviceType: String,
     name: String,

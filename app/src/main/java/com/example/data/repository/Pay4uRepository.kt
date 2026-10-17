@@ -111,6 +111,18 @@ class Pay4uRepository(private val database: AppDatabase) {
     providerDao.updateCommission(id, commissionPercent, flatCommission, isActive)
   }
 
+  suspend fun updateProviderFull(id: Long, name: String, code: String, serviceType: String, commissionPercent: Double, flatCommission: Double, isActive: Boolean, helperNote: String) {
+    providerDao.updateProviderFull(id, name, code, serviceType, commissionPercent, flatCommission, isActive, helperNote)
+  }
+
+  suspend fun deleteProvider(id: Long) {
+    providerDao.deleteProvider(id)
+  }
+
+  suspend fun toggleProviderActive(id: Long, isActive: Boolean) {
+    providerDao.toggleActive(id, isActive)
+  }
+
   suspend fun addProvider(provider: ServiceProviderEntity): Long {
     return providerDao.insertProvider(provider)
   }

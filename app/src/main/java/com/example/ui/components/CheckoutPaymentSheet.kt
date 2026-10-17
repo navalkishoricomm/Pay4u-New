@@ -87,21 +87,13 @@ fun CheckoutPaymentSheet(
   val merchantUpiId = "pay4u.recharge@icici"
 
   var selectedTab by remember { mutableStateOf(0) }
-  val tabs = listOf("UPI Payment", "Wallet (₹${"%.0f".format(walletBalance)})", "Credit Card")
+  val tabs = listOf("UPI Payment", "Wallet (₹${"%.0f".format(walletBalance)})")
 
   // UPI State
   var selectedUpiApp by remember { mutableStateOf("Google Pay") }
   var userUtr by remember { mutableStateOf("") }
   var copiedNotice by remember { mutableStateOf(false) }
   val upiApps = listOf("Google Pay", "PhonePe", "Paytm", "BHIM UPI", "Cred")
-
-  // Credit Card State
-  var cardNumber by remember { mutableStateOf("4532 8921 7734 4242") }
-  var cardHolder by remember { mutableStateOf("Mukesh Garg") }
-  var cardExpiry by remember { mutableStateOf("08/29") }
-  var cardCvv by remember { mutableStateOf("882") }
-  var showBankOtpDialog by remember { mutableStateOf(false) }
-  var bankOtpInput by remember { mutableStateOf("849201") }
 
   ModalBottomSheet(
     onDismissRequest = onDismiss,
@@ -313,26 +305,24 @@ fun CheckoutPaymentSheet(
             OutlinedTextField(
               value = userUtr,
               onValueChange = { if (it.length <= 16) userUtr = it },
-              label = { Text("12-Digit UPI Ref / UTR Number") },
-              placeholder = { Text("e.g. 428901847291") },
+              label = { Text("12-Digit UPI Ref / UTR Number *") },
+              placeholder = { Text("Enter UTR from payment app (e.g. 428901847291)") },
               leadingIcon = { Icon(Icons.Default.QrCode2, contentDescription = null) },
-              trailingIcon = {
-                Text(
-                  text = "DEMO",
-                  style = MaterialTheme.typography.labelSmall,
-                  fontWeight = FontWeight.Bold,
-                  color = MaterialTheme.colorScheme.primary,
-                  modifier = Modifier
-                    .clickable {
-                      userUtr = "4" + (10000000000L..99999999999L).random().toString()
-                    }
-                    .padding(8.dp)
-                )
-              },
               keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
               singleLine = true,
+              isError = userUtr.isNotBlank() && userUtr.trim().length < 6,
               modifier = Modifier.fillMaxWidth().testTag("upi_utr_input_field")
             )
+
+            if (userUtr.isNotBlank() && userUtr.trim().length < 6) {
+              Spacer(modifier = Modifier.height(4.dp))
+              Text(
+                text = "Please enter valid UPI Reference / UTR Number (minimum 6 digits)",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 11.sp
+              )
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -345,7 +335,7 @@ fun CheckoutPaymentSheet(
                 Icon(Icons.Default.Info, contentDescription = null, tint = StatusPending, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                  text = "Admin will manually verify UPI payment and update the Operator TR ID / genuine voucher code in the system.",
+                  text = "Enter the authentic UPI Transaction ID (UTR) generated in your payment app. Admin will verify and process your order.",
                   style = MaterialTheme.typography.bodySmall,
                   fontSize = 11.sp
                 )
@@ -354,17 +344,23 @@ fun CheckoutPaymentSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            val isUtrValid = userUtr.trim().length >= 6
             Button(
               onClick = {
-                val finalUtr = if (userUtr.isBlank()) "4" + (10000000000L..99999999999L).random().toString() else userUtr
-                onConfirmPayment("UPI", "$selectedUpiApp (UTR: $finalUtr)")
+                if (isUtrValid) {
+                  onConfirmPayment("UPI", "$selectedUpiApp (UTR: ${userUtr.trim()})")
+                }
               },
+              enabled = isUtrValid,
               modifier = Modifier.fillMaxWidth().height(48.dp).testTag("submit_upi_checkout_btn"),
               shape = RoundedCornerShape(12.dp)
             ) {
               Icon(Icons.Default.CheckCircle, contentDescription = null)
               Spacer(modifier = Modifier.width(8.dp))
-              Text("Submit UPI Payment (₹${"%.0f".format(amount)})", fontWeight = FontWeight.Bold)
+              Text(
+                text = if (isUtrValid) "Submit UPI Payment (₹${"%.0f".format(amount)})" else "Enter UPI UTR Number to Submit",
+                fontWeight = FontWeight.Bold
+              )
             }
           }
         }
@@ -439,7 +435,7 @@ fun CheckoutPaymentSheet(
                         color = StatusFailed
                       )
                       Text(
-                        text = "You need ₹${"%.2f".format(amount)} to purchase this item, but your wallet only has ₹${"%.2f".format(walletBalance)} (Short by ₹${"%.2f".format(shortfall)}). You cannot use wallet payment for this amount. Please switch to UPI or Credit Card above.",
+                        text = "You need ₹${"%.2f".format(amount)} to purchase this item, but your wallet only has ₹${"%.2f".format(walletBalance)} (Short by ₹${"%.2f".format(shortfall)}). Please switch to UPI tab above to complete payment.",
                         style = MaterialTheme.typography.bodySmall,
                         fontSize = 11.sp,
                         color = MaterialTheme.colorScheme.onSurface
@@ -476,151 +472,8 @@ fun CheckoutPaymentSheet(
             }
           }
         }
-
-        2 -> {
-          // TAB 2: CREDIT / DEBIT CARD
-          Column(modifier = Modifier.fillMaxWidth()) {
-            Row(
-              modifier = Modifier.fillMaxWidth(),
-              horizontalArrangement = Arrangement.SpaceBetween,
-              verticalAlignment = Alignment.CenterVertically
-            ) {
-              Text("Supported Cards:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-              Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Surface(color = MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(4.dp)) {
-                  Text("VISA", fontWeight = FontWeight.ExtraBold, fontSize = 9.sp, modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp))
-                }
-                Surface(color = MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(4.dp)) {
-                  Text("Mastercard", fontWeight = FontWeight.ExtraBold, fontSize = 9.sp, modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp))
-                }
-                Surface(color = MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(4.dp)) {
-                  Text("RuPay", fontWeight = FontWeight.ExtraBold, fontSize = 9.sp, modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp))
-                }
-              }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            OutlinedTextField(
-              value = cardNumber,
-              onValueChange = { cardNumber = it },
-              label = { Text("Card Number (16 digits)") },
-              leadingIcon = { Icon(Icons.Default.CreditCard, contentDescription = null) },
-              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-              singleLine = true,
-              modifier = Modifier.fillMaxWidth().testTag("credit_card_number_input")
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            OutlinedTextField(
-              value = cardHolder,
-              onValueChange = { cardHolder = it },
-              label = { Text("Name on Card") },
-              singleLine = true,
-              modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-              OutlinedTextField(
-                value = cardExpiry,
-                onValueChange = { cardExpiry = it },
-                label = { Text("Expiry (MM/YY)") },
-                modifier = Modifier.weight(1f),
-                singleLine = true
-              )
-              OutlinedTextField(
-                value = cardCvv,
-                onValueChange = { if (it.length <= 4) cardCvv = it },
-                label = { Text("CVV") },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.weight(1f),
-                singleLine = true
-              )
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-              Icon(Icons.Default.Lock, contentDescription = null, tint = BrandSecondary, modifier = Modifier.size(16.dp))
-              Spacer(modifier = Modifier.width(6.dp))
-              Text("Card details are encrypted & RBI compliant tokenized", style = MaterialTheme.typography.bodySmall, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-              onClick = { showBankOtpDialog = true },
-              modifier = Modifier.fillMaxWidth().height(48.dp).testTag("pay_via_credit_card_btn"),
-              colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-              shape = RoundedCornerShape(12.dp)
-            ) {
-              Icon(Icons.Default.CreditCard, contentDescription = null)
-              Spacer(modifier = Modifier.width(8.dp))
-              Text("Proceed to 3D Secure OTP (₹${"%.0f".format(amount)})", fontWeight = FontWeight.Bold)
-            }
-          }
-        }
       }
     }
-  }
-
-  // 3D Secure Bank OTP Dialog
-  if (showBankOtpDialog) {
-    AlertDialog(
-      onDismissRequest = { showBankOtpDialog = false },
-      title = {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Icon(Icons.Default.Security, contentDescription = null, tint = BrandPrimary)
-          Spacer(modifier = Modifier.width(8.dp))
-          Text("Bank 3D Secure Verification", fontWeight = FontWeight.Bold)
-        }
-      },
-      text = {
-        Column {
-          Text("A one-time password (OTP) has been sent to your mobile registered with your card (•••• 4242).")
-          Spacer(modifier = Modifier.height(10.dp))
-          Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            shape = RoundedCornerShape(8.dp)
-          ) {
-            Text(
-              text = "Demo Bank OTP: 849201",
-              fontWeight = FontWeight.Bold,
-              modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-              fontFamily = FontFamily.Monospace,
-              color = BrandPrimary
-            )
-          }
-          Spacer(modifier = Modifier.height(10.dp))
-          OutlinedTextField(
-            value = bankOtpInput,
-            onValueChange = { bankOtpInput = it },
-            label = { Text("Enter 6-Digit OTP") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth().testTag("bank_otp_input")
-          )
-        }
-      },
-      confirmButton = {
-        Button(
-          onClick = {
-            showBankOtpDialog = false
-            onConfirmPayment("CREDIT_CARD", "Credit Card (•••• 4242) - Auth: CC-${(100000..999999).random()}")
-          },
-          modifier = Modifier.testTag("confirm_bank_otp_btn")
-        ) {
-          Text("Approve & Pay")
-        }
-      },
-      dismissButton = {
-        OutlinedButton(onClick = { showBankOtpDialog = false }) { Text("Cancel") }
-      }
-    )
   }
 }
 

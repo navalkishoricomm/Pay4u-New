@@ -14,56 +14,104 @@ const BBPS_SERVICES = {
     paramName: "Consumer CA No. / Account ID",
     paramPlaceholder: "e.g. 1002948194",
     operators: [
+      // Delhi NCR
       "BSES Rajdhani Power Limited (BRPL) - Delhi",
       "BSES Yamuna Power Limited (BYPL) - Delhi",
       "Tata Power Delhi Distribution Limited (TPDDL)",
       "New Delhi Municipal Council (NDMC) Electricity",
+      "Military Engineer Services (MES) - Delhi Cantt",
+      // Maharashtra
       "Maharashtra State Electricity Dist. (MSEDCL / Mahavitaran)",
       "Adani Electricity Mumbai Ltd",
       "Tata Power - Mumbai",
       "Brihanmumbai Electric Supply & Transport (BEST)",
       "Torrent Power - Bhiwandi / Shil / Kalwa",
+      // Uttar Pradesh
       "UPPCL - Urban (Uttar Pradesh Power Corp)",
       "UPPCL - Rural (Uttar Pradesh Power Corp)",
       "Torrent Power - Agra",
       "Noida Power Company Ltd (NPCL)",
       "Kanpur Electricity Supply Co (KESCO)",
+      // Karnataka
       "Bangalore Electricity Supply (BESCOM)",
       "Chamundeshwari Electricity (CHESCOM)",
       "Hubli Electricity Supply (HESCOM)",
       "Mangalore Electricity Supply (MESCOM)",
       "Gulbarga Electricity Supply (GESCOM)",
-      "Tamil Nadu Generation & Distribution (TANGEDCO)",
+      "Hukkeri Rural Electric Co-operative Society (HRECS)",
+      // Gujarat
       "Dakshin Gujarat Vij Company (DGVCL)",
       "Madhya Gujarat Vij Company (MGVCL)",
       "Paschim Gujarat Vij Company (PGVCL)",
       "Uttar Gujarat Vij Company (UGVCL)",
       "Torrent Power - Ahmedabad / Gandhinagar / Surat",
+      "Torrent Power - Dahej",
+      "GIFT Power Company Limited (GIFT City)",
+      // Tamil Nadu & Puducherry
+      "Tamil Nadu Generation & Distribution (TANGEDCO)",
+      "Electricity Department Puducherry",
+      // West Bengal
       "CESC Kolkata",
       "West Bengal State Electricity (WBSEDCL)",
+      "India Power Corporation Limited (IPCL - Asansol)",
+      // Punjab, Haryana & Chandigarh
       "Punjab State Power Corporation (PSPCL)",
       "Dakshin Haryana Bijli Vitran Nigam (DHBVN)",
       "Uttar Haryana Bijli Vitran Nigam (UHBVN)",
+      "Chandigarh Electricity Department",
+      // Rajasthan
       "Jaipur Vidyut Vitran Nigam (JVVNL)",
       "Jodhpur Vidyut Vitran Nigam (JdVVNL)",
       "Ajmer Vidyut Vitran Nigam (AVVNL)",
+      "Kota Electricity Distribution Limited (KEDL)",
+      "Bharatpur Electricity Services Limited (BESL)",
+      "Bikaner Electricity Supply Limited (BKESL)",
+      // Telangana & Andhra Pradesh
       "Telangana State Southern Power (TSSPDCL)",
       "Telangana State Northern Power (TSNPDCL)",
       "Andhra Pradesh Eastern Power (APEPDCL)",
       "Andhra Pradesh Southern Power (APSPDCL)",
+      "Andhra Pradesh Central Power (APCPDCL)",
+      // Bihar & Jharkhand
       "North Bihar Power Distribution (NBPDCL)",
       "South Bihar Power Distribution (SBPDCL)",
+      "Jharkhand Bijli Vitran Nigam (JBVNL)",
+      "Jamshedpur Utilities & Services Company (JUSCO / Tata Steel)",
+      "Damodar Valley Corporation (DVC)",
+      // Madhya Pradesh & Chhattisgarh
       "MP Poorv Kshetra Vidyut Vitran (Jabalpur)",
       "MP Paschim Kshetra Vidyut Vitran (Indore)",
       "MP Madhya Kshetra Vidyut Vitran (Bhopal)",
-      "Kerala State Electricity Board (KSEBL)",
+      "Chhattisgarh State Power Distribution (CSPDCL)",
+      // Odisha
       "TP Central Odisha Distribution (TPCODL)",
       "TP Western Odisha Distribution (TPWODL)",
-      "Assam Power Distribution Company (APDCL)",
+      "TP Southern Odisha Distribution (TPSODL)",
+      "TP Northern Odisha Distribution (TPNODL)",
+      // Kerala & Goa
+      "Kerala State Electricity Board (KSEBL)",
+      "Goa Electricity Department",
+      // Uttarakhand & Himachal Pradesh
       "Uttarakhand Power Corporation (UPCL)",
       "Himachal Pradesh State Electricity Board (HPSEBL)",
+      // Jammu, Kashmir & Ladakh
       "Jammu Power Distribution Corp (JPDCL)",
-      "Goa Electricity Department"
+      "Kashmir Power Distribution Corp (KPDCL)",
+      "Ladakh Power Development Department (LPDD)",
+      // North East & Hill States
+      "Assam Power Distribution Company (APDCL)",
+      "Tripura State Electricity Corporation (TSECL)",
+      "Meghalaya Power Distribution Corp (MePDCL)",
+      "Manipur State Power Distribution (MSPDCL)",
+      "Sikkim Power Distribution (SPDC)",
+      "Nagaland Department of Power (DoPN)",
+      "Power & Electricity Department Mizoram (PEDM)",
+      "Department of Power Arunachal Pradesh (DoPAP)",
+      // Union Territories
+      "DNH Power Distribution Company (DNHPDCL)",
+      "Daman and Diu Electricity Department",
+      "Andaman and Nicobar Electricity Department",
+      "Lakshadweep Electricity Department"
     ]
   },
   "Mobile Postpaid": {
@@ -1323,13 +1371,13 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // 3. UPDATE INDIVIDUAL SERVICE IN A SCHEME
+  // 3. UPDATE INDIVIDUAL OPERATOR / SERVICE IN A SCHEME
   if (pathname === '/api/admin/schemes/update-service' && req.method === 'POST') {
     try {
-      const { schemeId, serviceCode, commType, retailer, distributor, superDistributor } = await parseBody(req);
+      const { schemeId, serviceCode, name, category, commType, retailer, distributor, superDistributor, isActive } = await parseBody(req);
       if (!db.schemes) return sendJson(res, { error: "No schemes configured" }, 404);
 
-      const scheme = db.schemes.find(s => s.id === schemeId);
+      const scheme = db.schemes.find(s => s.id === schemeId) || db.schemes[0];
       if (!scheme) return sendJson(res, { error: "Scheme not found" }, 404);
 
       let svc = scheme.services.find(s => s.code === serviceCode);
@@ -1337,13 +1385,93 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, { error: `Service "${serviceCode}" not found in scheme` }, 404);
       }
 
+      if (name) svc.name = name.trim();
+      if (category) svc.category = category.trim();
       if (commType) svc.commType = commType;
       if (retailer !== undefined) svc.retailer = parseFloat(retailer) || 0;
       if (distributor !== undefined) svc.distributor = parseFloat(distributor) || 0;
       if (superDistributor !== undefined) svc.superDistributor = parseFloat(superDistributor) || 0;
+      if (isActive !== undefined) svc.isActive = Boolean(isActive);
 
       saveState(db);
       return sendJson(res, { success: true, scheme, service: svc });
+    } catch (e) {
+      return sendJson(res, { error: e.message }, 400);
+    }
+  }
+
+  // 3b. TOGGLE ACTIVE/DISABLED STATUS FOR AN OPERATOR
+  if (pathname === '/api/admin/schemes/toggle-service' && req.method === 'POST') {
+    try {
+      const { schemeId, serviceCode, isActive } = await parseBody(req);
+      if (!db.schemes) return sendJson(res, { error: "No schemes configured" }, 404);
+
+      const scheme = db.schemes.find(s => s.id === schemeId) || db.schemes[0];
+      if (!scheme) return sendJson(res, { error: "Scheme not found" }, 404);
+
+      let svc = scheme.services.find(s => s.code === serviceCode);
+      if (!svc) return sendJson(res, { error: `Service "${serviceCode}" not found` }, 404);
+
+      svc.isActive = isActive !== undefined ? Boolean(isActive) : (svc.isActive === false ? true : false);
+      saveState(db);
+      return sendJson(res, { success: true, service: svc });
+    } catch (e) {
+      return sendJson(res, { error: e.message }, 400);
+    }
+  }
+
+  // 3c. ADD NEW OPERATOR / SERVICE TO SCHEME
+  if (pathname === '/api/admin/schemes/add-service' && req.method === 'POST') {
+    try {
+      const { schemeId, code, category, name, commType, retailer, distributor, superDistributor, isActive } = await parseBody(req);
+      if (!code || !name) return sendJson(res, { error: "Operator Code and Name are required" }, 400);
+      if (!db.schemes) db.schemes = [];
+
+      const cleanCode = code.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_');
+      const newService = {
+        code: cleanCode,
+        category: (category || 'BBPS').trim(),
+        name: name.trim(),
+        commType: commType || 'PERCENT',
+        retailer: parseFloat(retailer) || 0,
+        distributor: parseFloat(distributor) || 0,
+        superDistributor: parseFloat(superDistributor) || 0,
+        isActive: isActive !== undefined ? Boolean(isActive) : true
+      };
+
+      // Add to specified scheme, or all schemes
+      db.schemes.forEach(sc => {
+        if (!sc.services) sc.services = [];
+        const existingIdx = sc.services.findIndex(s => s.code === cleanCode);
+        if (existingIdx >= 0) {
+          sc.services[existingIdx] = { ...sc.services[existingIdx], ...newService };
+        } else {
+          sc.services.push({ ...newService });
+        }
+      });
+
+      saveState(db);
+      return sendJson(res, { success: true, service: newService });
+    } catch (e) {
+      return sendJson(res, { error: e.message }, 400);
+    }
+  }
+
+  // 3d. DELETE / REMOVE OPERATOR FROM SCHEMES
+  if (pathname === '/api/admin/schemes/delete-service' && req.method === 'POST') {
+    try {
+      const { schemeId, serviceCode } = await parseBody(req);
+      if (!serviceCode) return sendJson(res, { error: "serviceCode is required" }, 400);
+      if (!db.schemes) return sendJson(res, { error: "No schemes found" }, 404);
+
+      db.schemes.forEach(sc => {
+        if (sc.services) {
+          sc.services = sc.services.filter(s => s.code !== serviceCode);
+        }
+      });
+
+      saveState(db);
+      return sendJson(res, { success: true, deletedCode: serviceCode });
     } catch (e) {
       return sendJson(res, { error: e.message }, 400);
     }

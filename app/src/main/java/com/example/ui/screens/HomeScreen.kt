@@ -121,16 +121,12 @@ fun HomeScreen(
       WalletOverviewCard(
         balance = currentUser?.walletBalance ?: 0.0,
         userName = currentUser?.name ?: "User",
-        userPhone = currentUser?.phone ?: "9876543210",
+        userPhone = currentUser?.phone ?: "",
         onAddFunds = { viewModel.navigateTo(Screen.PROFILE) },
         onHistory = onNavigateToHistory
       )
     }
 
-    // 3. Hero Promo Banner
-    item {
-      HeroPromoCard(onExploreVouchers = onNavigateToVouchers)
-    }
 
     // 4. Primary Service Grid (Recharge & Bill Payment)
     item {
@@ -149,13 +145,7 @@ fun HomeScreen(
       )
     }
 
-    // 5. Brand Vouchers Spotlight
-    item {
-      Spacer(modifier = Modifier.height(16.dp))
-      BrandVoucherTeaser(onViewAll = onNavigateToVouchers)
-    }
-
-    // 6. Recent Recharges & Transactions
+    // 5. Recent Recharges & Transactions
     item {
       Spacer(modifier = Modifier.height(16.dp))
       Row(
@@ -460,55 +450,6 @@ private fun WalletOverviewCard(
   }
 }
 
-@Composable
-private fun HeroPromoCard(onExploreVouchers: () -> Unit) {
-  Card(
-    modifier = Modifier
-      .fillMaxWidth()
-      .padding(horizontal = 16.dp, vertical = 10.dp)
-      .clickable { onExploreVouchers() },
-    shape = RoundedCornerShape(16.dp),
-    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-    elevation = CardDefaults.cardElevation(2.dp)
-  ) {
-    Column {
-      Image(
-        painter = painterResource(id = R.drawable.img_hero_banner),
-        contentDescription = "Promotional Banner",
-        modifier = Modifier
-          .fillMaxWidth()
-          .aspectRatio(16f / 9f)
-          .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
-        contentScale = ContentScale.Crop
-      )
-      Row(
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(14.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-      ) {
-        Column {
-          Text(
-            text = "Fast Recharges + Brand Vouchers",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold
-          )
-          Text(
-            text = "Instant 2% to 10% discount on top brand gift cards",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-          )
-        }
-        Icon(
-          imageVector = Icons.Default.ArrowForward,
-          contentDescription = "Explore",
-          tint = MaterialTheme.colorScheme.primary
-        )
-      }
-    }
-  }
-}
 
 @Composable
 private fun ServiceGrid(
@@ -809,26 +750,42 @@ fun RecentTransactionItem(
           fontWeight = FontWeight.ExtraBold,
           color = MaterialTheme.colorScheme.onSurface
         )
-        Surface(
-          shape = RoundedCornerShape(6.dp),
-          color = when (transaction.status) {
-            "SUCCESS" -> StatusSuccess.copy(alpha = 0.15f)
-            "PENDING" -> StatusPending.copy(alpha = 0.15f)
-            else -> Color.Red.copy(alpha = 0.15f)
+        Spacer(modifier = Modifier.height(2.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+          Surface(
+            shape = RoundedCornerShape(4.dp),
+            color = if (transaction.paymentMethod == "WALLET") StatusSuccess.copy(alpha = 0.15f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+          ) {
+            Text(
+              text = if (transaction.paymentMethod == "WALLET") "Wallet" else "UPI",
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.Bold,
+              color = if (transaction.paymentMethod == "WALLET") StatusSuccess else MaterialTheme.colorScheme.primary,
+              modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+              fontSize = 9.sp
+            )
           }
-        ) {
-          Text(
-            text = transaction.status,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
+          Surface(
+            shape = RoundedCornerShape(6.dp),
             color = when (transaction.status) {
-              "SUCCESS" -> StatusSuccess
-              "PENDING" -> StatusPending
-              else -> Color.Red
-            },
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-            fontSize = 10.sp
-          )
+              "SUCCESS" -> StatusSuccess.copy(alpha = 0.15f)
+              "PENDING" -> StatusPending.copy(alpha = 0.15f)
+              else -> Color.Red.copy(alpha = 0.15f)
+            }
+          ) {
+            Text(
+              text = transaction.status,
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.Bold,
+              color = when (transaction.status) {
+                "SUCCESS" -> StatusSuccess
+                "PENDING" -> StatusPending
+                else -> Color.Red
+              },
+              modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+              fontSize = 10.sp
+            )
+          }
         }
       }
     }

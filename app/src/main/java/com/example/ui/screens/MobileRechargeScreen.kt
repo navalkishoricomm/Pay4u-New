@@ -50,6 +50,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -91,7 +92,22 @@ fun MobileRechargeScreen(
 
   var showPaymentSheet by remember { mutableStateOf(false) }
 
-  val operators = listOf("Jio", "Airtel", "Vi", "BSNL")
+  val allProviders by viewModel.allProviders.collectAsStateWithLifecycle()
+  val operators = remember(allProviders) {
+    val dbMobile = allProviders.filter { it.serviceType == "MOBILE" }
+    if (dbMobile.isEmpty()) listOf("Jio", "Airtel", "Vi", "BSNL")
+    else {
+      val activeNames = dbMobile.filter { it.isActive }.map { it.name }
+      if (activeNames.isEmpty()) listOf("Jio", "Airtel", "Vi", "BSNL") else activeNames
+    }
+  }
+
+  LaunchedEffect(operators) {
+    if (operators.isNotEmpty() && selectedOperator !in operators) {
+      selectedOperator = operators.first()
+    }
+  }
+
   val plans = remember(selectedOperator) { PlansData.getPlansForOperator(selectedOperator) }
   val planCategories = listOf("All Plans", "Popular", "True 5G Unlimited", "Data Booster", "Annual")
 

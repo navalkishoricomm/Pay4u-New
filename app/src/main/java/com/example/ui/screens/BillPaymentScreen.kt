@@ -48,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -93,23 +94,102 @@ fun BillPaymentScreen(
   var selectedCategory by remember { mutableStateOf("Electricity") }
 
   val electricityBillers = listOf(
+    // Delhi NCR
     "BSES Rajdhani Power Limited (BRPL) - Delhi",
     "BSES Yamuna Power Limited (BYPL) - Delhi",
     "Tata Power Delhi Distribution (TPDDL)",
-    "Maharashtra State Electricity Dist. (MSEDCL)",
+    "New Delhi Municipal Council (NDMC) Electricity",
+    "Military Engineer Services (MES) - Delhi Cantt",
+    // Maharashtra
+    "Maharashtra State Electricity Dist. (MSEDCL / Mahavitaran)",
     "Adani Electricity Mumbai Ltd",
     "Tata Power - Mumbai",
+    "Brihanmumbai Electric Supply & Transport (BEST)",
+    "Torrent Power - Bhiwandi / Shil / Kalwa",
+    // Uttar Pradesh
     "UPPCL - Urban (Uttar Pradesh Power Corp)",
     "UPPCL - Rural (Uttar Pradesh Power Corp)",
+    "Torrent Power - Agra",
+    "Noida Power Company Ltd (NPCL)",
+    "Kanpur Electricity Supply Co (KESCO)",
+    // Karnataka
     "Bangalore Electricity Supply (BESCOM)",
-    "Tamil Nadu Generation & Dist. (TANGEDCO)",
+    "Chamundeshwari Electricity (CHESCOM)",
+    "Hubli Electricity Supply (HESCOM)",
+    "Mangalore Electricity Supply (MESCOM)",
+    "Gulbarga Electricity Supply (GESCOM)",
+    "Hukkeri Rural Electric Co-operative Society (HRECS)",
+    // Gujarat
     "Dakshin Gujarat Vij Company (DGVCL)",
-    "Torrent Power - Ahmedabad / Surat / Agra",
-    "Punjab State Power Corporation (PSPCL)",
+    "Madhya Gujarat Vij Company (MGVCL)",
+    "Paschim Gujarat Vij Company (PGVCL)",
+    "Uttar Gujarat Vij Company (UGVCL)",
+    "Torrent Power - Ahmedabad / Gandhinagar / Surat",
+    "Torrent Power - Dahej",
+    "GIFT Power Company Limited (GIFT City)",
+    // Tamil Nadu & Puducherry
+    "Tamil Nadu Generation & Dist. (TANGEDCO)",
+    "Electricity Department Puducherry",
+    // West Bengal
     "CESC Kolkata",
     "West Bengal State Electricity (WBSEDCL)",
+    "India Power Corporation Limited (IPCL - Asansol)",
+    // Punjab & Haryana & Chandigarh
+    "Punjab State Power Corporation (PSPCL)",
+    "Dakshin Haryana Bijli Vitran Nigam (DHBVN)",
+    "Uttar Haryana Bijli Vitran Nigam (UHBVN)",
+    "Chandigarh Electricity Department",
+    // Rajasthan
+    "Jaipur Vidyut Vitran Nigam (JVVNL)",
+    "Jodhpur Vidyut Vitran Nigam (JdVVNL)",
+    "Ajmer Vidyut Vitran Nigam (AVVNL)",
+    "Kota Electricity Distribution Limited (KEDL)",
+    "Bharatpur Electricity Services Limited (BESL)",
+    "Bikaner Electricity Supply Limited (BKESL)",
+    // Telangana & Andhra Pradesh
     "Telangana State Southern Power (TSSPDCL)",
-    "Kerala State Electricity Board (KSEBL)"
+    "Telangana State Northern Power (TSNPDCL)",
+    "Andhra Pradesh Eastern Power (APEPDCL)",
+    "Andhra Pradesh Southern Power (APSPDCL)",
+    "Andhra Pradesh Central Power (APCPDCL)",
+    // Bihar & Jharkhand
+    "North Bihar Power Distribution (NBPDCL)",
+    "South Bihar Power Distribution (SBPDCL)",
+    "Jharkhand Bijli Vitran Nigam (JBVNL)",
+    "Jamshedpur Utilities & Services Company (JUSCO / Tata Steel)",
+    "Damodar Valley Corporation (DVC)",
+    // Madhya Pradesh & Chhattisgarh
+    "MP Poorv Kshetra Vidyut Vitran (Jabalpur)",
+    "MP Paschim Kshetra Vidyut Vitran (Indore)",
+    "MP Madhya Kshetra Vidyut Vitran (Bhopal)",
+    "Chhattisgarh State Power Distribution (CSPDCL)",
+    // Odisha
+    "TP Central Odisha Distribution (TPCODL)",
+    "TP Western Odisha Distribution (TPWODL)",
+    "TP Southern Odisha Distribution (TPSODL)",
+    "TP Northern Odisha Distribution (TPNODL)",
+    // Kerala & Goa
+    "Kerala State Electricity Board (KSEBL)",
+    "Goa Electricity Department",
+    // North East & Hills
+    "Assam Power Distribution Company (APDCL)",
+    "Uttarakhand Power Corporation (UPCL)",
+    "Himachal Pradesh State Electricity Board (HPSEBL)",
+    "Jammu Power Distribution Corp (JPDCL)",
+    "Kashmir Power Distribution Corp (KPDCL)",
+    "Ladakh Power Development Department (LPDD)",
+    "Tripura State Electricity Corporation (TSECL)",
+    "Meghalaya Power Distribution Corp (MePDCL)",
+    "Manipur State Power Distribution (MSPDCL)",
+    "Sikkim Power Distribution (SPDC)",
+    "Nagaland Department of Power (DoPN)",
+    "Power & Electricity Department Mizoram (PEDM)",
+    "Department of Power Arunachal Pradesh (DoPAP)",
+    // Union Territories
+    "DNH Power Distribution Company (DNHPDCL)",
+    "Daman and Diu Electricity Department",
+    "Andaman and Nicobar Electricity Department",
+    "Lakshadweep Electricity Department"
   )
   val waterBillers = listOf(
     "Delhi Jal Board (DJB)",
@@ -193,8 +273,13 @@ fun BillPaymentScreen(
     "Asianet Digital Network"
   )
 
-  val currentBillers = remember(selectedCategory) {
-    when (selectedCategory) {
+  val allProviders by viewModel.allProviders.collectAsStateWithLifecycle()
+  val disabledProviderNames = remember(allProviders) {
+    allProviders.filter { !it.isActive }.map { it.name.lowercase() }.toSet()
+  }
+
+  val currentBillers = remember(selectedCategory, disabledProviderNames) {
+    val rawList = when (selectedCategory) {
       "Electricity" -> electricityBillers
       "Water" -> waterBillers
       "LPG Gas" -> lpgBillers
@@ -208,11 +293,20 @@ fun BillPaymentScreen(
       "Cable TV" -> cableTvBillers
       else -> electricityBillers
     }
+    val activeOnly = rawList.filter { it.lowercase() !in disabledProviderNames }
+    if (activeOnly.isEmpty()) rawList else activeOnly
   }
 
   var selectedBiller by remember { mutableStateOf(electricityBillers.first()) }
+
+  LaunchedEffect(currentBillers) {
+    if (currentBillers.isNotEmpty() && selectedBiller !in currentBillers) {
+      selectedBiller = currentBillers.first()
+    }
+  }
+
   var billerDropdownOpen by remember { mutableStateOf(false) }
-  var consumerId by remember { mutableStateOf("1002948194") }
+  var consumerId by remember { mutableStateOf("") }
 
   var isFetchingLive by remember { mutableStateOf(false) }
   var fetchedBill by remember { mutableStateOf<LiveBillResult?>(null) }
