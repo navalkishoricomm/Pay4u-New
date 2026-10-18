@@ -30,6 +30,10 @@ import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Refresh
+import com.example.data.network.ServerConfig
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -262,9 +266,152 @@ fun AuthScreen(
           ) {
             Text(if (isSignUp) "Create Account & Get ₹250" else "Sign In", fontWeight = FontWeight.Bold)
           }
+
+          if (!isSignUp) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+              text = "Quick Sign In:",
+              style = MaterialTheme.typography.labelMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+              OutlinedButton(
+                onClick = {
+                  phone = "9810610554"
+                  password = "123456"
+                  errorMessage = null
+                },
+                modifier = Modifier
+                  .weight(1f)
+                  .testTag("quick_login_retailer"),
+                shape = RoundedCornerShape(8.dp)
+              ) {
+                Text("👤 Retailer\n9810610554", style = MaterialTheme.typography.labelSmall)
+              }
+              OutlinedButton(
+                onClick = {
+                  phone = "admin"
+                  password = "admin"
+                  errorMessage = null
+                },
+                modifier = Modifier
+                  .weight(1f)
+                  .testTag("quick_login_admin"),
+                shape = RoundedCornerShape(8.dp)
+              ) {
+                Text("⚡ Admin\nadmin", style = MaterialTheme.typography.labelSmall)
+              }
+            }
+          }
         }
       }
 
+      Spacer(modifier = Modifier.height(16.dp))
+
+      // VPS Server Connection Config Card
+      var showVpsDialog by remember { mutableStateOf(false) }
+      var vpsUrlInput by remember { mutableStateOf(ServerConfig.getVpsUrl()) }
+      var testStatus by remember { mutableStateOf<String?>(null) }
+      var isTesting by remember { mutableStateOf(false) }
+
+      Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+      ) {
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(12.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+          Column(modifier = Modifier.weight(1f)) {
+            Text(
+              text = "🌐 VPS Server Sync",
+              style = MaterialTheme.typography.labelMedium,
+              fontWeight = FontWeight.Bold
+            )
+            val currentVps = ServerConfig.getVpsUrl()
+            Text(
+              text = if (currentVps.isNotBlank()) "Target: $currentVps" else "Mode: Offline / Local Database (Tap to set VPS IP)",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+          }
+          IconButton(onClick = {
+            vpsUrlInput = ServerConfig.getVpsUrl()
+            testStatus = null
+            showVpsDialog = true
+          }) {
+            Icon(Icons.Default.Settings, contentDescription = "VPS Settings")
+          }
+        }
+      }
+
+      if (showVpsDialog) {
+        AlertDialog(
+          onDismissRequest = { showVpsDialog = false },
+          title = { Text("VPS Server Configuration", fontWeight = FontWeight.Bold) },
+          text = {
+            Column {
+              Text(
+                "Enter your VPS URL or IP address to log in and sync live transactions directly with your VPS Node.js server.",
+                style = MaterialTheme.typography.bodySmall
+              )
+              Spacer(modifier = Modifier.height(10.dp))
+              OutlinedTextField(
+                value = vpsUrlInput,
+                onValueChange = { vpsUrlInput = it; testStatus = null },
+                label = { Text("VPS URL (e.g. http://1.2.3.4:5003)") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+              )
+              if (testStatus != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                  text = testStatus ?: "",
+                  style = MaterialTheme.typography.bodySmall,
+                  color = if (testStatus?.startsWith("✓") == true) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                )
+              }
+              Spacer(modifier = Modifier.height(10.dp))
+              OutlinedButton(
+                onClick = {
+                  isTesting = true
+                  testStatus = "Testing connection to VPS..."
+                  scope.launch {
+                    val res = ServerConfig.testConnection(vpsUrlInput)
+                    isTesting = false
+                    testStatus = if (res.first) "✓ ${res.second}" else "❌ ${res.second}"
+                  }
+                },
+                enabled = !isTesting && vpsUrlInput.isNotBlank(),
+                modifier = Modifier.fillMaxWidth()
+              ) {
+                Text(if (isTesting) "Connecting..." else "⚡ Test Connection")
+              }
+            }
+          },
+          confirmButton = {
+            Button(onClick = {
+              ServerConfig.setVpsUrl(vpsUrlInput)
+              showVpsDialog = false
+            }) {
+              Text("Save & Apply")
+            }
+          },
+          dismissButton = {
+            OutlinedButton(onClick = { showVpsDialog = false }) {
+              Text("Cancel")
+            }
+          }
+        )
+      }
     }
   }
 }
@@ -407,7 +554,7 @@ fun ProfileScreen(
           modifier = Modifier.fillMaxWidth(),
           shape = RoundedCornerShape(16.dp),
           colors = CardDefaults.cardColors(containerColor = BrandAccent.copy(alpha = 0.1f)),
-          border = BorderStrokeSafe(1.dp, BrandAccent.copy(alpha = 0.4f))
+          border = androidx.compose.foundation.BorderStroke(1.dp, BrandAccent.copy(alpha = 0.4f))
         ) {
           Row(
             modifier = Modifier
@@ -427,6 +574,77 @@ fun ProfileScreen(
             Text("Open", fontWeight = FontWeight.Bold, color = BrandAccent)
           }
         }
+      }
+
+      // VPS Host Configuration
+      var showProfileVpsDialog by remember { mutableStateOf(false) }
+      var profileVpsInput by remember { mutableStateOf(ServerConfig.getVpsUrl()) }
+
+      Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(1.dp)
+      ) {
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+            Icon(Icons.Default.Settings, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+              Text("VPS Server Endpoint", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
+              val currentUrl = ServerConfig.getVpsUrl()
+              Text(
+                text = if (currentUrl.isNotBlank()) currentUrl else "Offline / Local Mode",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 11.sp
+              )
+            }
+          }
+          OutlinedButton(onClick = {
+            profileVpsInput = ServerConfig.getVpsUrl()
+            showProfileVpsDialog = true
+          }) {
+            Text("Configure")
+          }
+        }
+      }
+
+      if (showProfileVpsDialog) {
+        AlertDialog(
+          onDismissRequest = { showProfileVpsDialog = false },
+          title = { Text("Set VPS Server URL", fontWeight = FontWeight.Bold) },
+          text = {
+            Column {
+              Text("Set the address of your hosted pay4u backend server on your VPS:", style = MaterialTheme.typography.bodySmall)
+              Spacer(modifier = Modifier.height(8.dp))
+              OutlinedTextField(
+                value = profileVpsInput,
+                onValueChange = { profileVpsInput = it },
+                label = { Text("VPS URL (e.g. http://1.2.3.4:5003)") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+              )
+            }
+          },
+          confirmButton = {
+            Button(onClick = {
+              ServerConfig.setVpsUrl(profileVpsInput)
+              showProfileVpsDialog = false
+            }) {
+              Text("Save")
+            }
+          },
+          dismissButton = {
+            OutlinedButton(onClick = { showProfileVpsDialog = false }) { Text("Cancel") }
+          }
+        )
       }
 
       // Logout / Sign Out
@@ -491,6 +709,3 @@ fun ProfileScreen(
   }
 }
 
-@Composable
-private fun BorderStrokeSafe(width: androidx.compose.ui.unit.Dp, color: Color) =
-  androidx.compose.foundation.BorderStroke(width, color)

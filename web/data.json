@@ -28,11 +28,12 @@
     {
       "id": 2,
       "name": "Mukesh Garg",
-      "phone": "9876543210",
+      "phone": "9810610554",
+      "alternatePhone": "9876543210",
       "email": "mukgarg11@gmail.com",
       "password": "123456",
       "role": "RETAILER",
-      "walletBalance": 1051,
+      "walletBalance": 1250,
       "schemeId": "SCH_RETAILER_DEF"
     },
     {
@@ -199,7 +200,7 @@
           "category": "BBPS Bills",
           "name": "Maharashtra State Electricity (MSEDCL)",
           "commType": "FLAT",
-          "retailer": 2.0,
+          "retailer": 2,
           "distributor": 0.4,
           "superDistributor": 0.2,
           "isActive": true
@@ -219,7 +220,7 @@
           "category": "BBPS Bills",
           "name": "UPPCL (Uttar Pradesh Power Corp Urban/Rural)",
           "commType": "FLAT",
-          "retailer": 2.0,
+          "retailer": 2,
           "distributor": 0.4,
           "superDistributor": 0.2,
           "isActive": true
@@ -229,7 +230,7 @@
           "category": "BBPS Bills",
           "name": "Bangalore Electricity Supply (BESCOM)",
           "commType": "FLAT",
-          "retailer": 2.0,
+          "retailer": 2,
           "distributor": 0.4,
           "superDistributor": 0.2,
           "isActive": true
@@ -239,7 +240,7 @@
           "category": "BBPS Bills",
           "name": "Tamil Nadu Generation & Distribution (TANGEDCO)",
           "commType": "FLAT",
-          "retailer": 2.0,
+          "retailer": 2,
           "distributor": 0.4,
           "superDistributor": 0.2,
           "isActive": true
@@ -249,7 +250,7 @@
           "category": "BBPS Bills",
           "name": "Punjab State Power Corporation (PSPCL)",
           "commType": "FLAT",
-          "retailer": 2.0,
+          "retailer": 2,
           "distributor": 0.4,
           "superDistributor": 0.2,
           "isActive": true
@@ -259,7 +260,7 @@
           "category": "BBPS Bills",
           "name": "Jaipur Vidyut Vitran Nigam (JVVNL)",
           "commType": "FLAT",
-          "retailer": 2.0,
+          "retailer": 2,
           "distributor": 0.4,
           "superDistributor": 0.2,
           "isActive": true
@@ -269,7 +270,7 @@
           "category": "BBPS Bills",
           "name": "West Bengal State Electricity (WBSEDCL)",
           "commType": "FLAT",
-          "retailer": 2.0,
+          "retailer": 2,
           "distributor": 0.4,
           "superDistributor": 0.2,
           "isActive": true
@@ -279,7 +280,7 @@
           "category": "BBPS Bills",
           "name": "Kerala State Electricity Board (KSEBL)",
           "commType": "FLAT",
-          "retailer": 2.0,
+          "retailer": 2,
           "distributor": 0.4,
           "superDistributor": 0.2,
           "isActive": true

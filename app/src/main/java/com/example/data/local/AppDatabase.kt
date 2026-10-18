@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
     BrandVoucherEntity::class,
     UserVoucherEntity::class
   ],
-  version = 3,
+  version = 4,
   exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -64,6 +64,50 @@ abstract class AppDatabase : RoomDatabase() {
       }
     }
 
+    override fun onOpen(db: SupportSQLiteDatabase) {
+      super.onOpen(db)
+      INSTANCE?.let { database ->
+        scope.launch(Dispatchers.IO) {
+          ensureDefaultUsers(database)
+        }
+      }
+    }
+
+    private suspend fun ensureDefaultUsers(database: AppDatabase) {
+      val userDao = database.userDao()
+      // Ensure Master Admin exists
+      val admin = userDao.findByPhone("9999999999")
+      if (admin == null) {
+        userDao.insertUser(
+          UserEntity(
+            id = 1,
+            name = "Master Admin",
+            phone = "9999999999",
+            email = "admin@pay4u.in",
+            password = "admin",
+            walletBalance = 25000.0,
+            role = "ADMIN"
+          )
+        )
+      }
+
+      // Ensure Retailer 9810610554 exists
+      val retailer = userDao.findByPhone("9810610554")
+      if (retailer == null) {
+        userDao.insertUser(
+          UserEntity(
+            id = 2,
+            name = "Mukesh Garg",
+            phone = "9810610554",
+            email = "mukgarg11@gmail.com",
+            password = "123456",
+            walletBalance = 1250.0,
+            role = "USER"
+          )
+        )
+      }
+    }
+
     private suspend fun populateInitialData(database: AppDatabase) {
       val userDao = database.userDao()
       val providerDao = database.serviceProviderDao()
@@ -76,21 +120,21 @@ abstract class AppDatabase : RoomDatabase() {
           id = 1,
           name = "Master Admin",
           phone = "9999999999",
-          email = "admin@rechargepay.in",
+          email = "admin@pay4u.in",
           password = "admin",
           walletBalance = 25000.0,
           role = "ADMIN"
         )
       )
 
-      // Seed Regular User
+      // Seed Regular User / Retailer
       val defaultUserId = userDao.insertUser(
         UserEntity(
           id = 2,
           name = "Mukesh Garg",
-          phone = "9876543210",
+          phone = "9810610554",
           email = "mukgarg11@gmail.com",
-          password = "user123",
+          password = "123456",
           walletBalance = 1250.0,
           role = "USER"
         )

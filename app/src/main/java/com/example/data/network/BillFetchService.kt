@@ -159,8 +159,11 @@ class BillFetchService {
         put("consumerId", cleanId)
       }.toString()
 
+      val baseUrl = ServerConfig.getVpsUrl().ifBlank { "http://10.0.2.2:3000" }
+      val targetUrl = if (baseUrl.startsWith("http://") || baseUrl.startsWith("https://")) "$baseUrl/api/bill/fetch" else "http://$baseUrl/api/bill/fetch"
+
       val request = Request.Builder()
-        .url("http://10.0.2.2:3000/api/bill/fetch")
+        .url(targetUrl)
         .post(jsonBody.toRequestBody("application/json".toMediaType()))
         .build()
 

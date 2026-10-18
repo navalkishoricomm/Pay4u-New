@@ -163,11 +163,22 @@
           </div>
           <div class="form-group">
             <label class="form-label">Password *</label>
-            <input type="password" id="login-password" class="form-control" placeholder="Enter your password">
+            <input type="password" id="login-password" class="form-control" placeholder="Enter your password" onkeydown="if(event.key==='Enter') handleLogin()">
           </div>
           <button class="btn btn-primary" id="btn-login-submit" style="width: 100%; padding: 12px; font-size: 15px;" onclick="handleLogin()">
             Sign In to Portal
           </button>
+          <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">⚡ Quick Sign-In (1-Tap):</div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn btn-secondary" style="flex: 1; padding: 7px 10px; font-size: 12px; font-weight: 700; border-radius: 8px;" onclick="quickLoginDemo('9810610554', '123456')">
+                👤 Retailer: 9810610554
+              </button>
+              <button type="button" class="btn btn-secondary" style="flex: 1; padding: 7px 10px; font-size: 12px; font-weight: 700; border-radius: 8px;" onclick="quickLoginDemo('admin', 'admin')">
+                ⚡ Admin: admin
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Signup Form -->

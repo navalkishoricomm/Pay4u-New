@@ -11,6 +11,7 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
+    com.example.data.network.ServerConfig.init(this)
     setContent {
       RechargePayTheme {
         Pay4uApp()
