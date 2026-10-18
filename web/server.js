@@ -1730,14 +1730,16 @@ const server = http.createServer(async (req, res) => {
       apiKey: "eba68b79-d509-43a7-9386-abe9efed1cbb",
       saltIndex: 1,
       merchantId: "M9810610554",
-      upiVpa: "9810610554@ybl",
+      upiVpa: "9810610554@ptsbi",
+      merchantName: "Naval Kishori Communications Private Limited",
       status: "ACTIVE"
     };
     return sendJson(res, {
       success: true,
       phone: ph.phone,
       merchantId: ph.merchantId,
-      upiVpa: ph.upiVpa,
+      upiVpa: ph.upiVpa || "9810610554@ptsbi",
+      merchantName: ph.merchantName || "Naval Kishori Communications Private Limited",
       status: ph.status,
       apiKeyMasked: ph.apiKey ? ph.apiKey.slice(0, 8) + '...' + ph.apiKey.slice(-4) : ''
     });
@@ -1755,7 +1757,8 @@ const server = http.createServer(async (req, res) => {
         apiKey: "eba68b79-d509-43a7-9386-abe9efed1cbb",
         saltIndex: 1,
         merchantId: "M9810610554",
-        upiVpa: "9810610554@ybl",
+        upiVpa: "9810610554@ptsbi",
+        merchantName: "Naval Kishori Communications Private Limited",
         status: "ACTIVE"
       };
 
@@ -1779,7 +1782,8 @@ const server = http.createServer(async (req, res) => {
       const base64Payload = Buffer.from(JSON.stringify(payload)).toString('base64');
       const sha256 = crypto.createHash('sha256').update(base64Payload + "/pg/v1/pay" + ph.apiKey).digest('hex');
       const xVerify = sha256 + "###" + (ph.saltIndex || 1);
-      const upiIntentUri = `upi://pay?pa=${ph.upiVpa || '9810610554@ybl'}&pn=Pay4u&mc=0000&tr=${txnId}&tn=Pay4u_${encodeURIComponent(serviceType || 'Recharge')}_${encodeURIComponent(target || '')}&am=${numAmt.toFixed(2)}&cu=INR`;
+      const merchantTitle = encodeURIComponent(ph.merchantName || 'Naval Kishori Communications Private Limited');
+      const upiIntentUri = `upi://pay?pa=${ph.upiVpa || '9810610554@ptsbi'}&pn=${merchantTitle}&mc=0000&tr=${txnId}&tn=Pay4u_${encodeURIComponent(serviceType || 'Recharge')}_${encodeURIComponent(target || '')}&am=${numAmt.toFixed(2)}&cu=INR`;
 
       return sendJson(res, {
         success: true,
@@ -1860,11 +1864,39 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  // Serve static images (QR Barcode, etc.)
+  if (pathname === '/upi_qr_code.png' || pathname === '/raw_qr.png' || pathname.endsWith('/upi_qr_code.png') || pathname.endsWith('/raw_qr.png') || pathname.endsWith('.png') || pathname.endsWith('.jpg') || pathname.endsWith('.jpeg')) {
+    const filename = path.basename(pathname);
+    const imgPath = path.join(__dirname, filename);
+    const rootImgPath = path.join(__dirname, '..', filename);
+    const targetImg = fs.existsSync(imgPath) ? imgPath : (fs.existsSync(rootImgPath) ? rootImgPath : null);
+
+    if (targetImg) {
+      const contentType = filename.endsWith('.jpg') || filename.endsWith('.jpeg') ? 'image/jpeg' : 'image/png';
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=86400',
+        'Access-Control-Allow-Origin': '*'
+      });
+      return fs.createReadStream(targetImg).pipe(res);
+    }
+  }
+
+  // Redirect /pay4u to /pay4u/
+  if (pathname === '/pay4u') {
+    res.writeHead(301, { 'Location': '/pay4u/' });
+    return res.end();
+  }
+
   // Serve static HTML index
-  if (pathname === '/' || pathname === '/index.html' || pathname === '/admin') {
+  if (pathname === '/' || pathname === '/index.html' || pathname === '/admin' || pathname === '/pay4u/' || pathname.endsWith('/index.html') || pathname.endsWith('/admin')) {
     const htmlPath = path.join(__dirname, 'index.html');
     if (fs.existsSync(htmlPath)) {
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.writeHead(200, {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        'Access-Control-Allow-Origin': '*'
+      });
       return res.end(fs.readFileSync(htmlPath));
     }
   }

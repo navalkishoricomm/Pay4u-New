@@ -756,7 +756,7 @@
             </div>
             <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #E9D5FF;">
               <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">MERCHANT UPI VPA</div>
-              <div style="font-size: 16px; font-weight: 800; color: #5F259F; margin-top: 2px;">9810610554@ybl</div>
+              <div style="font-size: 16px; font-weight: 800; color: #5F259F; margin-top: 2px;">9810610554@ptsbi</div>
             </div>
             <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #E9D5FF;">
               <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">PHONEPE API KEY</div>
@@ -918,13 +918,22 @@
           <div style="background: white; border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #E9D5FF;">
             <div>
               <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">OFFICIAL MERCHANT VPA</div>
-              <div style="font-family: monospace; font-size: 13px; font-weight: 800; color: #5F259F;" id="phonepe-vpa-display">9810610554@ybl</div>
+              <div style="font-family: monospace; font-size: 14px; font-weight: 800; color: #5F259F;" id="phonepe-vpa-display">9810610554@ptsbi</div>
             </div>
-            <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="copyPhonePeVpa()">📋 Copy VPA</button>
+            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="copyPhonePeVpa()">📋 Copy VPA</button>
+          </div>
+
+          <!-- Official Barcode Stand -->
+          <div style="margin-top: 12px; background: white; border-radius: 10px; padding: 12px; text-align: center; border: 1.5px solid #C4B5FD;">
+            <div style="font-size: 12px; font-weight: 800; color: #5F259F; margin-bottom: 6px;">📷 Scan Barcode with Any UPI App</div>
+            <div style="background: #F8FAFC; border-radius: 8px; padding: 6px; display: inline-block;">
+              <img src="upi_qr_code.png" alt="Paytm / PhonePe UPI Barcode: 9810610554@ptsbi" style="max-width: 100%; width: 260px; height: auto; border-radius: 6px; display: block; margin: 0 auto;" />
+            </div>
+            <div style="font-size: 11px; color: #64748B; margin-top: 6px; font-weight: 600;">Naval Kishori Communications Private Limited • 9810610554@ptsbi</div>
           </div>
 
           <div style="margin-top: 10px;">
-            <a id="phonepe-deep-link-btn" href="upi://pay?pa=9810610554@ybl&pn=Pay4u&mc=0000&am=299&cu=INR" class="btn" style="width: 100%; background: #5F259F; color: white; text-align: center; text-decoration: none; display: block; font-weight: 800; padding: 10px; border-radius: 8px;">
+            <a id="phonepe-deep-link-btn" href="upi://pay?pa=9810610554@ptsbi&pn=Naval%20Kishori%20Communications%20Private%20Limited&mc=0000&am=299&cu=INR" class="btn" style="width: 100%; background: #5F259F; color: white; text-align: center; text-decoration: none; display: block; font-weight: 800; padding: 10px; border-radius: 8px;">
               ⚡ Open & Pay with PhonePe App
             </a>
           </div>
@@ -943,12 +952,20 @@
 
       <!-- TAB 1: OTHER UPI -->
       <div id="pay-sec-upi" style="display: none;">
-        <div class="alert alert-warning">
+        <div class="alert alert-warning" style="display: flex; justify-content: space-between; align-items: center;">
           <div>
             <strong>Pay to Merchant UPI:</strong>
-            <div style="font-family: monospace; font-size: 14px; margin-top: 2px;">9810610554@ybl</div>
+            <div style="font-family: monospace; font-size: 15px; font-weight: 800; color: #002970; margin-top: 2px;">9810610554@ptsbi</div>
           </div>
+          <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="copyPhonePeVpa()">📋 Copy</button>
         </div>
+
+        <!-- Barcode in Other UPI tab as well -->
+        <div style="margin-bottom: 12px; background: white; border-radius: 10px; padding: 10px; text-align: center; border: 1px solid #CBD5E1;">
+          <div style="font-size: 12px; font-weight: 800; color: #1E293B; margin-bottom: 6px;">📷 Scan Barcode with Any UPI App</div>
+          <img src="upi_qr_code.png" alt="Merchant UPI Barcode: 9810610554@ptsbi" style="max-width: 100%; width: 220px; height: auto; border-radius: 6px; display: block; margin: 0 auto;" />
+        </div>
+
         <div class="form-group">
           <label class="form-label">Select UPI App</label>
           <select id="upi-app-select" class="form-control">
@@ -2567,7 +2584,8 @@
         walletBtn.innerText = `Attempt Wallet Payment (Records FAILED Entry)`;
       }
 
-      const deepLink = `upi://pay?pa=9810610554@ybl&pn=Pay4u&mc=0000&tr=TXN${Date.now()}&tn=${encodeURIComponent((title || 'Recharge').slice(0, 20))}&am=${amount.toFixed(2)}&cu=INR`;
+      const merchantTitle = encodeURIComponent("Naval Kishori Communications Private Limited");
+      const deepLink = `upi://pay?pa=9810610554@ptsbi&pn=${merchantTitle}&mc=0000&tr=TXN${Date.now()}&tn=${encodeURIComponent((title || 'Recharge').slice(0, 20))}&am=${amount.toFixed(2)}&cu=INR`;
       const dlBtn = document.getElementById('phonepe-deep-link-btn');
       if (dlBtn) dlBtn.href = deepLink;
 
@@ -2576,8 +2594,8 @@
     }
 
     function copyPhonePeVpa() {
-      navigator.clipboard.writeText("9810610554@ybl");
-      showToast("✓ PhonePe VPA copied: 9810610554@ybl", "success");
+      navigator.clipboard.writeText("9810610554@ptsbi");
+      showToast("✓ Merchant VPA copied: 9810610554@ptsbi", "success");
     }
 
     async function testPhonePeGateway() {

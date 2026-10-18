@@ -10,7 +10,8 @@
       "apiKey": "eba68b79-d509-43a7-9386-abe9efed1cbb",
       "saltIndex": 1,
       "merchantId": "M9810610554",
-      "upiVpa": "9810610554@ybl",
+      "upiVpa": "9810610554@ptsbi",
+      "merchantName": "Naval Kishori Communications Private Limited",
       "status": "ACTIVE"
     }
   },
