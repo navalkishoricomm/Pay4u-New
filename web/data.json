@@ -4,7 +4,15 @@
     "upstreamHost": "127.0.0.1",
     "customBbpsApiUrl": "",
     "apiKey": "",
-    "mode": "HYBRID_LIVE"
+    "mode": "HYBRID_LIVE",
+    "phonepe": {
+      "phone": "9810610554",
+      "apiKey": "eba68b79-d509-43a7-9386-abe9efed1cbb",
+      "saltIndex": 1,
+      "merchantId": "M9810610554",
+      "upiVpa": "9810610554@ybl",
+      "status": "ACTIVE"
+    }
   },
   "users": [
     {

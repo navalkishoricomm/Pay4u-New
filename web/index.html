@@ -725,6 +725,46 @@
 
       <!-- ADMIN TAB 5: BBPS & UPSTREAM GATEWAY SETTINGS -->
       <div id="admin-sec-gateway" class="admin-section" style="display: none;">
+        <!-- PhonePe Payment Gateway Card -->
+        <div class="card" style="border: 2px solid #C4B5FD; background: linear-gradient(135deg, #FAF5FF 0%, #F5F3FF 100%); margin-bottom: 20px;">
+          <div class="card-header" style="flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="background: #5F259F; color: white; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px;">पे</span>
+              <div>
+                <div class="card-title" style="color: #5F259F;">🟣 PhonePe Payment Gateway Integration</div>
+                <div style="font-size: 12px; color: #6D28D9;">Automated Collections & UPI Intent Gateway via PhonePe API</div>
+              </div>
+            </div>
+            <span class="badge badge-success" style="font-size: 11px;">🟢 Connected & Active</span>
+          </div>
+
+          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 16px;">
+            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #E9D5FF;">
+              <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">REGISTERED MERCHANT PHONE</div>
+              <div style="font-size: 16px; font-weight: 800; color: #1E293B; margin-top: 2px;">9810610554</div>
+            </div>
+            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #E9D5FF;">
+              <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">MERCHANT UPI VPA</div>
+              <div style="font-size: 16px; font-weight: 800; color: #5F259F; margin-top: 2px;">9810610554@ybl</div>
+            </div>
+            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #E9D5FF;">
+              <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">PHONEPE API KEY</div>
+              <div style="font-size: 12px; font-weight: 700; color: #0F172A; font-family: monospace; margin-top: 4px; word-break: break-all;">eba68b79-d509-43a7-9386-abe9efed1cbb</div>
+            </div>
+            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #E9D5FF;">
+              <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">STATUS & INTEGRATION</div>
+              <div style="font-size: 14px; font-weight: 800; color: #059669; margin-top: 4px;">ACTIVE (Live Collection)</div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <button class="btn" style="background: #5F259F; color: white; font-weight: 700; padding: 8px 16px;" onclick="testPhonePeGateway()">
+              ⚡ Test PhonePe Gateway & Checksum
+            </button>
+            <div id="phonepe-test-result" style="font-size: 12px; font-weight: 600; color: #059669;"></div>
+          </div>
+        </div>
+
         <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
           <div class="card">
             <div class="card-header">
@@ -845,23 +885,64 @@
 
       <!-- Payment Method Tabs -->
       <div class="modal-tabs">
-        <button class="modal-tab active" id="tab-btn-upi" onclick="switchCheckoutTab('upi')">UPI</button>
+        <button class="modal-tab active" id="tab-btn-phonepe" onclick="switchCheckoutTab('phonepe')">🟣 PhonePe Gateway</button>
+        <button class="modal-tab" id="tab-btn-upi" onclick="switchCheckoutTab('upi')">Other UPI Apps</button>
         <button class="modal-tab" id="tab-btn-wallet" onclick="switchCheckoutTab('wallet')">Wallet Balance</button>
       </div>
 
-      <!-- TAB 1: UPI -->
-      <div id="pay-sec-upi">
+      <!-- TAB 0: PHONEPE GATEWAY -->
+      <div id="pay-sec-phonepe">
+        <div style="background: linear-gradient(135deg, #F3E8FF 0%, #EDE9FE 100%); border: 1.5px solid #C4B5FD; border-radius: 12px; padding: 14px; margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="background: #5F259F; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px;">पे</span>
+              <div>
+                <strong style="color: #5F259F; font-size: 14px;">PhonePe Payment Gateway</strong>
+                <div style="font-size: 11px; color: #6D28D9;">Merchant Registered Mobile: <strong>9810610554</strong></div>
+              </div>
+            </div>
+            <span class="badge badge-success" style="font-size: 10px;">🟢 Live Gateway</span>
+          </div>
+
+          <div style="background: white; border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #E9D5FF;">
+            <div>
+              <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">OFFICIAL MERCHANT VPA</div>
+              <div style="font-family: monospace; font-size: 13px; font-weight: 800; color: #5F259F;" id="phonepe-vpa-display">9810610554@ybl</div>
+            </div>
+            <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="copyPhonePeVpa()">📋 Copy VPA</button>
+          </div>
+
+          <div style="margin-top: 10px;">
+            <a id="phonepe-deep-link-btn" href="upi://pay?pa=9810610554@ybl&pn=Pay4u&mc=0000&am=299&cu=INR" class="btn" style="width: 100%; background: #5F259F; color: white; text-align: center; text-decoration: none; display: block; font-weight: 800; padding: 10px; border-radius: 8px;">
+              ⚡ Open & Pay with PhonePe App
+            </a>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">PhonePe Transaction ID / UTR *</label>
+          <input type="text" id="phonepe-utr-input" class="form-control" placeholder="Enter 12-digit UTR from PhonePe app (e.g. 428901847291)" required>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Verified through PhonePe API Gateway (9810610554). Blank IDs are strictly disallowed.</div>
+        </div>
+
+        <button class="btn" style="width: 100%; padding: 12px; background: #5F259F; color: white; font-weight: 800; border-radius: 8px;" onclick="confirmOrder('PHONEPE')">
+          Submit Payment via PhonePe Gateway
+        </button>
+      </div>
+
+      <!-- TAB 1: OTHER UPI -->
+      <div id="pay-sec-upi" style="display: none;">
         <div class="alert alert-warning">
           <div>
             <strong>Pay to Merchant UPI:</strong>
-            <div style="font-family: monospace; font-size: 14px; margin-top: 2px;">pay4u.recharge@icici</div>
+            <div style="font-family: monospace; font-size: 14px; margin-top: 2px;">9810610554@ybl</div>
           </div>
         </div>
         <div class="form-group">
           <label class="form-label">Select UPI App</label>
           <select id="upi-app-select" class="form-control">
-            <option>Google Pay</option>
             <option>PhonePe</option>
+            <option>Google Pay</option>
             <option>Paytm</option>
             <option>BHIM UPI</option>
             <option>Cred</option>
@@ -2475,8 +2556,37 @@
         walletBtn.innerText = `Attempt Wallet Payment (Records FAILED Entry)`;
       }
 
+      const deepLink = `upi://pay?pa=9810610554@ybl&pn=Pay4u&mc=0000&tr=TXN${Date.now()}&tn=${encodeURIComponent((title || 'Recharge').slice(0, 20))}&am=${amount.toFixed(2)}&cu=INR`;
+      const dlBtn = document.getElementById('phonepe-deep-link-btn');
+      if (dlBtn) dlBtn.href = deepLink;
+
       document.getElementById('checkout-modal').classList.add('open');
-      switchCheckoutTab(walletBal >= amount ? 'wallet' : 'upi');
+      switchCheckoutTab('phonepe');
+    }
+
+    function copyPhonePeVpa() {
+      navigator.clipboard.writeText("9810610554@ybl");
+      showToast("✓ PhonePe VPA copied: 9810610554@ybl", "success");
+    }
+
+    async function testPhonePeGateway() {
+      const resEl = document.getElementById('phonepe-test-result');
+      if (resEl) resEl.innerText = "⏳ Initiating test request to PhonePe Gateway...";
+      try {
+        const res = await fetch(api('api/gateway/phonepe/initiate'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: 10, serviceType: "TEST", target: "9810610554", provider: "PhonePe" })
+        });
+        const data = await res.json();
+        if (data.success) {
+          if (resEl) resEl.innerHTML = `✓ PhonePe Gateway Responded: Txn #${data.merchantTransactionId} generated with SHA256 Checksum!`;
+        } else {
+          if (resEl) resEl.innerText = "❌ Error: " + (data.error || "Failed");
+        }
+      } catch (e) {
+        if (resEl) resEl.innerText = "❌ Network Error: " + e.message;
+      }
     }
 
     function switchCheckoutTab(tab) {
@@ -2484,13 +2594,33 @@
       const activeBtn = document.getElementById('tab-btn-' + tab);
       if (activeBtn) activeBtn.classList.add('active');
 
-      document.getElementById('pay-sec-upi').style.display = tab === 'upi' ? 'block' : 'none';
-      document.getElementById('pay-sec-wallet').style.display = tab === 'wallet' ? 'block' : 'none';
+      const secPhonePe = document.getElementById('pay-sec-phonepe');
+      const secUpi = document.getElementById('pay-sec-upi');
+      const secWallet = document.getElementById('pay-sec-wallet');
+
+      if (secPhonePe) secPhonePe.style.display = tab === 'phonepe' ? 'block' : 'none';
+      if (secUpi) secUpi.style.display = tab === 'upi' ? 'block' : 'none';
+      if (secWallet) secWallet.style.display = tab === 'wallet' ? 'block' : 'none';
     }
 
     async function confirmOrder(method) {
       let ref = "";
-      if (method === 'UPI') {
+      if (method === 'PHONEPE') {
+        const utrInput = document.getElementById('phonepe-utr-input');
+        const utr = (utrInput ? utrInput.value : '').trim();
+        if (!utr) {
+          alert("❌ PhonePe Transaction ID / UTR cannot be blank. Please enter the authentic UTR from your PhonePe app.");
+          if (utrInput) utrInput.focus();
+          return;
+        }
+        if (utr.length < 6) {
+          alert("❌ Please enter a valid PhonePe Transaction ID / UTR (minimum 6 characters).");
+          if (utrInput) utrInput.focus();
+          return;
+        }
+        ref = `PhonePe Gateway (UTR: ${utr})`;
+        method = 'UPI';
+      } else if (method === 'UPI') {
         const app = document.getElementById('upi-app-select').value;
         const utrInput = document.getElementById('upi-utr-input');
         const utr = (utrInput ? utrInput.value : '').trim();

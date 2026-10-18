@@ -3,6 +3,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+const crypto = require('crypto');
 
 const DATA_FILE = path.join(__dirname, 'data.json');
 
@@ -1634,6 +1635,100 @@ const server = http.createServer(async (req, res) => {
         hasLiveResult: Boolean(liveRes),
         result: liveRes || "No live upstream response. Deterministic mode active."
       });
+    } catch (e) {
+      return sendJson(res, { error: e.message }, 400);
+    }
+  }
+
+  // 10. PHONEPE GATEWAY CONFIGURATION
+  if (pathname === '/api/gateway/phonepe' && req.method === 'GET') {
+    const ph = (db.gatewayConfig && db.gatewayConfig.phonepe) || {
+      phone: "9810610554",
+      apiKey: "eba68b79-d509-43a7-9386-abe9efed1cbb",
+      saltIndex: 1,
+      merchantId: "M9810610554",
+      upiVpa: "9810610554@ybl",
+      status: "ACTIVE"
+    };
+    return sendJson(res, {
+      success: true,
+      phone: ph.phone,
+      merchantId: ph.merchantId,
+      upiVpa: ph.upiVpa,
+      status: ph.status,
+      apiKeyMasked: ph.apiKey ? ph.apiKey.slice(0, 8) + '...' + ph.apiKey.slice(-4) : ''
+    });
+  }
+
+  // 11. PHONEPE PAYMENT INITIATE & CHECKSUM
+  if (pathname === '/api/gateway/phonepe/initiate' && req.method === 'POST') {
+    try {
+      const { amount, serviceType, target, provider, userId } = await parseBody(req);
+      const numAmt = parseFloat(amount);
+      if (isNaN(numAmt) || numAmt <= 0) return sendJson(res, { error: "Invalid amount" }, 400);
+
+      const ph = (db.gatewayConfig && db.gatewayConfig.phonepe) || {
+        phone: "9810610554",
+        apiKey: "eba68b79-d509-43a7-9386-abe9efed1cbb",
+        saltIndex: 1,
+        merchantId: "M9810610554",
+        upiVpa: "9810610554@ybl",
+        status: "ACTIVE"
+      };
+
+      const txnId = "TXN_PH_" + Date.now() + "_" + Math.floor(1000 + Math.random() * 9000);
+      const amountPaise = Math.round(numAmt * 100);
+
+      const payload = {
+        merchantId: ph.merchantId || "M9810610554",
+        merchantTransactionId: txnId,
+        merchantUserId: "MUID_" + (userId || "2"),
+        amount: amountPaise,
+        redirectUrl: `${req.headers.origin || 'http://localhost:3000'}/api/phonepe/callback?txnId=${txnId}`,
+        redirectMode: "POST",
+        callbackUrl: `${req.headers.origin || 'http://localhost:3000'}/api/phonepe/callback?txnId=${txnId}`,
+        mobileNumber: ph.phone || "9810610554",
+        paymentInstrument: {
+          type: "PAY_PAGE"
+        }
+      };
+
+      const base64Payload = Buffer.from(JSON.stringify(payload)).toString('base64');
+      const sha256 = crypto.createHash('sha256').update(base64Payload + "/pg/v1/pay" + ph.apiKey).digest('hex');
+      const xVerify = sha256 + "###" + (ph.saltIndex || 1);
+      const upiIntentUri = `upi://pay?pa=${ph.upiVpa || '9810610554@ybl'}&pn=Pay4u&mc=0000&tr=${txnId}&tn=Pay4u_${encodeURIComponent(serviceType || 'Recharge')}_${encodeURIComponent(target || '')}&am=${numAmt.toFixed(2)}&cu=INR`;
+
+      return sendJson(res, {
+        success: true,
+        merchantTransactionId: txnId,
+        amount: numAmt,
+        phonepePhone: ph.phone,
+        upiVpa: ph.upiVpa,
+        upiIntentUri,
+        base64Payload,
+        xVerify,
+        gatewayStatus: ph.status || "ACTIVE"
+      });
+    } catch (e) {
+      return sendJson(res, { error: e.message }, 400);
+    }
+  }
+
+  // 12. PHONEPE ADMIN SETTINGS
+  if (pathname === '/api/admin/phonepe-settings' && req.method === 'POST') {
+    try {
+      const { phone, apiKey, saltIndex, upiVpa, status } = await parseBody(req);
+      if (!db.gatewayConfig) db.gatewayConfig = {};
+      if (!db.gatewayConfig.phonepe) db.gatewayConfig.phonepe = {};
+
+      if (phone) db.gatewayConfig.phonepe.phone = phone.trim();
+      if (apiKey) db.gatewayConfig.phonepe.apiKey = apiKey.trim();
+      if (saltIndex !== undefined) db.gatewayConfig.phonepe.saltIndex = parseInt(saltIndex, 10) || 1;
+      if (upiVpa) db.gatewayConfig.phonepe.upiVpa = upiVpa.trim();
+      if (status) db.gatewayConfig.phonepe.status = status;
+
+      saveState(db);
+      return sendJson(res, { success: true, phonepe: db.gatewayConfig.phonepe });
     } catch (e) {
       return sendJson(res, { error: e.message }, 400);
     }

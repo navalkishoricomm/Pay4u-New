@@ -52,10 +52,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -84,16 +88,21 @@ fun CheckoutPaymentSheet(
 ) {
   val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
   val clipboardManager = LocalClipboardManager.current
-  val merchantUpiId = "pay4u.recharge@icici"
+  val context = LocalContext.current
+
+  // PhonePe Payment Gateway Credentials
+  val phonePeMerchantPhone = "9810610554"
+  val phonePeVpa = "9810610554@ybl"
+  val phonePeColor = Color(0xFF5F259F)
 
   var selectedTab by remember { mutableStateOf(0) }
-  val tabs = listOf("UPI Payment", "Wallet (₹${"%.0f".format(walletBalance)})")
+  val tabs = listOf("PhonePe / UPI Gateway", "Wallet (₹${"%.0f".format(walletBalance)})")
 
-  // UPI State
-  var selectedUpiApp by remember { mutableStateOf("Google Pay") }
+  // UPI / PhonePe State
+  var selectedUpiApp by remember { mutableStateOf("PhonePe") }
   var userUtr by remember { mutableStateOf("") }
   var copiedNotice by remember { mutableStateOf(false) }
-  val upiApps = listOf("Google Pay", "PhonePe", "Paytm", "BHIM UPI", "Cred")
+  val upiApps = listOf("PhonePe", "Google Pay", "Paytm", "BHIM UPI", "Cred")
 
   ModalBottomSheet(
     onDismissRequest = onDismiss,
@@ -128,7 +137,7 @@ fun CheckoutPaymentSheet(
           )
         }
         Surface(
-          color = MaterialTheme.colorScheme.primaryContainer,
+          color = phonePeColor.copy(alpha = 0.12f),
           shape = RoundedCornerShape(12.dp)
         ) {
           Row(
@@ -139,14 +148,14 @@ fun CheckoutPaymentSheet(
               imageVector = Icons.Default.Security,
               contentDescription = null,
               modifier = Modifier.size(16.dp),
-              tint = MaterialTheme.colorScheme.primary
+              tint = phonePeColor
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-              text = "256-Bit Secure",
+              text = "PhonePe Gateway",
               style = MaterialTheme.typography.labelSmall,
-              fontWeight = FontWeight.SemiBold,
-              color = MaterialTheme.colorScheme.primary
+              fontWeight = FontWeight.Bold,
+              color = phonePeColor
             )
           }
         }
@@ -192,7 +201,7 @@ fun CheckoutPaymentSheet(
 
       Spacer(modifier = Modifier.height(14.dp))
 
-      // Payment Tabs: UPI, Wallet, Credit Card
+      // Payment Tabs: PhonePe / UPI vs Wallet
       TabRow(
         selectedTabIndex = selectedTab,
         containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
@@ -219,40 +228,146 @@ fun CheckoutPaymentSheet(
 
       when (selectedTab) {
         0 -> {
-          // TAB 0: UPI PAYMENT
+          // TAB 0: PHONEPE & UPI GATEWAY
           Column(modifier = Modifier.fillMaxWidth()) {
-            Surface(
+            // PhonePe Merchant Gateway Card
+            Card(
               modifier = Modifier.fillMaxWidth(),
-              shape = RoundedCornerShape(12.dp),
-              color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-              border = CardDefaults.outlinedCardBorder()
+              shape = RoundedCornerShape(14.dp),
+              colors = CardDefaults.cardColors(
+                containerColor = phonePeColor.copy(alpha = 0.08f)
+              ),
+              border = androidx.compose.foundation.BorderStroke(1.5.dp, phonePeColor.copy(alpha = 0.35f))
             ) {
-              Row(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .padding(horizontal = 14.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-              ) {
-                Column {
-                  Text("Merchant UPI ID", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                  Text(
-                    text = merchantUpiId,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    fontFamily = FontFamily.Monospace
-                  )
-                }
-                IconButton(
-                  onClick = {
-                    clipboardManager.setText(AnnotatedString(merchantUpiId))
-                    copiedNotice = true
-                  }
+              Column(modifier = Modifier.padding(14.dp)) {
+                Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  horizontalArrangement = Arrangement.SpaceBetween,
+                  verticalAlignment = Alignment.CenterVertically
                 ) {
-                  Icon(
-                    imageVector = if (copiedNotice) Icons.Default.CheckCircle else Icons.Default.ContentCopy,
-                    contentDescription = "Copy UPI ID",
-                    tint = if (copiedNotice) BrandSecondary else MaterialTheme.colorScheme.primary
+                  Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                      modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(phonePeColor),
+                      contentAlignment = Alignment.Center
+                    ) {
+                      Text("पे", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                      Text(
+                        text = "PhonePe Gateway",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = phonePeColor
+                      )
+                      Text(
+                        text = "Merchant A/C: $phonePeMerchantPhone",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                      )
+                    }
+                  }
+
+                  Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = StatusSuccess.copy(alpha = 0.15f)
+                  ) {
+                    Text(
+                      text = "VERIFIED",
+                      style = MaterialTheme.typography.labelSmall,
+                      fontSize = 9.sp,
+                      fontWeight = FontWeight.Bold,
+                      color = StatusSuccess,
+                      modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                  }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // VPA and Copy Row
+                Surface(
+                  shape = RoundedCornerShape(8.dp),
+                  color = MaterialTheme.colorScheme.surface,
+                  modifier = Modifier.fillMaxWidth()
+                ) {
+                  Row(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .padding(horizontal = 10.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                  ) {
+                    Column {
+                      Text("Official Merchant VPA", style = MaterialTheme.typography.labelSmall, fontSize = 9.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                      Text(
+                        text = phonePeVpa,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        color = phonePeColor
+                      )
+                    }
+
+                    IconButton(
+                      onClick = {
+                        clipboardManager.setText(AnnotatedString(phonePeVpa))
+                        copiedNotice = true
+                      },
+                      modifier = Modifier.size(28.dp)
+                    ) {
+                      Icon(
+                        imageVector = if (copiedNotice) Icons.Default.CheckCircle else Icons.Default.ContentCopy,
+                        contentDescription = "Copy VPA",
+                        tint = if (copiedNotice) BrandSecondary else phonePeColor,
+                        modifier = Modifier.size(16.dp)
+                      )
+                    }
+                  }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // One-click Launch PhonePe Button
+                Button(
+                  onClick = {
+                    val cleanTarget = targetDetails.filter { it.isLetterOrDigit() }.take(15)
+                    val note = if (cleanTarget.isNotBlank()) "Pay4u-$cleanTarget" else "Pay4u-Recharge"
+                    val intentUri = "upi://pay?pa=$phonePeVpa&pn=Pay4u&mc=0000&tr=TXN${System.currentTimeMillis()}&tn=$note&am=${"%.2f".format(amount)}&cu=INR"
+
+                    val phonePeIntent = Intent(Intent.ACTION_VIEW, Uri.parse(intentUri)).apply {
+                      setPackage("com.phonepe.app")
+                    }
+
+                    try {
+                      context.startActivity(phonePeIntent)
+                    } catch (e: Exception) {
+                      val chooserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(intentUri))
+                      try {
+                        context.startActivity(Intent.createChooser(chooserIntent, "Pay via PhonePe or other UPI App"))
+                      } catch (ex: Exception) {
+                        Toast.makeText(context, "Please copy UPI VPA $phonePeVpa to pay.", Toast.LENGTH_LONG).show()
+                      }
+                    }
+                  },
+                  colors = ButtonDefaults.buttonColors(containerColor = phonePeColor),
+                  shape = RoundedCornerShape(10.dp),
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .testTag("launch_phonepe_btn")
+                ) {
+                  Icon(Icons.Default.FlashOn, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                  Spacer(modifier = Modifier.width(6.dp))
+                  Text(
+                    text = "⚡ Launch & Pay via PhonePe App",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    fontSize = 13.sp
                   )
                 }
               }
@@ -260,12 +375,13 @@ fun CheckoutPaymentSheet(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            Text("Select UPI App:", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold)
+            Text("Or select installed UPI App:", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.height(6.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
               upiApps.forEach { app ->
                 val isSelected = selectedUpiApp == app
+                val isPhonePeApp = app == "PhonePe"
                 Column(
                   horizontalAlignment = Alignment.CenterHorizontally,
                   modifier = Modifier
@@ -277,8 +393,8 @@ fun CheckoutPaymentSheet(
                     modifier = Modifier
                       .size(44.dp)
                       .clip(CircleShape)
-                      .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
-                      .border(if (isSelected) 2.dp else 1.dp, if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent, CircleShape),
+                      .background(if (isSelected) (if (isPhonePeApp) phonePeColor else MaterialTheme.colorScheme.primary) else MaterialTheme.colorScheme.surfaceVariant)
+                      .border(if (isSelected) 2.dp else 1.dp, if (isSelected) (if (isPhonePeApp) phonePeColor else MaterialTheme.colorScheme.primary) else Color.Transparent, CircleShape),
                     contentAlignment = Alignment.Center
                   ) {
                     Icon(
@@ -294,7 +410,7 @@ fun CheckoutPaymentSheet(
                     style = MaterialTheme.typography.labelSmall,
                     fontSize = 10.sp,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    color = if (isSelected) (if (isPhonePeApp) phonePeColor else MaterialTheme.colorScheme.primary) else MaterialTheme.colorScheme.onSurfaceVariant
                   )
                 }
               }
@@ -305,8 +421,8 @@ fun CheckoutPaymentSheet(
             OutlinedTextField(
               value = userUtr,
               onValueChange = { if (it.length <= 16) userUtr = it },
-              label = { Text("12-Digit UPI Ref / UTR Number *") },
-              placeholder = { Text("Enter UTR from payment app (e.g. 428901847291)") },
+              label = { Text("12-Digit PhonePe / UPI UTR Number *") },
+              placeholder = { Text("e.g. 428901847291 (from payment details)") },
               leadingIcon = { Icon(Icons.Default.QrCode2, contentDescription = null) },
               keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
               singleLine = true,
@@ -317,7 +433,7 @@ fun CheckoutPaymentSheet(
             if (userUtr.isNotBlank() && userUtr.trim().length < 6) {
               Spacer(modifier = Modifier.height(4.dp))
               Text(
-                text = "Please enter valid UPI Reference / UTR Number (minimum 6 digits)",
+                text = "Please enter valid UTR / Transaction ID (minimum 6 digits)",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
                 fontSize = 11.sp
@@ -335,7 +451,7 @@ fun CheckoutPaymentSheet(
                 Icon(Icons.Default.Info, contentDescription = null, tint = StatusPending, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                  text = "Enter the authentic UPI Transaction ID (UTR) generated in your payment app. Admin will verify and process your order.",
+                  text = "Enter the authentic UTR generated in PhonePe or your UPI app. Verified through PhonePe Gateway.",
                   style = MaterialTheme.typography.bodySmall,
                   fontSize = 11.sp
                 )
@@ -348,17 +464,20 @@ fun CheckoutPaymentSheet(
             Button(
               onClick = {
                 if (isUtrValid) {
-                  onConfirmPayment("UPI", "$selectedUpiApp (UTR: ${userUtr.trim()})")
+                  onConfirmPayment("UPI", "PhonePe Gateway: $selectedUpiApp (UTR: ${userUtr.trim()})")
                 }
               },
               enabled = isUtrValid,
               modifier = Modifier.fillMaxWidth().height(48.dp).testTag("submit_upi_checkout_btn"),
+              colors = ButtonDefaults.buttonColors(
+                containerColor = if (selectedUpiApp == "PhonePe") phonePeColor else MaterialTheme.colorScheme.primary
+              ),
               shape = RoundedCornerShape(12.dp)
             ) {
               Icon(Icons.Default.CheckCircle, contentDescription = null)
               Spacer(modifier = Modifier.width(8.dp))
               Text(
-                text = if (isUtrValid) "Submit UPI Payment (₹${"%.0f".format(amount)})" else "Enter UPI UTR Number to Submit",
+                text = if (isUtrValid) "Submit Payment via PhonePe Gateway (₹${"%.0f".format(amount)})" else "Enter UTR Number to Confirm",
                 fontWeight = FontWeight.Bold
               )
             }
